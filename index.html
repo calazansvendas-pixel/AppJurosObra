@@ -7,6 +7,11 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     
     <!-- React & ReactDOM -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -16,8 +21,188 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
-        /* Pequenos ajustes para garantir carregamento limpo */
-        body { margin: 0; padding: 0; background-color: #f8fafc; }
+        /* Transição suave de cores ao alternar tema */
+        body, div, input, select, button, header, card, section, main {
+            transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background-color: #f8fafc; 
+            color: #2D3748;
+        }
+
+        /* TEMA ESCURO (DARK MODE) */
+        html.dark, body.dark, [data-theme="dark"] {
+            color-scheme: dark;
+            background-color: #121212 !important;
+            color: #E0E0E0 !important;
+        }
+
+        html.dark body {
+            background-color: #121212 !important;
+            color: #E0E0E0 !important;
+        }
+
+        /* Fundo da página e containers gerais */
+        html.dark .bg-slate-100,
+        html.dark .bg-slate-50,
+        html.dark .bg-slate-200\/50,
+        html.dark .bg-slate-200\/60,
+        html.dark .bg-slate-200\/80 {
+            background-color: #121212 !important;
+            color: #E0E0E0 !important;
+        }
+
+        /* Cartões (Cards) e Modais */
+        html.dark .bg-white {
+            background-color: #1E1E1E !important;
+            color: #E0E0E0 !important;
+        }
+
+        html.dark .bg-slate-200 {
+            background-color: #2D2D2D !important;
+            color: #E0E0E0 !important;
+        }
+
+        /* Bordas no modo escuro */
+        html.dark .border-slate-100,
+        html.dark .border-slate-200,
+        html.dark .border-slate-300,
+        html.dark .border-slate-400,
+        html.dark .border-slate-200\/80,
+        html.dark .border-slate-300\/80 {
+            border-color: #333333 !important;
+        }
+
+        /* Cores de texto no modo escuro */
+        html.dark .text-slate-900,
+        html.dark .text-slate-800,
+        html.dark .text-slate-700 {
+            color: #FFFFFF !important;
+        }
+
+        html.dark .text-slate-600,
+        html.dark .text-slate-500 {
+            color: #E0E0E0 !important;
+        }
+
+        html.dark .text-slate-400 {
+            color: #B0B0B0 !important;
+        }
+
+        /* Form Inputs & Selects no modo escuro */
+        html.dark input,
+        html.dark select,
+        html.dark textarea {
+            background-color: #1E1E1E !important;
+            color: #FFFFFF !important;
+            border-color: #333333 !important;
+        }
+
+        html.dark input::placeholder,
+        html.dark textarea::placeholder {
+            color: #757575 !important;
+        }
+
+        /* Adaptação de Badges e elementos com fundos específicos no modo escuro */
+        html.dark .bg-emerald-50 {
+            background-color: rgba(129, 199, 132, 0.15) !important;
+            color: #A5D6A7 !important;
+        }
+        html.dark .bg-rose-50 {
+            background-color: rgba(225, 29, 72, 0.3) !important;
+            color: #FDA4AF !important;
+        }
+        html.dark .bg-amber-50 {
+            background-color: rgba(217, 119, 6, 0.3) !important;
+            color: #FDE68A !important;
+        }
+        html.dark .bg-sky-50 {
+            background-color: rgba(2, 132, 199, 0.3) !important;
+            color: #7DD3FC !important;
+        }
+        html.dark .bg-purple-50 {
+            background-color: rgba(102, 43, 127, 0.4) !important;
+            color: #E9D5FF !important;
+        }
+
+        /* ========================================================= */
+        /* REFATORAÇÃO DA PALETA DE VERDE APENAS PARA O MODO ESCURO  */
+        /* (TONS PASTÉIS, DESATURADOS, SUAVES E CONFORTÁVEIS À VISÃO)*/
+        /* ========================================================= */
+
+        /* Textos e Títulos em Verde no Modo Escuro */
+        html.dark .text-\[\#05532C\],
+        html.dark .text-\[\#1D8843\],
+        html.dark .text-emerald-600,
+        html.dark .text-emerald-700,
+        html.dark .text-emerald-800,
+        html.dark .text-emerald-900,
+        html.dark .text-green-600,
+        html.dark .text-green-700,
+        html.dark .text-green-800 {
+            color: #81C784 !important; /* Verde pastel suave desaturado */
+        }
+
+        html.dark .text-emerald-500,
+        html.dark .text-emerald-400,
+        html.dark .text-green-500 {
+            color: #A5D6A7 !important; /* Verde pálido suave */
+        }
+
+        html.dark .text-emerald-100,
+        html.dark .text-emerald-200,
+        html.dark .text-emerald-300 {
+            color: #C8E6C9 !important; /* Verde muito claro e opaco */
+        }
+
+        /* Botões de Ação Principais e Caixas com Fundo Verde em Modo Escuro */
+        html.dark .bg-\[\#05532C\],
+        html.dark .bg-\[\#1D8843\],
+        html.dark .bg-emerald-600,
+        html.dark .bg-emerald-700,
+        html.dark .bg-green-600,
+        html.dark .bg-green-700 {
+            background-color: #2E5A3C !important; /* Verde escuro opaco e discreto */
+            color: #F1F8E9 !important;
+        }
+
+        /* Hovers de Botões em Verde no Modo Escuro */
+        html.dark .hover\:bg-\[\#05532C\]:hover,
+        html.dark .hover\:bg-\[\#1D8843\]:hover,
+        html.dark .hover\:bg-emerald-700:hover,
+        html.dark .hover\:bg-emerald-800:hover {
+            background-color: #386E4B !important;
+        }
+
+        /* Gradientes de Topo/Header em Verde no Modo Escuro */
+        html.dark .from-\[\#05532C\] {
+            --tw-gradient-from: #1B3E2B !important;
+        }
+        html.dark .to-\[\#1D8843\] {
+            --tw-gradient-to: #28573D !important;
+        }
+
+        /* Caixas de Alerta, Banners, Badges e Destaques em Verde no Modo Escuro */
+        html.dark .bg-emerald-50,
+        html.dark .bg-emerald-100,
+        html.dark .bg-green-50,
+        html.dark .bg-green-100 {
+            background-color: rgba(129, 199, 132, 0.15) !important;
+            color: #A5D6A7 !important;
+            border-color: rgba(129, 199, 132, 0.3) !important;
+        }
+
+        /* Bordas Verdes em Modo Escuro */
+        html.dark .border-\[\#1D8843\],
+        html.dark .border-\[\#05532C\],
+        html.dark .border-emerald-300,
+        html.dark .border-emerald-400,
+        html.dark .border-emerald-500 {
+            border-color: #4E8761 !important;
+        }
     </style>
 </head>
 <body>
@@ -38,12 +223,14 @@
             getDocs,
             serverTimestamp,
             query,
-            orderBy
+            orderBy,
+            where
         } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
         import {
             getAuth,
             signInWithEmailAndPassword,
             createUserWithEmailAndPassword,
+            sendPasswordResetEmail,
             signOut,
             onAuthStateChanged,
             updateProfile
@@ -96,12 +283,60 @@
         const AlertOctagon = (p) => <Icon {...p}><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></Icon>;
         const Pause = (p) => <Icon {...p}><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></Icon>;
         const Play = (p) => <Icon {...p}><polygon points="5 3 19 12 5 21 5 3"/></Icon>;
+        const RotateCcw = (p) => <Icon {...p}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></Icon>;
+        const PlayCircle = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></Icon>;
         const UserCheck = (p) => <Icon {...p}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></Icon>;
         const UserX = (p) => <Icon {...p}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" x2="22" y1="8" y2="13"/><line x1="22" x2="17" y1="8" y2="13"/></Icon>;
         const UserPlus = (p) => <Icon {...p}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="16" x2="22" y1="11" y2="11"/></Icon>;
         const X = (p) => <Icon {...p}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></Icon>;
         const Phone = (p) => <Icon {...p}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></Icon>;
         const Award = (p) => <Icon {...p}><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></Icon>;
+        const KeyRound = (p) => <Icon {...p}><path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4Z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></Icon>;
+        const ArrowLeft = (p) => <Icon {...p}><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></Icon>;
+        const Send = (p) => <Icon {...p}><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></Icon>;
+        const Search = (p) => <Icon {...p}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></Icon>;
+        const Filter = (p) => <Icon {...p}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></Icon>;
+        const Sun = (p) => <Icon {...p}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></Icon>;
+        const Moon = (p) => <Icon {...p}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></Icon>;
+
+        // ==========================================
+        // COMPONENTE SELETOR DE TEMA (MODO CLARO / MODO ESCURO)
+        // ==========================================
+        const ThemeSelector = ({ theme, setTheme }) => {
+            const isDark = theme === 'escuro';
+
+            return (
+                <div className="inline-flex items-center p-1 rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-2xs shrink-0">
+                    <button
+                        type="button"
+                        onClick={() => setTheme('claro')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                            !isDark
+                                ? 'bg-white text-[#05532C] shadow-xs border border-slate-200 font-black'
+                                : 'text-slate-400 hover:text-white'
+                        }`}
+                        title="Ativar Modo Claro"
+                    >
+                        <Sun size={14} className={!isDark ? 'text-amber-500' : ''} />
+                        <span className="whitespace-nowrap">Modo Claro</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => setTheme('escuro')}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                            isDark
+                                ? 'bg-[#121212] text-amber-300 shadow-xs border border-slate-700 font-black'
+                                : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                        title="Ativar Modo Escuro"
+                    >
+                        <Moon size={14} className={isDark ? 'text-amber-300' : ''} />
+                        <span className="whitespace-nowrap">Modo Escuro</span>
+                    </button>
+                </div>
+            );
+        };
 
         // ==========================================
         // COMPONENTE DE INPUT DE MOEDA (BRL)
@@ -181,6 +416,31 @@
         // APLICAÇÃO PRINCIPAL
         // ==========================================
         function App() {
+            // Estado e lógica de troca de Tema (Modo Claro vs Modo Escuro)
+            const [theme, setTheme] = useState(() => {
+                const saved = localStorage.getItem('app_theme');
+                return saved === 'escuro' ? 'escuro' : 'claro';
+            });
+
+            // Aplica/Remove a classe 'dark' e o atributo data-theme nas tags HTML e BODY
+            useEffect(() => {
+                const rootEl = document.documentElement;
+                const bodyEl = document.body;
+                localStorage.setItem('app_theme', theme);
+
+                if (theme === 'escuro') {
+                    rootEl.classList.add('dark');
+                    bodyEl.classList.add('dark');
+                    rootEl.setAttribute('data-theme', 'dark');
+                    bodyEl.setAttribute('data-theme', 'dark');
+                } else {
+                    rootEl.classList.remove('dark');
+                    bodyEl.classList.remove('dark');
+                    rootEl.removeAttribute('data-theme');
+                    bodyEl.removeAttribute('data-theme');
+                }
+            }, [theme]);
+
             // Estados para os inputs do usuário
             const [financiamento, setFinanciamento] = useState('');
             const [taxaAnual, setTaxaAnual] = useState('');
@@ -188,11 +448,39 @@
             const [percObra, setPercObra] = useState('');
             const [parcelaFutura, setParcelaFutura] = useState('');
             const [seguro, setSeguro] = useState('');
+
+            // Estado para armazenar o resultado da simulação calculada sob demanda
+            const [resultadoSimulacao, setResultadoSimulacao] = useState(null);
+
+            // Função auxiliar que limpa o resultado anterior ao alterar qualquer campo
+            const updateInputVal = (setter) => (val) => {
+                setter(val);
+                setResultadoSimulacao(null);
+            };
             
             // Estados para a API do Banco Central (TR)
             const [tr, setTr] = useState(0);
             const [trData, setTrData] = useState('Buscando...');
             const [isFetchingTr, setIsFetchingTr] = useState(true);
+            const [showTrTooltip, setShowTrTooltip] = useState(false);
+
+            // Helper para formatar o período de referência da TR
+            const formatTrPeriodo = (dataStr) => {
+                if (!dataStr || dataStr === 'Buscando...' || dataStr === 'Fallback') {
+                    return 'Ref. Julho/2026';
+                }
+                if (dataStr.includes('/')) {
+                    const parts = dataStr.split('/');
+                    if (parts.length === 3) {
+                        const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                        const mIndex = parseInt(parts[1], 10) - 1;
+                        if (mIndex >= 0 && mIndex < 12) {
+                            return `Ref. ${meses[mIndex]}/${parts[2]}`;
+                        }
+                    }
+                }
+                return `Ref. ${dataStr}`;
+            };
 
             // Estados do Firestore (Simulações Salvas)
             const [nomeSimulacao, setNomeSimulacao] = useState('');
@@ -217,6 +505,12 @@
             const [authError, setAuthError] = useState('');
             const [authSubmitting, setAuthSubmitting] = useState(false);
 
+            // Estados para Recuperar Senha (Esqueci minha senha)
+            const [showModalResetPassword, setShowModalResetPassword] = useState(false);
+            const [resetEmail, setResetEmail] = useState('');
+            const [resetStatus, setResetStatus] = useState({ type: '', message: '' });
+            const [resetSubmitting, setResetSubmitting] = useState(false);
+
             // Estados para Gestão de Usuários (Administrador)
             const [listaUsuarios, setListaUsuarios] = useState([]);
             const [isLoadingUsuarios, setIsLoadingUsuarios] = useState(false);
@@ -230,8 +524,51 @@
             const [adminNovoError, setAdminNovoError] = useState('');
             const [adminNovoSubmitting, setAdminNovoSubmitting] = useState(false);
 
+            // Estados para Redefinição de Senha de Usuários pelo Administrador
+            const [selectedUserForPassword, setSelectedUserForPassword] = useState(null);
+            const [adminPasswordStatus, setAdminPasswordStatus] = useState({ type: '', message: '' });
+            const [isAdminPasswordSubmitting, setIsAdminPasswordSubmitting] = useState(false);
+
+            // Estados para Pesquisa e Filtro de Usuários
+            const [searchTermUsuarios, setSearchTermUsuarios] = useState('');
+            const [filterPerfilUsuarios, setFilterPerfilUsuarios] = useState('Todos');
+
+            // Map de prioridade dos perfis para ordenação sequencial
+            const PERFIL_HIERARQUIA_ORDEM = {
+                'Administrador': 1,
+                'Gerente': 2,
+                'Analista': 3,
+                'Assistente': 4,
+                'Corretor': 5
+            };
+
+            // Filtro dinâmico e ordenação da lista de usuários por busca, perfil e ordem alfabética
+            const usuariosFiltrados = listaUsuarios
+                .filter((u) => {
+                    const term = searchTermUsuarios.toLowerCase().trim();
+                    const matchesSearch = !term || 
+                        (u.nome && u.nome.toLowerCase().includes(term)) || 
+                        (u.email && u.email.toLowerCase().includes(term));
+                    const matchesPerfil = filterPerfilUsuarios === 'Todos' || u.perfil === filterPerfilUsuarios;
+                    return matchesSearch && matchesPerfil;
+                })
+                .sort((a, b) => {
+                    const rankA = PERFIL_HIERARQUIA_ORDEM[a.perfil] || 99;
+                    const rankB = PERFIL_HIERARQUIA_ORDEM[b.perfil] || 99;
+                    if (rankA !== rankB) {
+                        return rankA - rankB;
+                    }
+                    const nomeA = (a.nome || a.email || '').trim();
+                    const nomeB = (b.nome || b.email || '').trim();
+                    return nomeA.localeCompare(nomeB, 'pt-BR', { sensitivity: 'base' });
+                });
+
             // Taxa de administração fixa conforme regra da CEF
             const TAXA_ADM = 25.00;
+
+            // Permissão de edição para campos restritos (TR e Percentual do Terreno)
+            // Liberado apenas para Administrador e Gerente; Bloqueado (Apenas Leitura) para Corretor, Assistente e Analista
+            const canEditCamposRestritos = userData?.perfil === 'Administrador' || userData?.perfil === 'Gerente';
 
             // Monitora estado de autenticação do Firebase
             useEffect(() => {
@@ -293,34 +630,77 @@
 
             // Carrega as simulações salvas do Firestore em tempo real
             useEffect(() => {
+                if (!currentUser) {
+                    setSimulacoes([]);
+                    setIsLoadingSimulacoes(false);
+                    return;
+                }
+
                 setIsLoadingSimulacoes(true);
+                const isCorretor = userData?.perfil === 'Corretor';
+
                 try {
-                    const q = query(collection(db, 'simulacoes'), orderBy('criadoEm', 'desc'));
+                    const baseRef = collection(db, 'simulacoes');
+                    // Para Corretor: filtra na consulta do Firestore por criadoPorUid == user.uid
+                    // Para os demais perfis (Administrador, Gerente, Assistente, Analista): consulta global de todas as simulações
+                    const q = isCorretor 
+                        ? query(baseRef, where('criadoPorUid', '==', currentUser.uid))
+                        : query(baseRef, orderBy('criadoEm', 'desc'));
+
                     const unsubscribe = onSnapshot(q, (snapshot) => {
                         const lista = [];
                         snapshot.forEach((docSnap) => {
-                            lista.push({ id: docSnap.id, ...docSnap.data() });
+                            const data = docSnap.data();
+                            if (isCorretor) {
+                                // Garantia dupla de segurança no cliente para perfis de Corretor
+                                if (data.criadoPorUid === currentUser.uid || data.userId === currentUser.uid || data.criadoPorEmail === currentUser.email || !data.criadoPorUid) {
+                                    lista.push({ id: docSnap.id, ...data });
+                                }
+                            } else {
+                                lista.push({ id: docSnap.id, ...data });
+                            }
                         });
+
+                        // Ordenação cronológica (mais recentes primeiro)
+                        lista.sort((a, b) => {
+                            const timeA = a.criadoEm?.seconds || 0;
+                            const timeB = b.criadoEm?.seconds || 0;
+                            return timeB - timeA;
+                        });
+
                         setSimulacoes(lista);
                         setIsLoadingSimulacoes(false);
                     }, (error) => {
-                        console.error('Erro no snapshot de simulações com ordem:', error);
-                        // Fallback sem ordenação caso o índice esteja em criação
-                        onSnapshot(collection(db, 'simulacoes'), (snapshot) => {
+                        console.warn('Fallback no snapshot de simulações:', error);
+                        // Fallback sem ordenação composta caso o índice do Firestore esteja em criação
+                        const fallbackRef = isCorretor 
+                            ? query(collection(db, 'simulacoes'), where('criadoPorEmail', '==', currentUser.email))
+                            : collection(db, 'simulacoes');
+
+                        onSnapshot(fallbackRef, (snapshot) => {
                             const lista = [];
                             snapshot.forEach((docSnap) => {
-                                lista.push({ id: docSnap.id, ...docSnap.data() });
+                                const data = docSnap.data();
+                                if (isCorretor) {
+                                    if (data.criadoPorUid === currentUser.uid || data.userId === currentUser.uid || data.criadoPorEmail === currentUser.email) {
+                                        lista.push({ id: docSnap.id, ...data });
+                                    }
+                                } else {
+                                    lista.push({ id: docSnap.id, ...data });
+                                }
                             });
+                            lista.sort((a, b) => (b.criadoEm?.seconds || 0) - (a.criadoEm?.seconds || 0));
                             setSimulacoes(lista);
                             setIsLoadingSimulacoes(false);
                         });
                     });
+
                     return () => unsubscribe();
                 } catch (err) {
                     console.error('Erro ao conectar ao Firestore:', err);
                     setIsLoadingSimulacoes(false);
                 }
-            }, []);
+            }, [userData, currentUser]);
 
             const fetchTR = async () => {
                 setIsFetchingTr(true);
@@ -449,6 +829,37 @@
                 }
             };
 
+            const handleSendResetPassword = async (e) => {
+                e.preventDefault();
+                setResetStatus({ type: '', message: '' });
+                const targetEmail = resetEmail.trim();
+
+                if (!targetEmail) {
+                    setResetStatus({ type: 'error', message: 'Por favor, digite um endereço de e-mail válido.' });
+                    return;
+                }
+
+                setResetSubmitting(true);
+                try {
+                    await sendPasswordResetEmail(auth, targetEmail);
+                    setResetStatus({ 
+                        type: 'success', 
+                        message: 'E-mail de redefinição enviado com sucesso! Verifique sua caixa de entrada e o spam.' 
+                    });
+                } catch (err) {
+                    console.error('Erro ao enviar e-mail de redefinição:', err);
+                    let msg = 'Ocorreu um erro ao enviar o e-mail. Tente novamente.';
+                    if (err.code === 'auth/user-not-found') {
+                        msg = 'Nenhuma conta encontrada com este e-mail.';
+                    } else if (err.code === 'auth/invalid-email') {
+                        msg = 'Por favor, digite um endereço de e-mail válido.';
+                    }
+                    setResetStatus({ type: 'error', message: msg });
+                } finally {
+                    setResetSubmitting(false);
+                }
+            };
+
             const handleLogout = async () => {
                 try {
                     await signOut(auth);
@@ -459,11 +870,11 @@
 
             const getBadgeStyle = (perfil) => {
                 switch (perfil) {
-                    case 'Administrador': return 'bg-emerald-100 text-emerald-800 border-emerald-300';
-                    case 'Gerente': return 'bg-purple-100 text-purple-800 border-purple-300';
-                    case 'Analista': return 'bg-amber-100 text-amber-800 border-amber-300';
-                    case 'Assistente': return 'bg-sky-100 text-sky-800 border-sky-300';
-                    case 'Corretor': default: return 'bg-indigo-100 text-indigo-800 border-indigo-300';
+                    case 'Administrador': return 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/60';
+                    case 'Gerente': return 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-700/60';
+                    case 'Analista': return 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700/60';
+                    case 'Assistente': return 'bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-700/60';
+                    case 'Corretor': default: return 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-700/60';
                 }
             };
 
@@ -511,6 +922,36 @@
                         console.error("Erro ao excluir usuário:", err);
                         alert("Erro ao excluir usuário no banco de dados.");
                     }
+                }
+            };
+
+            const handleAdminSendResetEmail = async (targetEmail) => {
+                setAdminPasswordStatus({ type: '', message: '' });
+                if (!targetEmail) {
+                    setAdminPasswordStatus({ type: 'error', message: 'E-mail do usuário não informado.' });
+                    return;
+                }
+
+                setIsAdminPasswordSubmitting(true);
+                try {
+                    await sendPasswordResetEmail(auth, targetEmail);
+                    setAdminPasswordStatus({
+                        type: 'success',
+                        message: `E-mail de redefinição enviado com sucesso para ${targetEmail}! O usuário receberá as instruções para cadastrar uma nova senha.`
+                    });
+                    setFeedback({ text: `E-mail de redefinição enviado para ${targetEmail}!`, type: 'success' });
+                    setTimeout(() => setFeedback(null), 4000);
+                } catch (err) {
+                    console.error("Erro ao enviar e-mail de redefinição via Admin:", err);
+                    let msg = "Erro ao enviar e-mail de redefinição.";
+                    if (err.code === 'auth/user-not-found') {
+                        msg = "E-mail não encontrado no serviço de autenticação.";
+                    } else if (err.code === 'auth/invalid-email') {
+                        msg = "E-mail do usuário é inválido.";
+                    }
+                    setAdminPasswordStatus({ type: 'error', message: msg });
+                } finally {
+                    setIsAdminPasswordSubmitting(false);
                 }
             };
 
@@ -599,7 +1040,7 @@
                 }
             };
 
-            // Função para limpar todos os campos
+            // Função para zerar/limpar todos os campos e limpar os resultados exibidos na tela
             const handleReset = () => {
                 setFinanciamento('');
                 setTaxaAnual('');
@@ -608,6 +1049,7 @@
                 setParcelaFutura('');
                 setSeguro('');
                 setNomeSimulacao('');
+                setResultadoSimulacao(null);
                 fetchTR();
             };
 
@@ -630,24 +1072,59 @@
             };
 
             // ==========================================
-            // MOTOR DE CÁLCULO
+            // MOTOR DE CÁLCULO SOB DEMANDA
             // ==========================================
-            const percTotalLiberado = parseFloat(percTerreno || 0) + parseFloat(percObra || 0);
-            const saldoLiberado = parseFloat(financiamento || 0) * (percTotalLiberado / 100);
-            
-            const taxaMensal = parseFloat(taxaAnual || 0) / 12;
-            const valorJuros = saldoLiberado * (taxaMensal / 100);
-            const valorTr = saldoLiberado * (parseFloat(tr || 0) / 100);
-            
-            const totalParcela = valorJuros + valorTr + parseFloat(seguro || 0) + TAXA_ADM;
-            const tetoAlcancado = parcelaFutura > 0 ? (totalParcela / parcelaFutura) * 100 : 0;
+            const handleCalcularSimulacao = () => {
+                if (!financiamento || parseFloat(financiamento) <= 0) {
+                    alert('Por favor, informe o Valor do Financiamento para realizar o cálculo da simulação.');
+                    return;
+                }
+
+                const fin = parseFloat(financiamento || 0);
+                const taxaA = parseFloat(taxaAnual || 0);
+                const pTerr = parseFloat(percTerreno || 0);
+                const pObra = parseFloat(percObra || 0);
+                const parcFut = parseFloat(parcelaFutura || 0);
+                const seg = parseFloat(seguro || 0);
+                const trVal = parseFloat(tr || 0);
+
+                const percTotalLiberado = pTerr + pObra;
+                const saldoLiberado = fin * (percTotalLiberado / 100);
+                
+                const taxaMensal = taxaA / 12;
+                const valorJuros = saldoLiberado * (taxaMensal / 100);
+                const valorTr = saldoLiberado * (trVal / 100);
+                
+                const totalParcela = valorJuros + valorTr + seg + TAXA_ADM;
+                const tetoAlcancado = parcFut > 0 ? (totalParcela / parcFut) * 100 : 0;
+
+                setResultadoSimulacao({
+                    financiamento: fin,
+                    taxaAnual: taxaA,
+                    percTerreno: pTerr,
+                    percObra: pObra,
+                    parcelaFutura: parcFut,
+                    seguro: seg,
+                    tr: trVal,
+                    percTotalLiberado,
+                    saldoLiberado,
+                    taxaMensal,
+                    valorJuros,
+                    valorTr,
+                    totalParcela,
+                    tetoAlcancado
+                });
+
+                setFeedback({ text: 'Simulação calculada com sucesso!', type: 'success' });
+                setTimeout(() => setFeedback(null), 3000);
+            };
 
             // ==========================================
             // AÇÕES DO FIRESTORE (SALVAR, CARREGAR, EXCLUIR)
             // ==========================================
             const handleSalvarSimulacao = async () => {
-                if (!financiamento || parseFloat(financiamento) <= 0) {
-                    alert('Por favor, informe o Valor do Financiamento antes de salvar.');
+                if (!resultadoSimulacao) {
+                    alert('Por favor, preencha os dados e clique em "Calcular Simulação" antes de salvar no banco de dados.');
                     return;
                 }
 
@@ -658,22 +1135,24 @@
                     
                     const tituloFinal = nomeSimulacao.trim() 
                         ? nomeSimulacao.trim() 
-                        : `Simulação ${formatCurrency(financiamento)} (${dataTexto})`;
+                        : `Simulação ${formatCurrency(resultadoSimulacao.financiamento)} (${dataTexto})`;
 
                     const payload = {
                         titulo: tituloFinal,
-                        financiamento: parseFloat(financiamento || 0),
-                        taxaAnual: parseFloat(taxaAnual || 0),
-                        percTerreno: parseFloat(percTerreno || 0),
-                        percObra: parseFloat(percObra || 0),
-                        parcelaFutura: parseFloat(parcelaFutura || 0),
-                        seguro: parseFloat(seguro || 0),
-                        tr: parseFloat(tr || 0),
-                        totalParcela: totalParcela || 0,
-                        saldoLiberado: saldoLiberado || 0,
-                        valorJuros: valorJuros || 0,
-                        valorTr: valorTr || 0,
+                        financiamento: resultadoSimulacao.financiamento,
+                        taxaAnual: resultadoSimulacao.taxaAnual,
+                        percTerreno: resultadoSimulacao.percTerreno,
+                        percObra: resultadoSimulacao.percObra,
+                        parcelaFutura: resultadoSimulacao.parcelaFutura,
+                        seguro: resultadoSimulacao.seguro,
+                        tr: resultadoSimulacao.tr,
+                        totalParcela: resultadoSimulacao.totalParcela,
+                        saldoLiberado: resultadoSimulacao.saldoLiberado,
+                        valorJuros: resultadoSimulacao.valorJuros,
+                        valorTr: resultadoSimulacao.valorTr,
                         criadoPorUid: currentUser ? currentUser.uid : null,
+                        userId: currentUser ? currentUser.uid : null,
+                        criadoPorEmail: currentUser ? currentUser.email : null,
                         criadoPorNome: userData ? userData.nome : (currentUser ? currentUser.email : 'Usuário'),
                         criadoPorPerfil: userData ? userData.perfil : 'Corretor',
                         criadoEm: serverTimestamp(),
@@ -695,16 +1174,58 @@
             };
 
             const handleCarregarSimulacao = (item) => {
-                setFinanciamento(item.financiamento !== undefined ? String(item.financiamento) : '');
-                setTaxaAnual(item.taxaAnual !== undefined ? String(item.taxaAnual) : '');
-                setPercTerreno(item.percTerreno !== undefined ? String(item.percTerreno) : '6.9');
-                setPercObra(item.percObra !== undefined ? String(item.percObra) : '');
-                setParcelaFutura(item.parcelaFutura !== undefined ? String(item.parcelaFutura) : '');
-                setSeguro(item.seguro !== undefined ? String(item.seguro) : '');
+                const fin = item.financiamento !== undefined ? String(item.financiamento) : '';
+                const taxaA = item.taxaAnual !== undefined ? String(item.taxaAnual) : '';
+                const pTerr = item.percTerreno !== undefined ? String(item.percTerreno) : '6.9';
+                const pObra = item.percObra !== undefined ? String(item.percObra) : '';
+                const parcFut = item.parcelaFutura !== undefined ? String(item.parcelaFutura) : '';
+                const seg = item.seguro !== undefined ? String(item.seguro) : '';
+                const trVal = item.tr !== undefined ? item.tr : tr;
+
+                setFinanciamento(fin);
+                setTaxaAnual(taxaA);
+                setPercTerreno(pTerr);
+                setPercObra(pObra);
+                setParcelaFutura(parcFut);
+                setSeguro(seg);
                 if (item.tr !== undefined) setTr(item.tr);
 
+                // Executa o cálculo e exibe o resultado da simulação carregada
+                const numFin = parseFloat(fin || 0);
+                const numTaxaA = parseFloat(taxaA || 0);
+                const numPTerr = parseFloat(pTerr || 0);
+                const numPObra = parseFloat(pObra || 0);
+                const numParcFut = parseFloat(parcFut || 0);
+                const numSeg = parseFloat(seg || 0);
+                const numTr = parseFloat(trVal || 0);
+
+                const percTotalLiberado = numPTerr + numPObra;
+                const saldoLiberado = numFin * (percTotalLiberado / 100);
+                const taxaMensal = numTaxaA / 12;
+                const valorJuros = saldoLiberado * (taxaMensal / 100);
+                const valorTr = saldoLiberado * (numTr / 100);
+                const totalParcela = valorJuros + valorTr + numSeg + TAXA_ADM;
+                const tetoAlcancado = numParcFut > 0 ? (totalParcela / numParcFut) * 100 : 0;
+
+                setResultadoSimulacao({
+                    financiamento: numFin,
+                    taxaAnual: numTaxaA,
+                    percTerreno: numPTerr,
+                    percObra: numPObra,
+                    parcelaFutura: numParcFut,
+                    seguro: numSeg,
+                    tr: numTr,
+                    percTotalLiberado,
+                    saldoLiberado,
+                    taxaMensal,
+                    valorJuros,
+                    valorTr,
+                    totalParcela,
+                    tetoAlcancado
+                });
+
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-                setFeedback({ text: `Simulação "${item.titulo}" carregada na calculadora!`, type: 'info' });
+                setFeedback({ text: `Simulação "${item.titulo}" carregada e calculada na tela!`, type: 'info' });
                 setTimeout(() => setFeedback(null), 4000);
             };
 
@@ -761,7 +1282,10 @@
             // RENDERIZAÇÃO 2: TELA DE LOGIN / CADASTRO SE NÃO ESTIVER AUTENTICADO
             if (!currentUser) {
                 return (
-                    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+                    <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4">
+                        <div className="w-full max-w-md mb-3 flex justify-end">
+                            <ThemeSelector theme={theme} setTheme={setTheme} />
+                        </div>
                         <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden border border-slate-200">
                             <div className="bg-gradient-to-r from-[#05532C] to-[#1D8843] p-6 text-white text-center">
                                 <div className="bg-white/10 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 backdrop-blur border border-white/20 shadow-sm">
@@ -816,7 +1340,20 @@
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-bold text-slate-700 mb-1">Senha</label>
+                                            <div className="flex items-center justify-between mb-1">
+                                                <label className="block text-xs font-bold text-slate-700">Senha</label>
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setResetEmail(authEmail || '');
+                                                        setResetStatus({ type: '', message: '' });
+                                                        setShowModalResetPassword(true);
+                                                    }}
+                                                    className="text-xs font-bold text-[#1D8843] hover:text-[#05532C] hover:underline transition-all cursor-pointer"
+                                                >
+                                                    Esqueceu sua senha?
+                                                </button>
+                                            </div>
                                             <div className="relative">
                                                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                                 <input 
@@ -945,6 +1482,89 @@
                                 )}
                             </div>
                         </div>
+
+                        {/* MODAL DE RECUPERAR SENHA (ESQUECI MINHA SENHA) */}
+                        {showModalResetPassword && (
+                            <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+                                <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
+                                    {/* Cabeçalho do Modal */}
+                                    <div className="bg-gradient-to-r from-[#05532C] to-[#1D8843] text-white px-6 py-5 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-white/10 p-2.5 rounded-xl border border-white/20">
+                                                <KeyRound size={22} className="text-white" />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-base leading-tight">Recuperar Senha</h3>
+                                                <p className="text-emerald-100 text-xs font-medium">Redefinição de acesso seguro</p>
+                                            </div>
+                                        </div>
+                                        <button 
+                                            type="button"
+                                            onClick={() => setShowModalResetPassword(false)}
+                                            className="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                                        >
+                                            <X size={20} />
+                                        </button>
+                                    </div>
+
+                                    {/* Corpo do Modal */}
+                                    <form onSubmit={handleSendResetPassword} className="p-6 space-y-4">
+                                        <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                                            Informe o e-mail cadastrado no aplicativo para receber o link de redefinição de senha.
+                                        </p>
+
+                                        {resetStatus.message && (
+                                            <div className={`p-3 rounded-xl text-xs font-semibold flex items-start gap-2.5 ${
+                                                resetStatus.type === 'success' 
+                                                    ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' 
+                                                    : 'bg-rose-50 border border-rose-200 text-rose-700'
+                                            }`}>
+                                                {resetStatus.type === 'success' ? (
+                                                    <CheckCircle2 size={16} className="shrink-0 text-emerald-600 mt-0.5" />
+                                                ) : (
+                                                    <Info size={16} className="shrink-0 text-rose-500 mt-0.5" />
+                                                )}
+                                                <span className="leading-snug">{resetStatus.message}</span>
+                                            </div>
+                                        )}
+
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-700 mb-1">E-mail Cadastrado *</label>
+                                            <div className="relative">
+                                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                <input 
+                                                    type="email" 
+                                                    required
+                                                    placeholder="seu@email.com"
+                                                    value={resetEmail}
+                                                    onChange={(e) => setResetEmail(e.target.value)}
+                                                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none font-medium text-slate-800"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-2 flex flex-col sm:flex-row items-center gap-2">
+                                            <button
+                                                type="submit"
+                                                disabled={resetSubmitting}
+                                                className="w-full sm:flex-1 bg-[#1D8843] hover:bg-[#05532C] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-xs disabled:opacity-50 cursor-pointer"
+                                            >
+                                                <Send size={16} />
+                                                {resetSubmitting ? 'Enviando...' : 'Enviar e-mail de redefinição'}
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowModalResetPassword(false)}
+                                                className="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 px-4 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                                            >
+                                                <ArrowLeft size={16} />
+                                                Voltar ao Login
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 );
             }
@@ -953,8 +1573,8 @@
             return (
                 <div className="min-h-screen p-4 md:p-8 font-sans text-slate-800 bg-slate-100">
                 
-                {/* HEADER COM IDENTIFICAÇÃO DO USUÁRIO LOGADO E LOGOUT */}
-                <div className="max-w-[1600px] mx-auto mb-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                {/* HEADER COM IDENTIFICAÇÃO DO USUÁRIO LOGADO, TROCA DE TEMA E LOGOUT */}
+                <div className="w-[90%] max-w-[1200px] mx-auto mb-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <div className="bg-[#1D8843] p-3 rounded-xl text-white shadow-sm shrink-0">
                             <HardHat size={32} />
@@ -965,39 +1585,44 @@
                         </div>
                     </div>
 
-                    {/* BADGE DE USUÁRIO LOGADO E BOTÃO LOGOUT */}
-                    <div className="flex items-center gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200 self-start md:self-auto shrink-0">
-                        <div className="flex items-center gap-2.5 pl-1 pr-1">
-                            <div className="w-9 h-9 rounded-lg bg-[#05532C] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
-                                {userData?.nome ? userData.nome.substring(0, 2).toUpperCase() : 'US'}
-                            </div>
-                            <div className="text-xs">
-                                <p className="font-bold text-slate-800 leading-tight">
-                                    {userData?.nome || currentUser.email}
-                                </p>
-                                <div className="mt-0.5 flex items-center gap-1.5">
-                                    <span className="text-slate-500">Perfil:</span>
-                                    <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] uppercase border ${getBadgeStyle(userData?.perfil || 'Corretor')}`}>
-                                        {userData?.perfil || 'Corretor'}
-                                    </span>
+                    <div className="flex flex-wrap items-center gap-3 self-start lg:self-auto shrink-0">
+                        {/* SELETOR DE TEMA */}
+                        <ThemeSelector theme={theme} setTheme={setTheme} />
+
+                        {/* BADGE DE USUÁRIO LOGADO E BOTÃO LOGOUT */}
+                        <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-200 shrink-0">
+                            <div className="flex items-center gap-2.5 pl-1 pr-1">
+                                <div className="w-9 h-9 rounded-lg bg-[#05532C] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+                                    {userData?.nome ? userData.nome.substring(0, 2).toUpperCase() : 'US'}
+                                </div>
+                                <div className="text-xs">
+                                    <p className="font-bold text-slate-800 leading-tight">
+                                        {userData?.nome || currentUser.email}
+                                    </p>
+                                    <div className="mt-0.5 flex items-center gap-1.5">
+                                        <span className="text-slate-500 text-[11px]">Perfil:</span>
+                                        <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] tracking-wide uppercase border ${getBadgeStyle(userData?.perfil || 'Corretor')}`}>
+                                            {userData?.perfil || 'Corretor'}
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <button 
-                            onClick={handleLogout}
-                            title="Sair do Sistema"
-                            className="bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 p-2 rounded-lg border border-slate-200 transition-colors flex items-center gap-1.5 text-xs font-bold"
-                        >
-                            <LogOut size={16} />
-                            <span className="hidden sm:inline">Sair</span>
-                        </button>
+                            <button 
+                                onClick={handleLogout}
+                                title="Sair do Sistema"
+                                className="bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 p-2 rounded-lg border border-slate-200 transition-colors flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+                            >
+                                <LogOut size={16} />
+                                <span className="hidden sm:inline">Sair</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 {/* BANNER DE FEEDBACK */}
                 {feedback && (
-                    <div className={`max-w-[1600px] mx-auto mb-6 p-4 rounded-xl font-semibold flex items-center gap-3 shadow-sm ${
+                    <div className={`w-[90%] max-w-[1200px] mx-auto mb-6 p-4 rounded-xl font-semibold flex items-center gap-3 shadow-sm ${
                         feedback.type === 'success' ? 'bg-emerald-100 border border-emerald-300 text-emerald-800' :
                         feedback.type === 'error' ? 'bg-rose-100 border border-rose-300 text-rose-800' :
                         'bg-sky-100 border border-sky-300 text-sky-800'
@@ -1009,7 +1634,7 @@
 
                 {/* SEÇÃO ESPECIAL PARA GERENTE / ANALISTA / ADMINISTRADOR: PAINEL GERENCIAL */}
                 {(userData?.perfil === 'Gerente' || userData?.perfil === 'Analista' || userData?.perfil === 'Administrador') && (
-                    <div className="max-w-[1600px] mx-auto mb-6 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 border-l-4 border-l-purple-600">
+                    <div className="w-[90%] max-w-[1200px] mx-auto mb-6 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 border-l-4 border-l-purple-600">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div className="flex items-center gap-3">
                                 <div className="bg-purple-100 text-purple-800 p-2.5 rounded-xl border border-purple-200 shrink-0">
@@ -1021,14 +1646,14 @@
                                 </div>
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200">
-                                <div>
-                                    <span className="text-slate-400 block">Total de Simulações:</span>
+                            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs font-semibold text-slate-700 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+                                <div className="flex flex-col items-center text-center">
+                                    <span className="text-slate-400 block mb-0.5">Total de Simulações:</span>
                                     <span className="text-slate-800 font-bold text-sm">{simulacoes.length}</span>
                                 </div>
-                                <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
-                                <div>
-                                    <span className="text-slate-400 block">Volume Total Financiado:</span>
+                                <div className="h-9 w-px bg-slate-200 hidden sm:block"></div>
+                                <div className="flex flex-col items-center text-center">
+                                    <span className="text-slate-400 block mb-0.5">Volume Total Financiado:</span>
                                     <span className="text-[#05532C] font-bold text-sm">
                                         {formatCurrency(simulacoes.reduce((acc, c) => acc + (c.financiamento || 0), 0))}
                                     </span>
@@ -1039,16 +1664,31 @@
                 )}
 
                 {/* ESTRUTURA DE 3 COLUNAS RESPONSIVAS (DESKTOP) E EMPILHADAS (CELULAR) */}
-                <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 xl:gap-8">
+                <div className="w-[90%] max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
                     {/* ========================================== */}
                     {/* COLUNA 1 (ESQUERDA): ENTRADA DE DADOS      */}
                     {/* ========================================== */}
                     <div className="space-y-6">
+                        {/* BOTÃO "ZERAR TODOS OS VALORES" NO TOPO DO PAINEL */}
+                        <div className="flex items-center justify-between bg-white rounded-2xl shadow-sm border border-slate-200 p-4 border-l-4 border-l-[#99247F]">
+                            <div>
+                                <span className="font-bold text-slate-800 text-sm">Limpar Formulário</span>
+                            </div>
+                            <button 
+                                onClick={handleReset}
+                                className="bg-slate-100 hover:bg-[#99247F] text-[#99247F] hover:text-white border border-slate-300 hover:border-[#99247F] transition-all px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-2xs"
+                                title="Zerar todos os valores e resultados"
+                            >
+                                <RotateCcw size={15} />
+                                Zerar Todos os Valores
+                            </button>
+                        </div>
+
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 border-t-4 border-t-[#662B7F]">
                             <h2 className="text-xl font-bold flex items-center gap-2 mb-6 text-[#05532C]">
                                 <FileText className="text-[#662B7F]" /> 
-                                Dados do seu Contrato
+                                Dados do Contrato
                             </h2>
                             
                             <div className="space-y-5">
@@ -1056,7 +1696,7 @@
                                 <MoneyInput 
                                     label="Valor do Financiamento (R$)"
                                     value={financiamento}
-                                    onChange={setFinanciamento}
+                                    onChange={updateInputVal(setFinanciamento)}
                                     helpText="O valor total que você financiou com o banco."
                                 />
 
@@ -1068,18 +1708,48 @@
                                             type="number" 
                                             step="0.01"
                                             value={taxaAnual} 
-                                            onChange={(e) => setTaxaAnual(e.target.value)}
+                                            onChange={(e) => updateInputVal(setTaxaAnual)(e.target.value)}
                                             className="w-full pl-4 pr-10 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none transition-all font-semibold text-slate-800"
                                         />
                                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
                                     </div>
                                 </div>
 
+                                {/* Taxa TR (Taxa Referencial) */}
+                                <div>
+                                    <div className="mb-1">
+                                        <label className="block text-sm font-semibold text-slate-700">
+                                            Taxa TR (% ao mês)
+                                        </label>
+                                    </div>
+                                    <div className="relative">
+                                        <input 
+                                            type="number" 
+                                            step="0.0001"
+                                            value={tr} 
+                                            onChange={(e) => updateInputVal(setTr)(e.target.value)}
+                                            disabled={!canEditCamposRestritos}
+                                            readOnly={!canEditCamposRestritos}
+                                            className={`w-full pl-4 pr-16 py-2.5 rounded-lg border outline-none transition-all font-semibold ${
+                                                canEditCamposRestritos 
+                                                    ? 'border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] text-slate-800 bg-white' 
+                                                    : 'border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed'
+                                            }`}
+                                            placeholder="0.0000"
+                                        />
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-xs">% a.m.</span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-500 mt-1 flex items-center justify-between">
+                                        <span>Base: TR de {formatTrPeriodo(trData).replace('Ref. ', '')}</span>
+                                        <span>Atualizado em: {trData && trData !== 'Buscando...' && trData !== 'Fallback' ? trData : new Date().toLocaleDateString('pt-BR')}</span>
+                                    </p>
+                                </div>
+
                                 {/* Parcela Futura */}
                                 <MoneyInput 
                                     label="Valor da Parcela de Amortização (R$)"
                                     value={parcelaFutura}
-                                    onChange={setParcelaFutura}
+                                    onChange={updateInputVal(setParcelaFutura)}
                                     helpText="Usaremos para comparar se o juro está chegando no teto."
                                 />
 
@@ -1088,7 +1758,7 @@
                                     <MoneyInput 
                                         label="Seguros (MIP/DFI)"
                                         value={seguro}
-                                        onChange={setSeguro}
+                                        onChange={updateInputVal(setSeguro)}
                                     />
                                     {/* Taxa Adm */}
                                     <div>
@@ -1110,14 +1780,24 @@
                             <div className="space-y-5">
                                 {/* Percentual Terreno */}
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Percentual do Terreno (%)</label>
+                                    <div className="mb-1">
+                                        <label className="block text-sm font-semibold text-slate-700">
+                                            Percentual do Terreno (%)
+                                        </label>
+                                    </div>
                                     <div className="relative">
                                         <input 
                                             type="number" 
                                             step="0.1"
                                             value={percTerreno} 
-                                            onChange={(e) => setPercTerreno(e.target.value)}
-                                            className="w-full pl-4 pr-10 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-[#72AC44] focus:border-[#72AC44] outline-none transition-all font-semibold"
+                                            onChange={(e) => updateInputVal(setPercTerreno)(e.target.value)}
+                                            disabled={!canEditCamposRestritos}
+                                            readOnly={!canEditCamposRestritos}
+                                            className={`w-full pl-4 pr-10 py-2.5 rounded-lg border outline-none transition-all font-semibold ${
+                                                canEditCamposRestritos 
+                                                    ? 'border-slate-300 focus:ring-2 focus:ring-[#72AC44] focus:border-[#72AC44] text-slate-800 bg-white' 
+                                                    : 'border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed'
+                                            }`}
                                         />
                                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
                                     </div>
@@ -1132,7 +1812,7 @@
                                             type="number" 
                                             step="0.1"
                                             value={percObra} 
-                                            onChange={(e) => setPercObra(e.target.value)}
+                                            onChange={(e) => updateInputVal(setPercObra)(e.target.value)}
                                             className="w-full pl-4 pr-10 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-[#72AC44] focus:border-[#72AC44] outline-none transition-all font-semibold"
                                         />
                                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
@@ -1142,13 +1822,13 @@
                             </div>
                         </div>
 
-                        {/* Botão de Limpar Dados */}
+                        {/* BOTÃO PRINCIPAL "CALCULAR SIMULAÇÃO" */}
                         <button 
-                            onClick={handleReset}
-                            className="w-full bg-white border-2 border-[#99247F] text-[#99247F] hover:bg-[#99247F] hover:text-white transition-all py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-sm"
+                            onClick={handleCalcularSimulacao}
+                            className="w-full bg-[#1D8843] hover:bg-[#05532C] text-white transition-all py-3.5 px-4 rounded-xl font-extrabold text-base flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.99]"
                         >
-                            <RefreshCw size={20} />
-                            Zerar Todos os Valores
+                            <Calculator size={22} />
+                            Calcular Simulação
                         </button>
                     </div>
 
@@ -1157,154 +1837,217 @@
                     {/* ========================================== */}
                     <div className="space-y-6">
                         
-                        {/* CARD DE RESULTADO PRINCIPAL */}
-                        <div className="bg-gradient-to-br from-[#05532C] to-[#1D8843] rounded-2xl shadow-lg p-6 sm:p-8 text-white relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-32 bg-white opacity-5 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
-                            <div className="absolute bottom-0 left-0 p-24 bg-[#72AC44] opacity-20 rounded-full blur-3xl transform -translate-x-1/3 translate-y-1/3"></div>
-                            
-                            <div className="relative z-10">
-                                <div className="flex items-center justify-between mb-4">
-                                    <span className="text-[#72AC44] font-bold uppercase tracking-wider text-xs sm:text-sm flex items-center gap-2">
-                                        <Calculator size={16} /> Valor da Parcela (Juro de Obra)
-                                    </span>
-                                    
-                                    {/* TR Badge */}
-                                    <div className="bg-white/10 backdrop-blur border border-white/20 rounded-full px-3 py-1 flex items-center gap-2 text-xs">
-                                        <RefreshCw size={12} className={isFetchingTr ? "animate-spin text-white" : "text-[#72AC44]"} />
-                                        <span>TR: {isFetchingTr ? '...' : formatPercent(tr, 4)}</span>
-                                    </div>
+                        {!resultadoSimulacao ? (
+                            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 text-center flex flex-col items-center justify-center min-h-[380px]">
+                                <div className="w-16 h-16 rounded-full bg-emerald-50 text-[#1D8843] flex items-center justify-center mb-4 border border-emerald-100 shadow-2xs">
+                                    <Calculator size={32} />
                                 </div>
-
-                                <div className="text-4xl sm:text-5xl font-extrabold mb-6 tracking-tight drop-shadow-sm">
-                                    {formatCurrency(totalParcela)}
-                                </div>
-
-                                {/* Progress Bar do Teto */}
-                                <div className="space-y-2">
-                                    <div className="flex justify-between text-xs sm:text-sm font-medium text-white/80">
-                                        <span>Proporção / Parcela Futura</span>
-                                        <span>{formatPercent(tetoAlcancado, 1)} da parcela</span>
-                                    </div>
-                                    <div className="h-2 w-full bg-[#05532C] rounded-full overflow-hidden border border-white/10">
-                                        <div 
-                                            className={`h-full rounded-full transition-all duration-500 ${tetoAlcancado > 90 ? 'bg-[#99247F]' : tetoAlcancado > 70 ? 'bg-[#662B7F]' : 'bg-[#72AC44]'}`}
-                                            style={{ width: `${Math.min(tetoAlcancado, 100)}%` }}
-                                        ></div>
-                                    </div>
-                                    <p className="text-xs text-white/60">
-                                        Comparação com prestação futura de {formatCurrency(parcelaFutura)}.
-                                    </p>
-                                </div>
+                                <h3 className="text-xl font-bold text-slate-800 mb-2">
+                                    Simulação Pronta para Cálculo
+                                </h3>
+                                <p className="text-sm text-slate-500 max-w-sm mb-6 leading-relaxed">
+                                    Preencha os dados do contrato e a evolução da obra na coluna ao lado e clique no botão <span className="font-bold text-[#1D8843]">"Calcular Simulação"</span> para visualizar os resultados.
+                                </p>
+                                <button 
+                                    onClick={handleCalcularSimulacao}
+                                    className="bg-[#1D8843] hover:bg-[#05532C] text-white transition-all px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-sm"
+                                >
+                                    <Play size={16} />
+                                    Calcular Agora
+                                </button>
                             </div>
-                        </div>
-
-                        {/* MEMÓRIA DE CÁLCULO */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                            <h3 className="text-lg font-bold text-[#05532C] mb-4 flex items-center gap-2">
-                                <Info className="text-[#1D8843]" /> 
-                                Memória de Cálculo (Passo a Passo)
-                            </h3>
-                            
-                            <div className="space-y-4">
-                                {/* Passo A */}
-                                <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
-                                    <div className="flex items-start gap-3">
-                                        <div className="bg-[#1D8843]/10 text-[#1D8843] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">A</div>
-                                        <div>
-                                            <h4 className="font-semibold text-[#05532C] text-sm">Saldo Liberado</h4>
-                                            <p className="text-xs text-slate-600 mt-0.5">Terreno + obra executada emprestados.</p>
-                                            <div className="mt-2 font-mono text-xs bg-white p-2.5 rounded border border-slate-200 text-slate-700 overflow-x-auto">
-                                                <span className="text-slate-400">% =</span> {formatPercent(percTerreno)} + {formatPercent(percObra)} = <b>{formatPercent(percTotalLiberado)}</b><br/>
-                                                <span className="text-slate-400">Saldo =</span> {formatCurrency(financiamento)} × {formatPercent(percTotalLiberado)}<br/>
-                                                <span className="text-[#1D8843] font-semibold">= {formatCurrency(saldoLiberado)}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Passo B */}
-                                <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
-                                    <div className="flex items-start gap-3">
-                                        <div className="bg-[#1D8843]/10 text-[#1D8843] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">B</div>
-                                        <div>
-                                            <h4 className="font-semibold text-[#05532C] text-sm">Taxa do Mês</h4>
-                                            <p className="text-xs text-slate-600 mt-0.5">Taxa anual ({formatPercent(taxaAnual)}) dividida por 12.</p>
-                                            <div className="mt-2 font-mono text-xs bg-white p-2.5 rounded border border-slate-200 text-slate-700 overflow-x-auto">
-                                                <span className="text-slate-400">Taxa Mês =</span> {formatPercent(taxaAnual)} ÷ 12 <br/>
-                                                <span className="text-[#1D8843] font-semibold">= {formatPercent(taxaMensal, 4)} ao mês</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Passo C */}
-                                <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
-                                    <div className="flex items-start gap-3">
-                                        <div className="bg-[#1D8843]/10 text-[#1D8843] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">C</div>
-                                        <div>
-                                            <h4 className="font-semibold text-[#05532C] text-sm">Juros sobre Saldo</h4>
-                                            <p className="text-xs text-slate-600 mt-0.5">Taxa mensal × valor liberado.</p>
-                                            <div className="mt-2 font-mono text-xs bg-white p-2.5 rounded border border-slate-200 text-slate-700 overflow-x-auto">
-                                                <span className="text-slate-400">Juros =</span> {formatCurrency(saldoLiberado)} × {formatPercent(taxaMensal, 4)}<br/>
-                                                <span className="text-[#1D8843] font-semibold">= {formatCurrency(valorJuros)}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Passo D */}
-                                <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
-                                    <div className="flex items-start gap-3">
-                                        <div className="bg-[#1D8843]/10 text-[#1D8843] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">D</div>
-                                        <div className="w-full">
-                                            <h4 className="font-semibold text-[#05532C] text-sm">Correção pela TR</h4>
-                                            <div className="mt-2 flex flex-wrap gap-2 items-center">
-                                                <div className="relative w-28">
-                                                    <input 
-                                                        type="number" 
-                                                        step="0.0001"
-                                                        value={tr} 
-                                                        onChange={(e) => setTr(e.target.value)}
-                                                        className="w-full pl-2 pr-6 py-1 text-xs rounded border border-slate-300 font-mono"
-                                                    />
-                                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs">%</span>
-                                                </div>
-                                                
+                        ) : (
+                            <>
+                                {/* CARD DE RESULTADO PRINCIPAL */}
+                                <div className="bg-gradient-to-br from-[#05532C] to-[#1D8843] rounded-2xl shadow-lg p-6 sm:p-8 text-white relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 p-32 bg-white opacity-5 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
+                                    <div className="absolute bottom-0 left-0 p-24 bg-[#72AC44] opacity-20 rounded-full blur-3xl transform -translate-x-1/3 translate-y-1/3"></div>
+                                    
+                                    <div className="relative z-10">
+                                        <div className="flex items-center justify-between mb-4 gap-2">
+                                            <span className="text-[#72AC44] font-bold uppercase tracking-wider text-xs sm:text-sm flex items-center gap-2 shrink-0">
+                                                <Calculator size={18} className="shrink-0" /> VALOR DA PARCELA
+                                            </span>
+                                            
+                                            {/* TR Badge */}
+                                            {canEditCamposRestritos ? (
                                                 <button 
+                                                    type="button"
                                                     onClick={fetchTR}
                                                     disabled={isFetchingTr}
-                                                    className="px-2 py-1 bg-[#1D8843]/10 text-[#1D8843] hover:bg-[#1D8843]/20 transition-colors rounded text-xs font-semibold flex items-center gap-1 disabled:opacity-50"
+                                                    className="bg-white/10 hover:bg-white/20 backdrop-blur border border-white/20 rounded-full px-3 py-1 text-xs font-semibold text-white transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                                                    title="Clique para atualizar a TR no Banco Central"
                                                 >
-                                                    <RefreshCw size={12} className={isFetchingTr ? "animate-spin" : ""} />
-                                                    Atualizar TR
+                                                    <span>TR: {isFetchingTr ? '...' : formatPercent(resultadoSimulacao.tr, 4)}</span>
                                                 </button>
+                                            ) : (
+                                                <div className="bg-white/10 backdrop-blur border border-white/20 rounded-full px-3 py-1 text-xs font-semibold text-white shrink-0">
+                                                    <span>TR: {isFetchingTr ? '...' : formatPercent(resultadoSimulacao.tr, 4)}</span>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="text-4xl sm:text-5xl font-extrabold mb-6 tracking-tight drop-shadow-sm">
+                                            {formatCurrency(resultadoSimulacao.totalParcela)}
+                                        </div>
+
+                                        {/* Progress Bar do Teto */}
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-xs sm:text-sm font-medium text-white/80">
+                                                <span>Proporção / Parcela Futura</span>
+                                                <span>{formatPercent(resultadoSimulacao.tetoAlcancado, 1)} da parcela</span>
                                             </div>
-                                            <div className="mt-2 font-mono text-xs bg-white p-2.5 rounded border border-slate-200 text-slate-700 overflow-x-auto">
-                                                <span className="text-slate-400">TR =</span> {formatCurrency(saldoLiberado)} × {formatPercent(tr, 4)}<br/>
-                                                <span className="text-[#1D8843] font-semibold">= {formatCurrency(valorTr)}</span>
+                                            <div className="h-2 w-full bg-[#05532C] rounded-full overflow-hidden border border-white/10">
+                                                <div 
+                                                    className={`h-full rounded-full transition-all duration-500 ${resultadoSimulacao.tetoAlcancado > 90 ? 'bg-[#99247F]' : resultadoSimulacao.tetoAlcancado > 70 ? 'bg-[#662B7F]' : 'bg-[#72AC44]'}`}
+                                                    style={{ width: `${Math.min(resultadoSimulacao.tetoAlcancado, 100)}%` }}
+                                                ></div>
                                             </div>
+                                            <p className="text-xs text-white/60">
+                                                Comparação com prestação futura de {formatCurrency(resultadoSimulacao.parcelaFutura)}.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Conclusão */}
-                                <div className="p-4 rounded-xl bg-[#05532C] text-white shadow-inner mt-4 border border-[#1D8843]/30">
-                                    <h4 className="font-semibold flex items-center gap-2 mb-2 text-[#72AC44] text-sm">
-                                        <CheckCircle2 size={16} /> 
-                                        Composição Final da Parcela
-                                    </h4>
-                                    <ul className="space-y-1.5 text-xs text-slate-200 font-mono">
-                                        <li className="flex justify-between"><span>Juros (C):</span> <span>{formatCurrency(valorJuros)}</span></li>
-                                        <li className="flex justify-between"><span>Correção TR (D):</span> <span>{formatCurrency(valorTr)}</span></li>
-                                        <li className="flex justify-between"><span>Seguros:</span> <span>{formatCurrency(seguro)}</span></li>
-                                        <li className="flex justify-between"><span>Taxa Adm:</span> <span>{formatCurrency(TAXA_ADM)}</span></li>
-                                        <li className="border-t border-[#1D8843] my-1 pt-1 flex justify-between text-white font-bold text-sm">
-                                            <span>Total (TEO):</span> <span>{formatCurrency(totalParcela)}</span>
-                                        </li>
-                                    </ul>
+                                {/* MEMÓRIA DE CÁLCULO */}
+                                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                                    <h3 className="text-lg font-bold text-[#05532C] mb-4 flex items-center gap-2">
+                                        <Info className="text-[#1D8843]" /> 
+                                        Memória de Cálculo (Passo a Passo)
+                                    </h3>
+                                    
+                                    <div className="space-y-4">
+                                        {/* Passo A */}
+                                        <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
+                                            <div className="flex items-start gap-3">
+                                                <div className="bg-[#1D8843]/10 text-[#1D8843] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">A</div>
+                                                <div>
+                                                    <h4 className="font-semibold text-[#05532C] text-sm">Saldo Liberado</h4>
+                                                    <p className="text-xs text-slate-600 mt-0.5">Terreno + obra executada emprestados.</p>
+                                                    <div className="mt-2 font-mono text-xs bg-white p-2.5 rounded border border-slate-200 text-slate-700 overflow-x-auto">
+                                                        <span className="text-slate-400">% =</span> {formatPercent(resultadoSimulacao.percTerreno)} + {formatPercent(resultadoSimulacao.percObra)} = <b>{formatPercent(resultadoSimulacao.percTotalLiberado)}</b><br/>
+                                                        <span className="text-slate-400">Saldo =</span> {formatCurrency(resultadoSimulacao.financiamento)} × {formatPercent(resultadoSimulacao.percTotalLiberado)}<br/>
+                                                        <span className="text-[#1D8843] font-semibold">= {formatCurrency(resultadoSimulacao.saldoLiberado)}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Passo B */}
+                                        <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
+                                            <div className="flex items-start gap-3">
+                                                <div className="bg-[#1D8843]/10 text-[#1D8843] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">B</div>
+                                                <div>
+                                                    <h4 className="font-semibold text-[#05532C] text-sm">Taxa do Mês</h4>
+                                                    <p className="text-xs text-slate-600 mt-0.5">Taxa anual ({formatPercent(resultadoSimulacao.taxaAnual)}) dividida por 12.</p>
+                                                    <div className="mt-2 font-mono text-xs bg-white p-2.5 rounded border border-slate-200 text-slate-700 overflow-x-auto">
+                                                        <span className="text-slate-400">Taxa Mês =</span> {formatPercent(resultadoSimulacao.taxaAnual)} ÷ 12 <br/>
+                                                        <span className="text-[#1D8843] font-semibold">= {formatPercent(resultadoSimulacao.taxaMensal, 4)} ao mês</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Passo C */}
+                                        <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
+                                            <div className="flex items-start gap-3">
+                                                <div className="bg-[#1D8843]/10 text-[#1D8843] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">C</div>
+                                                <div>
+                                                    <h4 className="font-semibold text-[#05532C] text-sm">Juros sobre Saldo</h4>
+                                                    <p className="text-xs text-slate-600 mt-0.5">Taxa mensal × valor liberado.</p>
+                                                    <div className="mt-2 font-mono text-xs bg-white p-2.5 rounded border border-slate-200 text-slate-700 overflow-x-auto">
+                                                        <span className="text-slate-400">Juros =</span> {formatCurrency(resultadoSimulacao.saldoLiberado)} × {formatPercent(resultadoSimulacao.taxaMensal, 4)}<br/>
+                                                        <span className="text-[#1D8843] font-semibold">= {formatCurrency(resultadoSimulacao.valorJuros)}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Passo D */}
+                                        {canEditCamposRestritos ? (
+                                            /* Visão Administrador e Gerente: Card completo com destaque visual, opções de atualização e edição */
+                                            <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="bg-[#1D8843] text-white font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm shadow-2xs">D</div>
+                                                    <div className="w-full">
+                                                        <div className="flex items-center justify-between">
+                                                            <h4 className="font-semibold text-[#05532C] text-sm flex items-center gap-1.5">
+                                                                Correção pela TR (Banco Central)
+                                                            </h4>
+                                                            <span className="text-[11px] font-medium text-emerald-800 bg-emerald-100/80 px-2 py-0.5 rounded-full border border-emerald-200">
+                                                                {formatTrPeriodo(trData)}
+                                                            </span>
+                                                        </div>
+                                                        <p className="text-xs text-slate-600 mt-0.5">
+                                                            Taxa Referencial aplicada sobre o saldo devedor liberado ({formatCurrency(resultadoSimulacao.saldoLiberado)}).
+                                                        </p>
+                                                        <div className="mt-2.5 flex flex-wrap gap-2 items-center">
+                                                            <div className="relative w-32">
+                                                                <input 
+                                                                    type="number" 
+                                                                    step="0.0001"
+                                                                    value={tr} 
+                                                                    onChange={(e) => updateInputVal(setTr)(e.target.value)}
+                                                                    className="w-full pl-2.5 pr-8 py-1.5 text-xs rounded-lg border border-emerald-300 bg-white font-mono font-bold text-slate-800 shadow-2xs focus:ring-2 focus:ring-[#1D8843] outline-none"
+                                                                />
+                                                                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">% a.m.</span>
+                                                            </div>
+                                                            
+                                                            <button 
+                                                                onClick={fetchTR}
+                                                                disabled={isFetchingTr}
+                                                                className="px-2.5 py-1.5 bg-[#1D8843] text-white hover:bg-[#05532C] transition-all rounded-lg text-xs font-bold flex items-center gap-1 disabled:opacity-50 shadow-2xs cursor-pointer"
+                                                                title="Atualizar via API SGS do Banco Central"
+                                                            >
+                                                                <RefreshCw size={12} className={isFetchingTr ? "animate-spin" : ""} />
+                                                                Atualizar
+                                                            </button>
+                                                        </div>
+                                                        <div className="mt-2 font-mono text-xs bg-white p-2.5 rounded-lg border border-emerald-200 text-slate-700 overflow-x-auto shadow-2xs">
+                                                            <span className="text-slate-400">TR =</span> {formatCurrency(resultadoSimulacao.saldoLiberado)} × {formatPercent(resultadoSimulacao.tr, 4)}<br/>
+                                                            <span className="text-[#1D8843] font-semibold">= {formatCurrency(resultadoSimulacao.valorTr)}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            /* Visão Corretor, Assistente e Analista: Card simplificado no padrão dos passos A, B e C */
+                                            <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
+                                                <div className="flex items-start gap-3">
+                                                    <div className="bg-[#1D8843]/10 text-[#1D8843] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">D</div>
+                                                    <div className="w-full">
+                                                        <h4 className="font-semibold text-[#05532C] text-sm">Correção pela TR</h4>
+                                                        <p className="text-xs text-slate-600 mt-0.5">Taxa Referencial aplicada sobre o saldo devedor liberado ({formatCurrency(resultadoSimulacao.saldoLiberado)}).</p>
+                                                        <div className="mt-2 font-mono text-xs bg-white p-2.5 rounded border border-slate-200 text-slate-700 overflow-x-auto">
+                                                            <span className="text-slate-400">TR =</span> {formatCurrency(resultadoSimulacao.saldoLiberado)} × {formatPercent(resultadoSimulacao.tr, 4)}<br/>
+                                                            <span className="text-[#1D8843] font-semibold">= {formatCurrency(resultadoSimulacao.valorTr)}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Conclusão */}
+                                        <div className="p-4 rounded-xl bg-[#05532C] text-white shadow-inner mt-4 border border-[#1D8843]/30">
+                                            <h4 className="font-semibold flex items-center gap-2 mb-2 text-[#72AC44] text-sm">
+                                                <CheckCircle2 size={16} /> 
+                                                Composição Final da Parcela
+                                            </h4>
+                                            <ul className="space-y-1.5 text-xs text-slate-200 font-mono">
+                                                <li className="flex justify-between"><span>Juros (C):</span> <span>{formatCurrency(resultadoSimulacao.valorJuros)}</span></li>
+                                                <li className="flex justify-between"><span>Correção TR (D):</span> <span>{formatCurrency(resultadoSimulacao.valorTr)}</span></li>
+                                                <li className="flex justify-between"><span>Seguros:</span> <span>{formatCurrency(resultadoSimulacao.seguro)}</span></li>
+                                                <li className="flex justify-between"><span>Taxa Adm:</span> <span>{formatCurrency(TAXA_ADM)}</span></li>
+                                                <li className="border-t border-[#1D8843] my-1 pt-1 flex justify-between text-white font-bold text-sm">
+                                                    <span>Total (TEO):</span> <span>{formatCurrency(resultadoSimulacao.totalParcela)}</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
+                            </>
+                        )}
 
                     </div>
 
@@ -1314,13 +2057,10 @@
                     <div className="space-y-6">
                         {/* CARD SALVAR SIMULAÇÃO NO FIRESTORE (NO TOPO DA COLUNA 3) */}
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 border-t-4 border-t-[#1D8843]">
-                            <h3 className="text-lg font-bold text-[#05532C] mb-1 flex items-center gap-2">
+                            <h3 className="text-lg font-bold text-[#05532C] mb-4 flex items-center gap-2">
                                 <Bookmark className="text-[#1D8843]" size={20} />
-                                Salvar Simulação no Banco de Dados
+                                Salvar Simulação
                             </h3>
-                            <p className="text-xs text-slate-500 mb-4">
-                                Sincronize os dados no Firestore para consultar depois.
-                            </p>
 
                             <div className="space-y-3">
                                 <div>
@@ -1353,9 +2093,6 @@
                                         <Bookmark className="text-[#662B7F]" size={22} />
                                         Simulações Salvas
                                     </h2>
-                                    <p className="text-slate-500 text-xs mt-0.5">
-                                        Conectado ao Cloud Firestore
-                                    </p>
                                 </div>
                                 <div className="bg-slate-100 px-3 py-1 rounded-full font-bold text-slate-700 text-xs border border-slate-200 shrink-0">
                                     {simulacoes.length}
@@ -1370,9 +2107,13 @@
                             ) : simulacoes.length === 0 ? (
                                 <div className="py-12 text-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200 my-auto p-4">
                                     <Bookmark size={36} className="mx-auto text-slate-300 mb-2" />
-                                    <p className="font-semibold text-slate-600 text-sm">Nenhum registro salvo</p>
+                                    <p className="font-semibold text-slate-600 text-sm">
+                                        {userData?.perfil === 'Corretor' ? 'Você ainda não possui simulações salvas.' : 'Nenhum registro salvo'}
+                                    </p>
                                     <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-                                        Preencha os valores e clique em "Salvar Simulação" acima para registrar no banco.
+                                        {userData?.perfil === 'Corretor' 
+                                            ? 'Preencha os valores do formulário e clique em "Salvar Simulação" para registrar no seu histórico.'
+                                            : 'Preencha os valores e clique em "Salvar Simulação" acima para registrar no banco.'}
                                     </p>
                                 </div>
                             ) : (
@@ -1443,14 +2184,14 @@
 
                 {/* SEÇÃO DE GESTÃO DE USUÁRIOS E PERFIS (APENAS ADMINISTRADOR) */}
                 {userData?.perfil === 'Administrador' && (
-                    <div className="max-w-[1600px] mx-auto mt-8 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 border-t-4 border-t-emerald-600">
+                    <div className="w-[90%] max-w-[1200px] mx-auto mt-8 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 border-t-4 border-t-emerald-600">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 mb-6">
-                            <div>
-                                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                    <Users className="text-emerald-600" size={24} />
-                                    Gestão de Usuários e Controle de Acessos (RBAC - Administrador)
+                            <div className="flex-1 min-w-0">
+                                <h2 className="text-lg md:text-xl font-bold text-slate-800 flex items-start sm:items-center gap-2 flex-wrap leading-snug break-words">
+                                    <Users className="text-emerald-600 shrink-0 mt-0.5 sm:mt-0" size={24} />
+                                    <span className="break-words">Gestão de Usuários e Controle de Acessos (RBAC - Administrador)</span>
                                 </h2>
-                                <p className="text-slate-500 text-xs mt-1">
+                                <p className="text-slate-500 text-xs mt-1 break-words">
                                     Gerencie permissões (Corretor, Assistente, Analista, Gerente, Administrador), pause acessos ou exclua usuários cadastrados no banco de dados.
                                 </p>
                             </div>
@@ -1481,6 +2222,50 @@
                             </div>
                         </div>
 
+                        {/* BARRA DE PESQUISA E FILTROS DE USUÁRIOS */}
+                        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
+                            {/* Campo de Pesquisa por Nome ou E-mail */}
+                            <div className="relative w-full sm:flex-1">
+                                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                <input 
+                                    type="text" 
+                                    placeholder="Buscar por nome ou e-mail..."
+                                    value={searchTermUsuarios}
+                                    onChange={(e) => setSearchTermUsuarios(e.target.value)}
+                                    className="w-full pl-10 pr-9 py-2 text-xs md:text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white text-slate-800 font-medium placeholder:text-slate-400 shadow-2xs transition-all"
+                                />
+                                {searchTermUsuarios && (
+                                    <button 
+                                        onClick={() => setSearchTermUsuarios('')}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 rounded-full hover:bg-slate-200 transition-colors cursor-pointer"
+                                        title="Limpar busca"
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Filtro por Perfil (Role) */}
+                            <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                                <div className="flex items-center gap-1.5 text-slate-600 text-xs font-bold whitespace-nowrap">
+                                    <Filter size={15} className="text-emerald-600 shrink-0" />
+                                    <span>Perfil:</span>
+                                </div>
+                                <select 
+                                    value={filterPerfilUsuarios}
+                                    onChange={(e) => setFilterPerfilUsuarios(e.target.value)}
+                                    className="w-full sm:w-auto px-3 py-2 text-xs md:text-sm rounded-xl border border-slate-300 font-semibold bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500 outline-none shadow-2xs cursor-pointer"
+                                >
+                                    <option value="Todos">Todos os Perfis</option>
+                                    <option value="Corretor">Corretor</option>
+                                    <option value="Assistente">Assistente</option>
+                                    <option value="Analista">Analista</option>
+                                    <option value="Gerente">Gerente</option>
+                                    <option value="Administrador">Administrador</option>
+                                </select>
+                            </div>
+                        </div>
+
                         {isLoadingUsuarios ? (
                             <div className="py-12 text-center text-slate-500 flex flex-col items-center justify-center gap-2">
                                 <RefreshCw size={28} className="animate-spin text-emerald-600" />
@@ -1488,9 +2273,29 @@
                             </div>
                         ) : listaUsuarios.length === 0 ? (
                             <p className="text-slate-400 text-sm py-6 text-center">Nenhum usuário cadastrado no banco de dados.</p>
+                        ) : usuariosFiltrados.length === 0 ? (
+                            <div className="py-12 text-center text-slate-500 bg-slate-50 rounded-2xl border border-dashed border-slate-200 p-6 my-2">
+                                <Search size={36} className="mx-auto text-slate-300 mb-2" />
+                                <p className="font-bold text-slate-700 text-sm">Nenhum usuário encontrado com os critérios de busca.</p>
+                                <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                                    Tente buscar por outro termo ou alterar o filtro de perfil selecionado acima.
+                                </p>
+                                {(searchTermUsuarios || filterPerfilUsuarios !== 'Todos') && (
+                                    <button 
+                                        onClick={() => {
+                                            setSearchTermUsuarios('');
+                                            setFilterPerfilUsuarios('Todos');
+                                        }}
+                                        className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 font-bold text-xs rounded-xl transition-all cursor-pointer shadow-2xs"
+                                    >
+                                        <RotateCcw size={13} />
+                                        Limpar filtros
+                                    </button>
+                                )}
+                            </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {listaUsuarios.map((u) => {
+                                {usuariosFiltrados.map((u) => {
                                     const isSelf = u.id === currentUser?.uid;
                                     const isPaused = u.status === 'Pausado';
 
@@ -1504,72 +2309,78 @@
                                             }`}
                                         >
                                             {/* CABEÇALHO DO CARD DO USUÁRIO */}
-                                            <div className="flex items-start justify-between gap-2">
-                                                <div className="flex items-center gap-3 min-w-0">
-                                                    <div className={`w-10 h-10 rounded-xl text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs ${
-                                                        isPaused ? 'bg-amber-600' : 'bg-slate-800'
-                                                    }`}>
-                                                        {u.nome ? u.nome.substring(0, 2).toUpperCase() : 'US'}
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <h3 className="font-bold text-slate-800 text-sm truncate flex items-center gap-1.5">
-                                                            {u.nome || 'Sem Nome'}
-                                                            {isSelf && (
-                                                                <span className="text-[10px] font-normal text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded border border-emerald-200">(Você)</span>
-                                                            )}
-                                                        </h3>
-                                                        <p className="text-xs text-slate-500 truncate mb-1.5">{u.email}</p>
-                                                        
-                                                        {/* DESTAQUE DE CELULAR E CRECI PARA VERIFICAÇÃO */}
-                                                        <div className="flex items-center gap-1.5 flex-wrap font-bold text-[11px] mt-1">
-                                                            {u.celular ? (
-                                                                <span className="flex items-center gap-1 bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded-md border border-emerald-200 shadow-2xs">
-                                                                    <Phone size={11} className="text-emerald-600 shrink-0" />
-                                                                    {u.celular}
-                                                                </span>
-                                                            ) : (
-                                                                <span className="flex items-center gap-1 bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded text-[10px] font-normal border border-slate-200">
-                                                                    Sem Tel
-                                                                </span>
-                                                            )}
-
-                                                            {u.creci ? (
-                                                                <span className="flex items-center gap-1 bg-purple-50 text-purple-900 px-2 py-0.5 rounded-md border border-purple-200 shadow-2xs">
-                                                                    <Award size={11} className="text-purple-600 shrink-0" />
-                                                                    CRECI: {u.creci}
-                                                                </span>
-                                                            ) : (
-                                                                <span className="flex items-center gap-1 bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded text-[10px] font-normal border border-slate-200">
-                                                                    Sem CRECI
-                                                                </span>
-                                                            )}
+                                            <div className="flex flex-col gap-2.5">
+                                                <div className="flex items-start justify-between gap-2 flex-wrap sm:flex-nowrap">
+                                                    <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                                                        <div className={`w-10 h-10 rounded-xl text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs mt-0.5 ${
+                                                            isPaused ? 'bg-amber-600' : 'bg-slate-800'
+                                                        }`}>
+                                                            {u.nome ? u.nome.substring(0, 2).toUpperCase() : 'US'}
+                                                        </div>
+                                                        <div className="min-w-0 flex-1">
+                                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                                <h3 className="font-bold text-slate-800 text-sm leading-snug break-words">
+                                                                    {u.nome || 'Sem Nome'}
+                                                                </h3>
+                                                                {isSelf && (
+                                                                    <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md border border-emerald-200 shrink-0 inline-flex items-center">
+                                                                        (Você)
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <p className="text-xs text-slate-500 break-all mt-0.5">{u.email}</p>
                                                         </div>
                                                     </div>
+
+                                                    {/* BADGE DE STATUS */}
+                                                    <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase shrink-0 flex items-center gap-1 self-start ${
+                                                        isPaused 
+                                                            ? 'bg-amber-100 text-amber-800 border-amber-300' 
+                                                            : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                                    }`}>
+                                                        {isPaused ? (
+                                                            <>
+                                                                <Pause size={10} /> Pausado
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <CheckCircle2 size={10} /> Ativo
+                                                            </>
+                                                        )}
+                                                    </span>
                                                 </div>
 
-                                                {/* BADGE DE STATUS */}
-                                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase shrink-0 flex items-center gap-1 ${
-                                                    isPaused 
-                                                        ? 'bg-amber-100 text-amber-800 border-amber-300' 
-                                                        : 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                                                }`}>
-                                                    {isPaused ? (
-                                                        <>
-                                                            <Pause size={10} /> Pausado
-                                                        </>
+                                                {/* DESTAQUE DE CELULAR E CRECI PARA VERIFICAÇÃO */}
+                                                <div className="flex items-center gap-1.5 flex-wrap font-bold text-[11px] pt-1">
+                                                    {u.celular ? (
+                                                        <span className="flex items-center gap-1 bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded-md border border-emerald-200 shadow-2xs">
+                                                            <Phone size={11} className="text-emerald-600 shrink-0" />
+                                                            {u.celular}
+                                                        </span>
                                                     ) : (
-                                                        <>
-                                                            <CheckCircle2 size={10} /> Ativo
-                                                        </>
+                                                        <span className="flex items-center gap-1 bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded text-[10px] font-normal border border-slate-200">
+                                                            Sem Tel
+                                                        </span>
                                                     )}
-                                                </span>
+
+                                                    {u.creci ? (
+                                                        <span className="flex items-center gap-1 bg-purple-50 text-purple-900 px-2 py-0.5 rounded-md border border-purple-200 shadow-2xs">
+                                                            <Award size={11} className="text-purple-600 shrink-0" />
+                                                            CRECI: {u.creci}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="flex items-center gap-1 bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded text-[10px] font-normal border border-slate-200">
+                                                            Sem CRECI
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             {/* SELETOR DE PERFIL (ROLE) */}
                                             <div className="pt-2 border-t border-slate-200/80">
                                                 <div className="flex items-center justify-between mb-1.5">
                                                     <label className="text-[11px] font-bold text-slate-600">Perfil de Acesso (Role):</label>
-                                                    <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] border ${getBadgeStyle(u.perfil || 'Corretor')}`}>
+                                                    <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] uppercase border tracking-wide ${getBadgeStyle(u.perfil || 'Corretor')}`}>
                                                         {u.perfil || 'Corretor'}
                                                     </span>
                                                 </div>
@@ -1586,27 +2397,39 @@
                                                 </select>
                                             </div>
 
-                                            {/* BOTÕES DE AÇÃO: PAUSAR / REATIVAR & EXCLUIR */}
-                                            <div className="pt-2 border-t border-slate-200/80 flex items-center gap-2">
+                                            {/* BOTÕES DE AÇÃO: ALTERAR SENHA, PAUSAR / REATIVAR & EXCLUIR */}
+                                            <div className="pt-2 border-t border-slate-200/80 flex flex-wrap items-center gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedUserForPassword(u);
+                                                        setAdminPasswordStatus({ type: '', message: '' });
+                                                    }}
+                                                    className="flex-1 py-2 px-2.5 rounded-xl text-xs font-bold transition-all border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                                                    title="Redefinir / Alterar senha do usuário"
+                                                >
+                                                    <KeyRound size={14} className="text-emerald-600 shrink-0" />
+                                                    <span className="whitespace-nowrap">Alterar Senha</span>
+                                                </button>
+
                                                 <button
                                                     onClick={() => handleTogglePausarUsuario(u)}
                                                     disabled={isSelf}
-                                                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs ${
+                                                    className={`py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs ${
                                                         isPaused
                                                             ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                                                             : 'bg-amber-500 hover:bg-amber-600 text-white'
-                                                    } disabled:opacity-40 disabled:cursor-not-allowed`}
+                                                    } disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer`}
                                                     title={isSelf ? 'Você não pode pausar a sua própria conta' : isPaused ? 'Reativar acesso do usuário' : 'Pausar acesso do usuário'}
                                                 >
                                                     {isPaused ? (
                                                         <>
                                                             <Play size={14} />
-                                                            Reativar
+                                                            <span>Reativar</span>
                                                         </>
                                                     ) : (
                                                         <>
                                                             <Pause size={14} />
-                                                            Pausar
+                                                            <span>Pausar</span>
                                                         </>
                                                     )}
                                                 </button>
@@ -1614,7 +2437,7 @@
                                                 <button
                                                     onClick={() => handleExcluirUsuario(u)}
                                                     disabled={isSelf}
-                                                    className="py-2 px-3 rounded-xl text-xs font-bold transition-all border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 flex items-center justify-center gap-1.5 shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed"
+                                                    className="py-2 px-2.5 rounded-xl text-xs font-bold transition-all border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 flex items-center justify-center gap-1.5 shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                                                     title={isSelf ? 'Você não pode excluir a sua própria conta' : 'Excluir usuário permanentemente'}
                                                 >
                                                     <Trash2 size={14} />
@@ -1787,6 +2610,100 @@
                                     </button>
                                 </div>
                             </form>
+                        </div>
+                    </div>
+                )}
+
+                {/* MODAL DE ALTERAÇÃO / REDEFINIÇÃO DE SENHA DO USUÁRIO (ADMINISTRADOR) */}
+                {selectedUserForPassword && (
+                    <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+                        <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
+                            {/* Cabeçalho do Modal */}
+                            <div className="bg-gradient-to-r from-[#05532C] to-[#1D8843] text-white px-6 py-5 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-white/10 p-2.5 rounded-xl border border-white/20">
+                                        <KeyRound size={22} className="text-white" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-base leading-tight">Alterar Senha do Usuário</h3>
+                                        <p className="text-emerald-100 text-xs font-medium">Gestão de Acessos (Administrador)</p>
+                                    </div>
+                                </div>
+                                <button 
+                                    type="button"
+                                    onClick={() => setSelectedUserForPassword(null)}
+                                    className="text-white/80 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            {/* Conteúdo do Modal */}
+                            <div className="p-6 space-y-4">
+                                {/* Informações do Usuário Selecionado */}
+                                <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-1.5">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-slate-500 font-medium">Nome:</span>
+                                        <span className="font-bold text-slate-800">{selectedUserForPassword.nome || 'Sem Nome'}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-slate-500 font-medium">E-mail Cadastrado:</span>
+                                        <span className="font-bold text-slate-800 break-all">{selectedUserForPassword.email}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-slate-500 font-medium">Perfil:</span>
+                                        <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] border ${getBadgeStyle(selectedUserForPassword.perfil || 'Corretor')}`}>
+                                            {selectedUserForPassword.perfil || 'Corretor'}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Aviso sobre Criptografia de Senha do Firebase Auth */}
+                                <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900 space-y-1">
+                                    <p className="font-bold flex items-center gap-1.5 text-amber-800">
+                                        <Lock size={14} className="text-amber-600 shrink-0" />
+                                        Segurança do Firebase Auth:
+                                    </p>
+                                    <p className="text-amber-700 leading-relaxed text-[11px]">
+                                        A senha do usuário é mantida com criptografia irreversível. Para redefinir a senha com segurança, clique abaixo para disparar o e-mail de redefinição para a caixa de entrada do usuário.
+                                    </p>
+                                </div>
+
+                                {adminPasswordStatus.message && (
+                                    <div className={`p-3 rounded-xl text-xs font-semibold flex items-start gap-2.5 ${
+                                        adminPasswordStatus.type === 'success' 
+                                            ? 'bg-emerald-50 border border-emerald-200 text-emerald-800' 
+                                            : 'bg-rose-50 border border-rose-200 text-rose-700'
+                                    }`}>
+                                        {adminPasswordStatus.type === 'success' ? (
+                                            <CheckCircle2 size={16} className="shrink-0 text-emerald-600 mt-0.5" />
+                                        ) : (
+                                            <Info size={16} className="shrink-0 text-rose-500 mt-0.5" />
+                                        )}
+                                        <span className="leading-snug">{adminPasswordStatus.message}</span>
+                                    </div>
+                                )}
+
+                                <div className="pt-2 space-y-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleAdminSendResetEmail(selectedUserForPassword.email)}
+                                        disabled={isAdminPasswordSubmitting}
+                                        className="w-full bg-[#1D8843] hover:bg-[#05532C] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-xs disabled:opacity-50 cursor-pointer"
+                                    >
+                                        <Send size={16} />
+                                        {isAdminPasswordSubmitting ? 'Disparando e-mail...' : 'Enviar E-mail de Redefinição de Senha'}
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedUserForPassword(null)}
+                                        className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-2.5 px-4 rounded-xl transition-all text-xs cursor-pointer"
+                                    >
+                                        Fechar Modal
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 )}
