@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Juros de Obra - Morar</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel para compilar JSX no navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* Pequenos ajustes para garantir carregamento limpo */
+        body { margin: 0; padding: 0; background-color: #f8fafc; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            onSnapshot, 
+            deleteDoc, 
+            doc, 
+            setDoc,
+            getDoc,
+            updateDoc,
+            getDocs,
+            serverTimestamp,
+            query,
+            orderBy
+        } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+        import {
+            getAuth,
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword,
+            signOut,
+            onAuthStateChanged,
+            updateProfile
+        } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+        const { useState, useEffect } = React;
+
+        // ==========================================
+        // CONFIGURAÇÃO E INICIALIZAÇÃO DO FIREBASE
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAYC141m6AGqmNgcpA4t9IbU-0fOjBdRHQ",
+            authDomain: "juros-obra-24936.firebaseapp.com",
+            projectId: "juros-obra-24936",
+            storageBucket: "juros-obra-24936.firebasestorage.app",
+            messagingSenderId: "869659067328",
+            appId: "1:869659067328:web:485f339c2926b77fc4be25"
+        };
+
+        const firebaseApp = initializeApp(firebaseConfig);
+        const db = getFirestore(firebaseApp);
+        const auth = getAuth(firebaseApp);
+
+        // ==========================================
+        // ÍCONES (Substitutos em SVG para o Lucide React)
+        // ==========================================
+        const Icon = ({ size = 24, className = "", children }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+                {children}
+            </svg>
+        );
+        const HardHat = (p) => <Icon {...p}><path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"/><path d="M10 10V5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"/><path d="M4 15v-3a6 6 0 0 1 6-6h0"/><path d="M14 6h0a6 6 0 0 1 6 6v3"/></Icon>;
+        const FileText = (p) => <Icon {...p}><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></Icon>;
+        const TrendingUp = (p) => <Icon {...p}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></Icon>;
+        const Calculator = (p) => <Icon {...p}><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></Icon>;
+        const RefreshCw = (p) => <Icon {...p}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></Icon>;
+        const Info = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></Icon>;
+        const CheckCircle2 = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></Icon>;
+        const Save = (p) => <Icon {...p}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></Icon>;
+        const Trash2 = (p) => <Icon {...p}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></Icon>;
+        const Bookmark = (p) => <Icon {...p}><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></Icon>;
+        const ArrowUpRight = (p) => <Icon {...p}><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></Icon>;
+        const User = (p) => <Icon {...p}><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></Icon>;
+        const LogOut = (p) => <Icon {...p}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></Icon>;
+        const Shield = (p) => <Icon {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></Icon>;
+        const Users = (p) => <Icon {...p}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></Icon>;
+        const Mail = (p) => <Icon {...p}><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></Icon>;
+        const Lock = (p) => <Icon {...p}><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></Icon>;
+        const BarChart2 = (p) => <Icon {...p}><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></Icon>;
+        const AlertOctagon = (p) => <Icon {...p}><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></Icon>;
+        const Pause = (p) => <Icon {...p}><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></Icon>;
+        const Play = (p) => <Icon {...p}><polygon points="5 3 19 12 5 21 5 3"/></Icon>;
+        const UserCheck = (p) => <Icon {...p}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></Icon>;
+        const UserX = (p) => <Icon {...p}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="17" x2="22" y1="8" y2="13"/><line x1="22" x2="17" y1="8" y2="13"/></Icon>;
+        const UserPlus = (p) => <Icon {...p}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" x2="19" y1="8" y2="14"/><line x1="16" x2="22" y1="11" y2="11"/></Icon>;
+        const X = (p) => <Icon {...p}><path d="M18 6 6 18"/><path d="m6 6 12 12"/></Icon>;
+        const Phone = (p) => <Icon {...p}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></Icon>;
+        const Award = (p) => <Icon {...p}><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></Icon>;
+
+        // ==========================================
+        // COMPONENTE DE INPUT DE MOEDA (BRL)
+        // ==========================================
+        const MoneyInput = ({ label, value, onChange, placeholder = "0,00", helpText, id }) => {
+            const [focused, setFocused] = useState(false);
+            const [displayVal, setDisplayVal] = useState('');
+
+            useEffect(() => {
+                if (!focused) {
+                    if (value === '' || value === null || value === undefined || isNaN(value)) {
+                        setDisplayVal('');
+                    } else {
+                        const num = parseFloat(value);
+                        setDisplayVal(num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                    }
+                }
+            }, [value, focused]);
+
+            const handleFocus = () => {
+                setFocused(true);
+                if (value !== '' && value !== null && !isNaN(value)) {
+                    setDisplayVal(String(value).replace('.', ','));
+                }
+            };
+
+            const handleChange = (e) => {
+                const raw = e.target.value;
+                setDisplayVal(raw);
+                
+                if (!raw.trim()) {
+                    onChange('');
+                    return;
+                }
+
+                const cleanStr = raw.replace(/\./g, '').replace(',', '.');
+                const parsed = parseFloat(cleanStr);
+                if (!isNaN(parsed)) {
+                    onChange(parsed);
+                } else {
+                    onChange('');
+                }
+            };
+
+            const handleBlur = () => {
+                setFocused(false);
+                const num = parseFloat(value);
+                if (!isNaN(num) && value !== '') {
+                    setDisplayVal(num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                } else {
+                    setDisplayVal('');
+                }
+            };
+
+            return (
+                <div>
+                    {label && <label className="block text-sm font-semibold text-slate-700 mb-1">{label}</label>}
+                    <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">R$</span>
+                        <input 
+                            type="text" 
+                            id={id}
+                            value={displayVal} 
+                            onChange={handleChange}
+                            onFocus={handleFocus}
+                            onBlur={handleBlur}
+                            placeholder={placeholder}
+                            className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none transition-all font-semibold text-slate-800"
+                        />
+                    </div>
+                    {helpText && <p className="text-xs text-slate-500 mt-1">{helpText}</p>}
+                </div>
+            );
+        };
+
+        // ==========================================
+        // APLICAÇÃO PRINCIPAL
+        // ==========================================
+        function App() {
+            // Estados para os inputs do usuário
+            const [financiamento, setFinanciamento] = useState('');
+            const [taxaAnual, setTaxaAnual] = useState('');
+            const [percTerreno, setPercTerreno] = useState('6.9'); // Valor fixo por padrão em 6,9%
+            const [percObra, setPercObra] = useState('');
+            const [parcelaFutura, setParcelaFutura] = useState('');
+            const [seguro, setSeguro] = useState('');
+            
+            // Estados para a API do Banco Central (TR)
+            const [tr, setTr] = useState(0);
+            const [trData, setTrData] = useState('Buscando...');
+            const [isFetchingTr, setIsFetchingTr] = useState(true);
+
+            // Estados do Firestore (Simulações Salvas)
+            const [nomeSimulacao, setNomeSimulacao] = useState('');
+            const [simulacoes, setSimulacoes] = useState([]);
+            const [isSaving, setIsSaving] = useState(false);
+            const [isLoadingSimulacoes, setIsLoadingSimulacoes] = useState(true);
+            const [feedback, setFeedback] = useState(null);
+
+            // Estados de Autenticação e Perfis de Usuário (RBAC)
+            const [currentUser, setCurrentUser] = useState(null);
+            const [userData, setUserData] = useState(null);
+            const [authLoading, setAuthLoading] = useState(true);
+
+            // Estados do formulário de Login / Cadastro
+            const [isRegistering, setIsRegistering] = useState(false);
+            const [authEmail, setAuthEmail] = useState('');
+            const [authPassword, setAuthPassword] = useState('');
+            const [authNome, setAuthNome] = useState('');
+            const [authCelular, setAuthCelular] = useState('');
+            const [authCreci, setAuthCreci] = useState('');
+            const [authPerfil, setAuthPerfil] = useState('Corretor'); // 'Corretor' | 'Gerente' | 'Administrador'
+            const [authError, setAuthError] = useState('');
+            const [authSubmitting, setAuthSubmitting] = useState(false);
+
+            // Estados para Gestão de Usuários (Administrador)
+            const [listaUsuarios, setListaUsuarios] = useState([]);
+            const [isLoadingUsuarios, setIsLoadingUsuarios] = useState(false);
+            const [showModalNovoUsuario, setShowModalNovoUsuario] = useState(false);
+            const [adminNovoNome, setAdminNovoNome] = useState('');
+            const [adminNovoEmail, setAdminNovoEmail] = useState('');
+            const [adminNovoCelular, setAdminNovoCelular] = useState('');
+            const [adminNovoCreci, setAdminNovoCreci] = useState('');
+            const [adminNovoSenha, setAdminNovoSenha] = useState('');
+            const [adminNovoPerfil, setAdminNovoPerfil] = useState('Corretor');
+            const [adminNovoError, setAdminNovoError] = useState('');
+            const [adminNovoSubmitting, setAdminNovoSubmitting] = useState(false);
+
+            // Taxa de administração fixa conforme regra da CEF
+            const TAXA_ADM = 25.00;
+
+            // Monitora estado de autenticação do Firebase
+            useEffect(() => {
+                const unsubscribe = onAuthStateChanged(auth, async (user) => {
+                    setCurrentUser(user);
+                    if (user) {
+                        try {
+                            const userDocRef = doc(db, 'usuarios', user.uid);
+                            const userSnap = await getDoc(userDocRef);
+                            if (userSnap.exists()) {
+                                setUserData(userSnap.data());
+                            } else {
+                                const defaultProfile = {
+                                    nome: user.displayName || user.email.split('@')[0],
+                                    email: user.email,
+                                    perfil: 'Corretor',
+                                    status: 'Ativo',
+                                    uid: user.uid,
+                                    criadoEm: serverTimestamp()
+                                };
+                                await setDoc(userDocRef, defaultProfile);
+                                setUserData(defaultProfile);
+                            }
+                        } catch (err) {
+                            console.error("Erro ao carregar perfil do usuário:", err);
+                            setUserData({ nome: user.email, email: user.email, perfil: 'Corretor', status: 'Ativo', uid: user.uid });
+                        }
+                    } else {
+                        setUserData(null);
+                    }
+                    setAuthLoading(false);
+                });
+                return () => unsubscribe();
+            }, []);
+
+            // Carrega lista de usuários para o perfil Administrador
+            useEffect(() => {
+                if (userData && userData.perfil === 'Administrador') {
+                    setIsLoadingUsuarios(true);
+                    const unsubscribe = onSnapshot(collection(db, 'usuarios'), (snapshot) => {
+                        const usersArr = [];
+                        snapshot.forEach((docSnap) => {
+                            usersArr.push({ id: docSnap.id, ...docSnap.data() });
+                        });
+                        setListaUsuarios(usersArr);
+                        setIsLoadingUsuarios(false);
+                    }, (err) => {
+                        console.error("Erro ao carregar usuários:", err);
+                        setIsLoadingUsuarios(false);
+                    });
+                    return () => unsubscribe();
+                }
+            }, [userData]);
+
+            // Busca a TR na API do Banco Central na inicialização
+            useEffect(() => {
+                fetchTR();
+            }, []);
+
+            // Carrega as simulações salvas do Firestore em tempo real
+            useEffect(() => {
+                setIsLoadingSimulacoes(true);
+                try {
+                    const q = query(collection(db, 'simulacoes'), orderBy('criadoEm', 'desc'));
+                    const unsubscribe = onSnapshot(q, (snapshot) => {
+                        const lista = [];
+                        snapshot.forEach((docSnap) => {
+                            lista.push({ id: docSnap.id, ...docSnap.data() });
+                        });
+                        setSimulacoes(lista);
+                        setIsLoadingSimulacoes(false);
+                    }, (error) => {
+                        console.error('Erro no snapshot de simulações com ordem:', error);
+                        // Fallback sem ordenação caso o índice esteja em criação
+                        onSnapshot(collection(db, 'simulacoes'), (snapshot) => {
+                            const lista = [];
+                            snapshot.forEach((docSnap) => {
+                                lista.push({ id: docSnap.id, ...docSnap.data() });
+                            });
+                            setSimulacoes(lista);
+                            setIsLoadingSimulacoes(false);
+                        });
+                    });
+                    return () => unsubscribe();
+                } catch (err) {
+                    console.error('Erro ao conectar ao Firestore:', err);
+                    setIsLoadingSimulacoes(false);
+                }
+            }, []);
+
+            const fetchTR = async () => {
+                setIsFetchingTr(true);
+                try {
+                    let response = await fetch('/api/tr').catch(() => null);
+                    if (!response || !response.ok) {
+                        response = await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.226/dados/ultimos/1?formato=json');
+                    }
+                    const data = await response.json();
+                    if (data && data.length > 0) {
+                        setTr(parseFloat(data[0].valor));
+                        setTrData(data[0].data);
+                    }
+                } catch (error) {
+                    console.error('Erro ao buscar TR:', error);
+                    setTr(0.10);
+                    setTrData('Fallback');
+                }
+                finally {
+                    setIsFetchingTr(false);
+                }
+            };
+
+            // Handlers de Autenticação
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                setAuthError('');
+                if (!authEmail.trim() || !authPassword) {
+                    setAuthError('Preencha e-mail e senha para acessar.');
+                    return;
+                }
+                setAuthSubmitting(true);
+                try {
+                    await signInWithEmailAndPassword(auth, authEmail.trim(), authPassword);
+                    setAuthEmail('');
+                    setAuthPassword('');
+                } catch (err) {
+                    console.error("Erro de Login:", err);
+                    if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+                        setAuthError('E-mail ou senha incorretos.');
+                    } else if (err.code === 'auth/invalid-email') {
+                        setAuthError('Formato de e-mail inválido.');
+                    } else if (err.code === 'auth/too-many-requests') {
+                        setAuthError('Muitas tentativas sem sucesso. Tente novamente mais tarde.');
+                    } else {
+                        setAuthError(`Erro ao entrar: ${err.message || err.code || 'Falha de autenticação.'}`);
+                    }
+                } finally {
+                    setAuthSubmitting(false);
+                }
+            };
+
+            const handleRegister = async (e) => {
+                e.preventDefault();
+                setAuthError('');
+                if (!authNome.trim()) {
+                    setAuthError('Informe o seu Nome Completo.');
+                    return;
+                }
+                if (!authEmail.trim()) {
+                    setAuthError('Informe o seu E-mail.');
+                    return;
+                }
+                if (!authCelular.trim()) {
+                    setAuthError('Informe o seu Celular / WhatsApp.');
+                    return;
+                }
+                if (!authCreci.trim()) {
+                    setAuthError('Informe o seu registro CRECI.');
+                    return;
+                }
+                if (!authPassword || authPassword.length < 6) {
+                    setAuthError('A senha deve ter no mínimo 6 caracteres.');
+                    return;
+                }
+                setAuthSubmitting(true);
+                try {
+                    // 1. Cria conta no Firebase Authentication
+                    const userCred = await createUserWithEmailAndPassword(auth, authEmail.trim(), authPassword);
+                    const user = userCred.user;
+
+                    // 2. Atualiza o perfil do Firebase Auth (displayName)
+                    try {
+                        await updateProfile(user, { displayName: authNome.trim() });
+                    } catch (pErr) {
+                        console.warn("Aviso ao atualizar displayName no Auth:", pErr);
+                    }
+                    
+                    // 3. Salva os dados estendidos do usuário e perfil no Firestore (coleção 'usuarios')
+                    const profileData = {
+                        nome: authNome.trim(),
+                        email: authEmail.trim(),
+                        celular: authCelular.trim(),
+                        creci: authCreci.trim(),
+                        perfil: authPerfil,
+                        status: 'Ativo',
+                        uid: user.uid,
+                        criadoEm: serverTimestamp()
+                    };
+                    
+                    await setDoc(doc(db, 'usuarios', user.uid), profileData);
+                    
+                    // 4. Atualiza os estados locais para liberação e navegação imediata
+                    setUserData(profileData);
+                    setCurrentUser(user);
+                    setAuthEmail('');
+                    setAuthPassword('');
+                    setAuthNome('');
+                    setAuthCelular('');
+                    setAuthCreci('');
+                } catch (err) {
+                    console.error("Erro no Cadastro:", err);
+                    if (err.code === 'auth/email-already-in-use') {
+                        setAuthError('Este e-mail já está cadastrado no sistema.');
+                    } else if (err.code === 'auth/weak-password') {
+                        setAuthError('A senha deve ter pelo menos 6 caracteres.');
+                    } else if (err.code === 'auth/invalid-email') {
+                        setAuthError('O e-mail digitado é inválido.');
+                    } else if (err.code === 'auth/operation-not-allowed') {
+                        setAuthError('O método de autenticação por E-mail/Senha não está ativado no Firebase.');
+                    } else {
+                        setAuthError(`Erro no cadastro: ${err.message || err.code || 'Ocorreu uma falha ao criar a conta.'}`);
+                    }
+                } finally {
+                    setAuthSubmitting(false);
+                }
+            };
+
+            const handleLogout = async () => {
+                try {
+                    await signOut(auth);
+                } catch (err) {
+                    console.error("Erro no logout:", err);
+                }
+            };
+
+            const getBadgeStyle = (perfil) => {
+                switch (perfil) {
+                    case 'Administrador': return 'bg-emerald-100 text-emerald-800 border-emerald-300';
+                    case 'Gerente': return 'bg-purple-100 text-purple-800 border-purple-300';
+                    case 'Analista': return 'bg-amber-100 text-amber-800 border-amber-300';
+                    case 'Assistente': return 'bg-sky-100 text-sky-800 border-sky-300';
+                    case 'Corretor': default: return 'bg-indigo-100 text-indigo-800 border-indigo-300';
+                }
+            };
+
+            const handleAtualizarPerfilUsuario = async (userId, novoPerfil) => {
+                try {
+                    await updateDoc(doc(db, 'usuarios', userId), { perfil: novoPerfil });
+                    setFeedback({ text: `Perfil do usuário atualizado para "${novoPerfil}"!`, type: 'success' });
+                    setTimeout(() => setFeedback(null), 3500);
+                } catch (err) {
+                    console.error("Erro ao alterar perfil:", err);
+                    alert("Erro ao alterar perfil do usuário.");
+                }
+            };
+
+            const handleTogglePausarUsuario = async (u) => {
+                if (u.id === currentUser?.uid) {
+                    alert("Você não pode pausar a sua própria conta.");
+                    return;
+                }
+                const novoStatus = u.status === 'Pausado' ? 'Ativo' : 'Pausado';
+                try {
+                    await updateDoc(doc(db, 'usuarios', u.id), { status: novoStatus });
+                    setFeedback({ 
+                        text: `Usuário "${u.nome || u.email}" alterado para "${novoStatus}"! ${novoStatus === 'Pausado' ? 'O acesso deste usuário foi temporariamente bloqueado.' : 'Acesso liberado.'}`, 
+                        type: novoStatus === 'Pausado' ? 'error' : 'success' 
+                    });
+                    setTimeout(() => setFeedback(null), 3500);
+                } catch (err) {
+                    console.error("Erro ao alterar status do usuário:", err);
+                    alert("Erro ao atualizar status no banco de dados.");
+                }
+            };
+
+            const handleExcluirUsuario = async (u) => {
+                if (u.id === currentUser?.uid) {
+                    alert("Você não pode excluir a sua própria conta.");
+                    return;
+                }
+                if (window.confirm(`Tem certeza que deseja EXCLUIR permanentemente o usuário "${u.nome || u.email}" (${u.email})?`)) {
+                    try {
+                        await deleteDoc(doc(db, 'usuarios', u.id));
+                        setFeedback({ text: `Usuário "${u.nome || u.email}" foi excluído do sistema.`, type: 'info' });
+                        setTimeout(() => setFeedback(null), 3500);
+                    } catch (err) {
+                        console.error("Erro ao excluir usuário:", err);
+                        alert("Erro ao excluir usuário no banco de dados.");
+                    }
+                }
+            };
+
+            const handleAdminCadastrarUsuario = async (e) => {
+                e.preventDefault();
+                setAdminNovoError('');
+
+                if (!adminNovoNome.trim()) {
+                    setAdminNovoError('Informe o Nome Completo.');
+                    return;
+                }
+                if (!adminNovoEmail.trim()) {
+                    setAdminNovoError('Informe o E-mail do usuário.');
+                    return;
+                }
+                if (!adminNovoCelular.trim()) {
+                    setAdminNovoError('Informe o Celular / WhatsApp do usuário.');
+                    return;
+                }
+                if (adminNovoPerfil === 'Corretor' && !adminNovoCreci.trim()) {
+                    setAdminNovoError('O registro CRECI é OBRIGATÓRIO para o perfil de Corretor.');
+                    return;
+                }
+                if (!adminNovoSenha || adminNovoSenha.length < 6) {
+                    setAdminNovoError('A Senha deve ter no mínimo 6 caracteres.');
+                    return;
+                }
+
+                setAdminNovoSubmitting(true);
+                try {
+                    // Instância secundária para não interromper a sessão ativa do Admin logado
+                    const appName = "AdminUserApp_" + Date.now();
+                    const secondaryApp = initializeApp(firebaseConfig, appName);
+                    const secondaryAuth = getAuth(secondaryApp);
+
+                    const userCred = await createUserWithEmailAndPassword(secondaryAuth, adminNovoEmail.trim(), adminNovoSenha);
+                    const newUser = userCred.user;
+
+                    try {
+                        await updateProfile(newUser, { displayName: adminNovoNome.trim() });
+                    } catch (pErr) {
+                        console.warn("Aviso ao atualizar displayName:", pErr);
+                    }
+
+                    const newUserProfile = {
+                        nome: adminNovoNome.trim(),
+                        email: adminNovoEmail.trim(),
+                        celular: adminNovoCelular.trim() || '',
+                        creci: adminNovoCreci.trim() || '',
+                        perfil: adminNovoPerfil,
+                        status: 'Ativo',
+                        uid: newUser.uid,
+                        criadoEm: serverTimestamp()
+                    };
+
+                    await setDoc(doc(db, 'usuarios', newUser.uid), newUserProfile);
+                    await signOut(secondaryAuth);
+
+                    setFeedback({ 
+                        text: `Usuário "${adminNovoNome.trim()}" (${adminNovoPerfil}) cadastrado com sucesso!`, 
+                        type: 'success' 
+                    });
+                    setTimeout(() => setFeedback(null), 4000);
+
+                    // Limpar formulário e fechar modal
+                    setAdminNovoNome('');
+                    setAdminNovoEmail('');
+                    setAdminNovoCelular('');
+                    setAdminNovoCreci('');
+                    setAdminNovoSenha('');
+                    setAdminNovoPerfil('Corretor');
+                    setShowModalNovoUsuario(false);
+                } catch (err) {
+                    console.error("Erro ao cadastrar usuário via Admin:", err);
+                    if (err.code === 'auth/email-already-in-use') {
+                        setAdminNovoError('Este e-mail já está cadastrado no sistema.');
+                    } else if (err.code === 'auth/invalid-email') {
+                        setAdminNovoError('O e-mail digitado é inválido.');
+                    } else if (err.code === 'auth/weak-password') {
+                        setAdminNovoError('A senha deve ter no mínimo 6 caracteres.');
+                    } else {
+                        setAdminNovoError(`Erro no cadastro: ${err.message || err.code || 'Falha ao criar conta.'}`);
+                    }
+                } finally {
+                    setAdminNovoSubmitting(false);
+                }
+            };
+
+            // Função para limpar todos os campos
+            const handleReset = () => {
+                setFinanciamento('');
+                setTaxaAnual('');
+                setPercTerreno('6.9');
+                setPercObra('');
+                setParcelaFutura('');
+                setSeguro('');
+                setNomeSimulacao('');
+                fetchTR();
+            };
+
+            // Funções utilitárias de formatação
+            const formatCurrency = (value) => {
+                const num = parseFloat(value);
+                if (isNaN(num)) return 'R$ 0,00';
+                return new Intl.NumberFormat('pt-BR', { 
+                    style: 'currency', 
+                    currency: 'BRL',
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }).format(num);
+            };
+            
+            const formatPercent = (value, decimals = 2) => {
+                const num = parseFloat(value);
+                if (isNaN(num)) return '0,00%';
+                return `${num.toLocaleString('pt-BR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}%`;
+            };
+
+            // ==========================================
+            // MOTOR DE CÁLCULO
+            // ==========================================
+            const percTotalLiberado = parseFloat(percTerreno || 0) + parseFloat(percObra || 0);
+            const saldoLiberado = parseFloat(financiamento || 0) * (percTotalLiberado / 100);
+            
+            const taxaMensal = parseFloat(taxaAnual || 0) / 12;
+            const valorJuros = saldoLiberado * (taxaMensal / 100);
+            const valorTr = saldoLiberado * (parseFloat(tr || 0) / 100);
+            
+            const totalParcela = valorJuros + valorTr + parseFloat(seguro || 0) + TAXA_ADM;
+            const tetoAlcancado = parcelaFutura > 0 ? (totalParcela / parcelaFutura) * 100 : 0;
+
+            // ==========================================
+            // AÇÕES DO FIRESTORE (SALVAR, CARREGAR, EXCLUIR)
+            // ==========================================
+            const handleSalvarSimulacao = async () => {
+                if (!financiamento || parseFloat(financiamento) <= 0) {
+                    alert('Por favor, informe o Valor do Financiamento antes de salvar.');
+                    return;
+                }
+
+                setIsSaving(true);
+                try {
+                    const agora = new Date();
+                    const dataTexto = agora.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    
+                    const tituloFinal = nomeSimulacao.trim() 
+                        ? nomeSimulacao.trim() 
+                        : `Simulação ${formatCurrency(financiamento)} (${dataTexto})`;
+
+                    const payload = {
+                        titulo: tituloFinal,
+                        financiamento: parseFloat(financiamento || 0),
+                        taxaAnual: parseFloat(taxaAnual || 0),
+                        percTerreno: parseFloat(percTerreno || 0),
+                        percObra: parseFloat(percObra || 0),
+                        parcelaFutura: parseFloat(parcelaFutura || 0),
+                        seguro: parseFloat(seguro || 0),
+                        tr: parseFloat(tr || 0),
+                        totalParcela: totalParcela || 0,
+                        saldoLiberado: saldoLiberado || 0,
+                        valorJuros: valorJuros || 0,
+                        valorTr: valorTr || 0,
+                        criadoPorUid: currentUser ? currentUser.uid : null,
+                        criadoPorNome: userData ? userData.nome : (currentUser ? currentUser.email : 'Usuário'),
+                        criadoPorPerfil: userData ? userData.perfil : 'Corretor',
+                        criadoEm: serverTimestamp(),
+                        dataTexto: dataTexto
+                    };
+
+                    await addDoc(collection(db, 'simulacoes'), payload);
+                    
+                    setNomeSimulacao('');
+                    setFeedback({ text: 'Simulação salva no Firestore com sucesso!', type: 'success' });
+                    setTimeout(() => setFeedback(null), 4000);
+                } catch (error) {
+                    console.error('Erro ao salvar no Firestore:', error);
+                    setFeedback({ text: 'Erro ao salvar simulação. Tente novamente.', type: 'error' });
+                    setTimeout(() => setFeedback(null), 4000);
+                } finally {
+                    setIsSaving(false);
+                }
+            };
+
+            const handleCarregarSimulacao = (item) => {
+                setFinanciamento(item.financiamento !== undefined ? String(item.financiamento) : '');
+                setTaxaAnual(item.taxaAnual !== undefined ? String(item.taxaAnual) : '');
+                setPercTerreno(item.percTerreno !== undefined ? String(item.percTerreno) : '6.9');
+                setPercObra(item.percObra !== undefined ? String(item.percObra) : '');
+                setParcelaFutura(item.parcelaFutura !== undefined ? String(item.parcelaFutura) : '');
+                setSeguro(item.seguro !== undefined ? String(item.seguro) : '');
+                if (item.tr !== undefined) setTr(item.tr);
+
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                setFeedback({ text: `Simulação "${item.titulo}" carregada na calculadora!`, type: 'info' });
+                setTimeout(() => setFeedback(null), 4000);
+            };
+
+            const handleExcluirSimulacao = async (id, titulo) => {
+                if (window.confirm(`Deseja excluir permanentemente a simulação "${titulo}"?`)) {
+                    try {
+                        await deleteDoc(doc(db, 'simulacoes', id));
+                        setFeedback({ text: 'Simulação excluída do Firestore.', type: 'info' });
+                        setTimeout(() => setFeedback(null), 3000);
+                    } catch (error) {
+                        console.error('Erro ao excluir simulação:', error);
+                        alert('Erro ao excluir a simulação do banco de dados.');
+                    }
+                }
+            };
+
+            // RENDERIZAÇÃO 1: CARREGANDO AUTENTICAÇÃO
+            if (authLoading) {
+                return (
+                    <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
+                        <RefreshCw size={36} className="animate-spin text-[#1D8843] mb-3" />
+                        <p className="text-slate-600 font-bold text-base">Carregando dados do sistema...</p>
+                    </div>
+                );
+            }
+
+            // RENDERIZAÇÃO 1.5: TELA DE CONTA SUSPENSA / PAUSADA
+            if (currentUser && userData && userData.status === 'Pausado') {
+                return (
+                    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+                        <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden border border-slate-200 text-center p-8">
+                            <div className="bg-amber-100 text-amber-700 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-300 shadow-sm">
+                                <AlertOctagon size={36} />
+                            </div>
+                            <h2 className="text-2xl font-black text-slate-800 mb-2">Conta Suspensa / Pausada</h2>
+                            <p className="text-slate-600 text-sm mb-6 leading-relaxed">
+                                Olá <strong className="text-slate-800">{userData.nome || currentUser.email}</strong>, seu acesso ao aplicativo está temporariamente <strong>pausado</strong> pelo Administrador.
+                            </p>
+                            <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 font-semibold mb-6">
+                                Entre em contato com o <strong>Administrador</strong> do sistema para solicitar a liberação da sua conta.
+                            </div>
+                            <button 
+                                onClick={handleLogout}
+                                className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm"
+                            >
+                                <LogOut size={18} />
+                                Sair da Conta
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // RENDERIZAÇÃO 2: TELA DE LOGIN / CADASTRO SE NÃO ESTIVER AUTENTICADO
+            if (!currentUser) {
+                return (
+                    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+                        <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+                            <div className="bg-gradient-to-r from-[#05532C] to-[#1D8843] p-6 text-white text-center">
+                                <div className="bg-white/10 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 backdrop-blur border border-white/20 shadow-sm">
+                                    <HardHat size={36} className="text-white" />
+                                </div>
+                                <h1 className="text-2xl font-black tracking-tight">AppJurosObra</h1>
+                                <p className="text-emerald-100 text-xs mt-1 font-medium">Calculadora e Gestão de Juros de Obra - CEF</p>
+                            </div>
+
+                            <div className="flex border-b border-slate-200 bg-slate-50">
+                                <button 
+                                    type="button"
+                                    onClick={() => { setIsRegistering(false); setAuthError(''); }}
+                                    className={`flex-1 py-3 text-sm font-bold transition-all border-b-2 flex items-center justify-center gap-2 ${!isRegistering ? 'border-[#1D8843] text-[#05532C] bg-white' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                                >
+                                    <User size={16} />
+                                    Entrar
+                                </button>
+                                <button 
+                                    type="button"
+                                    onClick={() => { setIsRegistering(true); setAuthError(''); }}
+                                    className={`flex-1 py-3 text-sm font-bold transition-all border-b-2 flex items-center justify-center gap-2 ${isRegistering ? 'border-[#1D8843] text-[#05532C] bg-white' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                                >
+                                    <Shield size={16} />
+                                    Criar Conta
+                                </button>
+                            </div>
+
+                            <div className="p-6">
+                                {authError && (
+                                    <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold flex items-center gap-2">
+                                        <Info size={16} className="shrink-0 text-rose-500" />
+                                        <span>{authError}</span>
+                                    </div>
+                                )}
+
+                                {!isRegistering ? (
+                                    <form onSubmit={handleLogin} className="space-y-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-700 mb-1">E-mail</label>
+                                            <div className="relative">
+                                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                <input 
+                                                    type="email" 
+                                                    required
+                                                    placeholder="seu@email.com"
+                                                    value={authEmail}
+                                                    onChange={(e) => setAuthEmail(e.target.value)}
+                                                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none font-medium"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-700 mb-1">Senha</label>
+                                            <div className="relative">
+                                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                <input 
+                                                    type="password" 
+                                                    required
+                                                    placeholder="••••••••"
+                                                    value={authPassword}
+                                                    onChange={(e) => setAuthPassword(e.target.value)}
+                                                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none font-medium"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <button 
+                                            type="submit"
+                                            disabled={authSubmitting}
+                                            className="w-full mt-2 bg-[#1D8843] hover:bg-[#05532C] text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                                        >
+                                            <User size={18} />
+                                            {authSubmitting ? 'Acessando...' : 'Entrar no Sistema'}
+                                        </button>
+                                    </form>
+                                ) : (
+                                    <form onSubmit={handleRegister} className="space-y-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-700 mb-1">Nome Completo *</label>
+                                            <div className="relative">
+                                                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                <input 
+                                                    type="text" 
+                                                    required
+                                                    placeholder="Ex: João da Silva"
+                                                    value={authNome}
+                                                    onChange={(e) => setAuthNome(e.target.value)}
+                                                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none font-medium text-slate-800"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-700 mb-1">E-mail *</label>
+                                            <div className="relative">
+                                                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                <input 
+                                                    type="email" 
+                                                    required
+                                                    placeholder="seu@email.com"
+                                                    value={authEmail}
+                                                    onChange={(e) => setAuthEmail(e.target.value)}
+                                                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none font-medium text-slate-800"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-700 mb-1">Celular / WhatsApp *</label>
+                                                <div className="relative">
+                                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                    <input 
+                                                        type="tel" 
+                                                        required
+                                                        placeholder="(11) 99999-9999"
+                                                        value={authCelular}
+                                                        onChange={(e) => setAuthCelular(e.target.value)}
+                                                        className="w-full pl-10 pr-3 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none font-medium text-slate-800"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-xs font-bold text-slate-700 mb-1">CRECI *</label>
+                                                <div className="relative">
+                                                    <Award className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                    <input 
+                                                        type="text" 
+                                                        required
+                                                        placeholder="12345-F"
+                                                        value={authCreci}
+                                                        onChange={(e) => setAuthCreci(e.target.value)}
+                                                        className="w-full pl-10 pr-3 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none font-medium text-slate-800"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-700 mb-1">Senha * (Mínimo 6 caracteres)</label>
+                                            <div className="relative">
+                                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                                                <input 
+                                                    type="password" 
+                                                    required
+                                                    placeholder="••••••••"
+                                                    value={authPassword}
+                                                    onChange={(e) => setAuthPassword(e.target.value)}
+                                                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none font-medium text-slate-800"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-bold text-slate-700 mb-1">Perfil de Usuário (Permissão)</label>
+                                            <select 
+                                                value={authPerfil}
+                                                onChange={(e) => setAuthPerfil(e.target.value)}
+                                                className="w-full px-3 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none font-semibold text-slate-800 bg-white"
+                                            >
+                                                <option value="Corretor">Corretor (Simulações e atendimento)</option>
+                                                <option value="Assistente">Assistente (Realiza e visualiza simulações)</option>
+                                                <option value="Analista">Analista (Simulações, edições e relatórios)</option>
+                                                <option value="Gerente">Gerente (Simulações, salvamento e relatórios)</option>
+                                                <option value="Administrador">Administrador (Gestão de usuários e acesso total)</option>
+                                            </select>
+                                        </div>
+
+                                        <button 
+                                            type="submit"
+                                            disabled={authSubmitting}
+                                            className="w-full mt-2 bg-[#1D8843] hover:bg-[#05532C] text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                                        >
+                                            <Shield size={18} />
+                                            {authSubmitting ? 'Cadastrando...' : 'Criar Minha Conta'}
+                                        </button>
+                                    </form>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
+            // RENDERIZAÇÃO 3: APLICAÇÃO PRINCIPAL (USUÁRIO AUTENTICADO)
+            return (
+                <div className="min-h-screen p-4 md:p-8 font-sans text-slate-800 bg-slate-100">
+                
+                {/* HEADER COM IDENTIFICAÇÃO DO USUÁRIO LOGADO E LOGOUT */}
+                <div className="max-w-[1600px] mx-auto mb-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-[#1D8843] p-3 rounded-xl text-white shadow-sm shrink-0">
+                            <HardHat size={32} />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl md:text-3xl font-black text-[#05532C] tracking-tight">Simulador de Juros de Obra</h1>
+                            <p className="text-slate-600 text-sm md:text-base">Evolução de obra da Caixa - Modelo Apoio à Produção</p>
+                        </div>
+                    </div>
+
+                    {/* BADGE DE USUÁRIO LOGADO E BOTÃO LOGOUT */}
+                    <div className="flex items-center gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200 self-start md:self-auto shrink-0">
+                        <div className="flex items-center gap-2.5 pl-1 pr-1">
+                            <div className="w-9 h-9 rounded-lg bg-[#05532C] text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0">
+                                {userData?.nome ? userData.nome.substring(0, 2).toUpperCase() : 'US'}
+                            </div>
+                            <div className="text-xs">
+                                <p className="font-bold text-slate-800 leading-tight">
+                                    {userData?.nome || currentUser.email}
+                                </p>
+                                <div className="mt-0.5 flex items-center gap-1.5">
+                                    <span className="text-slate-500">Perfil:</span>
+                                    <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] uppercase border ${getBadgeStyle(userData?.perfil || 'Corretor')}`}>
+                                        {userData?.perfil || 'Corretor'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button 
+                            onClick={handleLogout}
+                            title="Sair do Sistema"
+                            className="bg-white hover:bg-rose-50 text-slate-600 hover:text-rose-600 p-2 rounded-lg border border-slate-200 transition-colors flex items-center gap-1.5 text-xs font-bold"
+                        >
+                            <LogOut size={16} />
+                            <span className="hidden sm:inline">Sair</span>
+                        </button>
+                    </div>
+                </div>
+
+                {/* BANNER DE FEEDBACK */}
+                {feedback && (
+                    <div className={`max-w-[1600px] mx-auto mb-6 p-4 rounded-xl font-semibold flex items-center gap-3 shadow-sm ${
+                        feedback.type === 'success' ? 'bg-emerald-100 border border-emerald-300 text-emerald-800' :
+                        feedback.type === 'error' ? 'bg-rose-100 border border-rose-300 text-rose-800' :
+                        'bg-sky-100 border border-sky-300 text-sky-800'
+                    }`}>
+                        <CheckCircle2 size={20} />
+                        <span>{feedback.text}</span>
+                    </div>
+                )}
+
+                {/* SEÇÃO ESPECIAL PARA GERENTE / ANALISTA / ADMINISTRADOR: PAINEL GERENCIAL */}
+                {(userData?.perfil === 'Gerente' || userData?.perfil === 'Analista' || userData?.perfil === 'Administrador') && (
+                    <div className="max-w-[1600px] mx-auto mb-6 bg-white rounded-2xl shadow-sm border border-slate-200 p-5 border-l-4 border-l-purple-600">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-purple-100 text-purple-800 p-2.5 rounded-xl border border-purple-200 shrink-0">
+                                    <BarChart2 size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-slate-800 text-base">Relatório Gerencial de Simulações</h3>
+                                    <p className="text-xs text-slate-500">Visão consolidada das simulações da equipe</p>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                <div>
+                                    <span className="text-slate-400 block">Total de Simulações:</span>
+                                    <span className="text-slate-800 font-bold text-sm">{simulacoes.length}</span>
+                                </div>
+                                <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
+                                <div>
+                                    <span className="text-slate-400 block">Volume Total Financiado:</span>
+                                    <span className="text-[#05532C] font-bold text-sm">
+                                        {formatCurrency(simulacoes.reduce((acc, c) => acc + (c.financiamento || 0), 0))}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* ESTRUTURA DE 3 COLUNAS RESPONSIVAS (DESKTOP) E EMPILHADAS (CELULAR) */}
+                <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 xl:gap-8">
+                    
+                    {/* ========================================== */}
+                    {/* COLUNA 1 (ESQUERDA): ENTRADA DE DADOS      */}
+                    {/* ========================================== */}
+                    <div className="space-y-6">
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 border-t-4 border-t-[#662B7F]">
+                            <h2 className="text-xl font-bold flex items-center gap-2 mb-6 text-[#05532C]">
+                                <FileText className="text-[#662B7F]" /> 
+                                Dados do seu Contrato
+                            </h2>
+                            
+                            <div className="space-y-5">
+                                {/* Financiamento */}
+                                <MoneyInput 
+                                    label="Valor do Financiamento (R$)"
+                                    value={financiamento}
+                                    onChange={setFinanciamento}
+                                    helpText="O valor total que você financiou com o banco."
+                                />
+
+                                {/* Taxa de Juros Anual */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Taxa de Juros Nominal (% ao ano)</label>
+                                    <div className="relative">
+                                        <input 
+                                            type="number" 
+                                            step="0.01"
+                                            value={taxaAnual} 
+                                            onChange={(e) => setTaxaAnual(e.target.value)}
+                                            className="w-full pl-4 pr-10 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none transition-all font-semibold text-slate-800"
+                                        />
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
+                                    </div>
+                                </div>
+
+                                {/* Parcela Futura */}
+                                <MoneyInput 
+                                    label="Valor da Parcela de Amortização (R$)"
+                                    value={parcelaFutura}
+                                    onChange={setParcelaFutura}
+                                    helpText="Usaremos para comparar se o juro está chegando no teto."
+                                />
+
+                                <div className="grid grid-cols-2 gap-4 pt-2">
+                                    {/* Seguros */}
+                                    <MoneyInput 
+                                        label="Seguros (MIP/DFI)"
+                                        value={seguro}
+                                        onChange={setSeguro}
+                                    />
+                                    {/* Taxa Adm */}
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-1">Taxa Adm. CEF</label>
+                                        <div className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-slate-100 font-semibold text-slate-600 flex items-center cursor-not-allowed h-[42px]">
+                                            {formatCurrency(TAXA_ADM)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 border-t-4 border-t-[#72AC44]">
+                            <h2 className="text-xl font-bold flex items-center gap-2 mb-6 text-[#05532C]">
+                                <TrendingUp className="text-[#72AC44]" /> 
+                                Evolução da Obra (Medição)
+                            </h2>
+                            
+                            <div className="space-y-5">
+                                {/* Percentual Terreno */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Percentual do Terreno (%)</label>
+                                    <div className="relative">
+                                        <input 
+                                            type="number" 
+                                            step="0.1"
+                                            value={percTerreno} 
+                                            onChange={(e) => setPercTerreno(e.target.value)}
+                                            className="w-full pl-4 pr-10 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-[#72AC44] focus:border-[#72AC44] outline-none transition-all font-semibold"
+                                        />
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
+                                    </div>
+                                    <p className="text-xs text-slate-500 mt-1">Valor do terreno fixado por padrão em 6,9%.</p>
+                                </div>
+
+                                {/* Percentual Obra */}
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Obra Executada (%)</label>
+                                    <div className="relative">
+                                        <input 
+                                            type="number" 
+                                            step="0.1"
+                                            value={percObra} 
+                                            onChange={(e) => setPercObra(e.target.value)}
+                                            className="w-full pl-4 pr-10 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-[#72AC44] focus:border-[#72AC44] outline-none transition-all font-semibold"
+                                        />
+                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
+                                    </div>
+                                    <p className="text-xs text-slate-500 mt-1">Medição atestada pela engenharia da Caixa este mês.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Botão de Limpar Dados */}
+                        <button 
+                            onClick={handleReset}
+                            className="w-full bg-white border-2 border-[#99247F] text-[#99247F] hover:bg-[#99247F] hover:text-white transition-all py-3 rounded-xl font-bold flex items-center justify-center gap-2 shadow-sm"
+                        >
+                            <RefreshCw size={20} />
+                            Zerar Todos os Valores
+                        </button>
+                    </div>
+
+                    {/* ========================================== */}
+                    {/* COLUNA 2 (CENTRO): RESULTADOS & CÁLCULOS   */}
+                    {/* ========================================== */}
+                    <div className="space-y-6">
+                        
+                        {/* CARD DE RESULTADO PRINCIPAL */}
+                        <div className="bg-gradient-to-br from-[#05532C] to-[#1D8843] rounded-2xl shadow-lg p-6 sm:p-8 text-white relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-32 bg-white opacity-5 rounded-full blur-3xl transform translate-x-1/3 -translate-y-1/3"></div>
+                            <div className="absolute bottom-0 left-0 p-24 bg-[#72AC44] opacity-20 rounded-full blur-3xl transform -translate-x-1/3 translate-y-1/3"></div>
+                            
+                            <div className="relative z-10">
+                                <div className="flex items-center justify-between mb-4">
+                                    <span className="text-[#72AC44] font-bold uppercase tracking-wider text-xs sm:text-sm flex items-center gap-2">
+                                        <Calculator size={16} /> Valor da Parcela (Juro de Obra)
+                                    </span>
+                                    
+                                    {/* TR Badge */}
+                                    <div className="bg-white/10 backdrop-blur border border-white/20 rounded-full px-3 py-1 flex items-center gap-2 text-xs">
+                                        <RefreshCw size={12} className={isFetchingTr ? "animate-spin text-white" : "text-[#72AC44]"} />
+                                        <span>TR: {isFetchingTr ? '...' : formatPercent(tr, 4)}</span>
+                                    </div>
+                                </div>
+
+                                <div className="text-4xl sm:text-5xl font-extrabold mb-6 tracking-tight drop-shadow-sm">
+                                    {formatCurrency(totalParcela)}
+                                </div>
+
+                                {/* Progress Bar do Teto */}
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-xs sm:text-sm font-medium text-white/80">
+                                        <span>Proporção / Parcela Futura</span>
+                                        <span>{formatPercent(tetoAlcancado, 1)} da parcela</span>
+                                    </div>
+                                    <div className="h-2 w-full bg-[#05532C] rounded-full overflow-hidden border border-white/10">
+                                        <div 
+                                            className={`h-full rounded-full transition-all duration-500 ${tetoAlcancado > 90 ? 'bg-[#99247F]' : tetoAlcancado > 70 ? 'bg-[#662B7F]' : 'bg-[#72AC44]'}`}
+                                            style={{ width: `${Math.min(tetoAlcancado, 100)}%` }}
+                                        ></div>
+                                    </div>
+                                    <p className="text-xs text-white/60">
+                                        Comparação com prestação futura de {formatCurrency(parcelaFutura)}.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* MEMÓRIA DE CÁLCULO */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                            <h3 className="text-lg font-bold text-[#05532C] mb-4 flex items-center gap-2">
+                                <Info className="text-[#1D8843]" /> 
+                                Memória de Cálculo (Passo a Passo)
+                            </h3>
+                            
+                            <div className="space-y-4">
+                                {/* Passo A */}
+                                <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
+                                    <div className="flex items-start gap-3">
+                                        <div className="bg-[#1D8843]/10 text-[#1D8843] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">A</div>
+                                        <div>
+                                            <h4 className="font-semibold text-[#05532C] text-sm">Saldo Liberado</h4>
+                                            <p className="text-xs text-slate-600 mt-0.5">Terreno + obra executada emprestados.</p>
+                                            <div className="mt-2 font-mono text-xs bg-white p-2.5 rounded border border-slate-200 text-slate-700 overflow-x-auto">
+                                                <span className="text-slate-400">% =</span> {formatPercent(percTerreno)} + {formatPercent(percObra)} = <b>{formatPercent(percTotalLiberado)}</b><br/>
+                                                <span className="text-slate-400">Saldo =</span> {formatCurrency(financiamento)} × {formatPercent(percTotalLiberado)}<br/>
+                                                <span className="text-[#1D8843] font-semibold">= {formatCurrency(saldoLiberado)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Passo B */}
+                                <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
+                                    <div className="flex items-start gap-3">
+                                        <div className="bg-[#1D8843]/10 text-[#1D8843] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">B</div>
+                                        <div>
+                                            <h4 className="font-semibold text-[#05532C] text-sm">Taxa do Mês</h4>
+                                            <p className="text-xs text-slate-600 mt-0.5">Taxa anual ({formatPercent(taxaAnual)}) dividida por 12.</p>
+                                            <div className="mt-2 font-mono text-xs bg-white p-2.5 rounded border border-slate-200 text-slate-700 overflow-x-auto">
+                                                <span className="text-slate-400">Taxa Mês =</span> {formatPercent(taxaAnual)} ÷ 12 <br/>
+                                                <span className="text-[#1D8843] font-semibold">= {formatPercent(taxaMensal, 4)} ao mês</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Passo C */}
+                                <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
+                                    <div className="flex items-start gap-3">
+                                        <div className="bg-[#1D8843]/10 text-[#1D8843] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">C</div>
+                                        <div>
+                                            <h4 className="font-semibold text-[#05532C] text-sm">Juros sobre Saldo</h4>
+                                            <p className="text-xs text-slate-600 mt-0.5">Taxa mensal × valor liberado.</p>
+                                            <div className="mt-2 font-mono text-xs bg-white p-2.5 rounded border border-slate-200 text-slate-700 overflow-x-auto">
+                                                <span className="text-slate-400">Juros =</span> {formatCurrency(saldoLiberado)} × {formatPercent(taxaMensal, 4)}<br/>
+                                                <span className="text-[#1D8843] font-semibold">= {formatCurrency(valorJuros)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Passo D */}
+                                <div className="p-4 rounded-xl border border-slate-100 bg-slate-50">
+                                    <div className="flex items-start gap-3">
+                                        <div className="bg-[#1D8843]/10 text-[#1D8843] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">D</div>
+                                        <div className="w-full">
+                                            <h4 className="font-semibold text-[#05532C] text-sm">Correção pela TR</h4>
+                                            <div className="mt-2 flex flex-wrap gap-2 items-center">
+                                                <div className="relative w-28">
+                                                    <input 
+                                                        type="number" 
+                                                        step="0.0001"
+                                                        value={tr} 
+                                                        onChange={(e) => setTr(e.target.value)}
+                                                        className="w-full pl-2 pr-6 py-1 text-xs rounded border border-slate-300 font-mono"
+                                                    />
+                                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs">%</span>
+                                                </div>
+                                                
+                                                <button 
+                                                    onClick={fetchTR}
+                                                    disabled={isFetchingTr}
+                                                    className="px-2 py-1 bg-[#1D8843]/10 text-[#1D8843] hover:bg-[#1D8843]/20 transition-colors rounded text-xs font-semibold flex items-center gap-1 disabled:opacity-50"
+                                                >
+                                                    <RefreshCw size={12} className={isFetchingTr ? "animate-spin" : ""} />
+                                                    Atualizar TR
+                                                </button>
+                                            </div>
+                                            <div className="mt-2 font-mono text-xs bg-white p-2.5 rounded border border-slate-200 text-slate-700 overflow-x-auto">
+                                                <span className="text-slate-400">TR =</span> {formatCurrency(saldoLiberado)} × {formatPercent(tr, 4)}<br/>
+                                                <span className="text-[#1D8843] font-semibold">= {formatCurrency(valorTr)}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Conclusão */}
+                                <div className="p-4 rounded-xl bg-[#05532C] text-white shadow-inner mt-4 border border-[#1D8843]/30">
+                                    <h4 className="font-semibold flex items-center gap-2 mb-2 text-[#72AC44] text-sm">
+                                        <CheckCircle2 size={16} /> 
+                                        Composição Final da Parcela
+                                    </h4>
+                                    <ul className="space-y-1.5 text-xs text-slate-200 font-mono">
+                                        <li className="flex justify-between"><span>Juros (C):</span> <span>{formatCurrency(valorJuros)}</span></li>
+                                        <li className="flex justify-between"><span>Correção TR (D):</span> <span>{formatCurrency(valorTr)}</span></li>
+                                        <li className="flex justify-between"><span>Seguros:</span> <span>{formatCurrency(seguro)}</span></li>
+                                        <li className="flex justify-between"><span>Taxa Adm:</span> <span>{formatCurrency(TAXA_ADM)}</span></li>
+                                        <li className="border-t border-[#1D8843] my-1 pt-1 flex justify-between text-white font-bold text-sm">
+                                            <span>Total (TEO):</span> <span>{formatCurrency(totalParcela)}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {/* ========================================== */}
+                    {/* COLUNA 3 (DIREITA): SIMULAÇÕES SALVAS      */}
+                    {/* ========================================== */}
+                    <div className="space-y-6">
+                        {/* CARD SALVAR SIMULAÇÃO NO FIRESTORE (NO TOPO DA COLUNA 3) */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 border-t-4 border-t-[#1D8843]">
+                            <h3 className="text-lg font-bold text-[#05532C] mb-1 flex items-center gap-2">
+                                <Bookmark className="text-[#1D8843]" size={20} />
+                                Salvar Simulação no Banco de Dados
+                            </h3>
+                            <p className="text-xs text-slate-500 mb-4">
+                                Sincronize os dados no Firestore para consultar depois.
+                            </p>
+
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="block text-xs font-semibold text-slate-700 mb-1">Nome / Identificação da Simulação</label>
+                                    <input 
+                                        type="text" 
+                                        placeholder="Ex: Ap 302, Cliente João, Medição 50%..."
+                                        value={nomeSimulacao}
+                                        onChange={(e) => setNomeSimulacao(e.target.value)}
+                                        className="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none font-medium"
+                                    />
+                                </div>
+
+                                <button 
+                                    onClick={handleSalvarSimulacao}
+                                    disabled={isSaving}
+                                    className="w-full bg-[#1D8843] hover:bg-[#05532C] text-white font-bold py-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                                >
+                                    <Save size={18} />
+                                    {isSaving ? 'Salvando no Firestore...' : 'Salvar Simulação'}
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* LISTA DE SIMULAÇÕES SALVAS DO FIRESTORE */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 border-t-4 border-t-[#662B7F] flex flex-col">
+                            <div className="flex items-center justify-between gap-2 pb-4 border-b border-slate-200 mb-6">
+                                <div>
+                                    <h2 className="text-xl font-bold text-[#05532C] flex items-center gap-2">
+                                        <Bookmark className="text-[#662B7F]" size={22} />
+                                        Simulações Salvas
+                                    </h2>
+                                    <p className="text-slate-500 text-xs mt-0.5">
+                                        Conectado ao Cloud Firestore
+                                    </p>
+                                </div>
+                                <div className="bg-slate-100 px-3 py-1 rounded-full font-bold text-slate-700 text-xs border border-slate-200 shrink-0">
+                                    {simulacoes.length}
+                                </div>
+                            </div>
+
+                            {isLoadingSimulacoes ? (
+                                <div className="py-12 text-center text-slate-500 flex flex-col items-center justify-center gap-2 my-auto">
+                                    <RefreshCw size={24} className="animate-spin text-[#1D8843]" />
+                                    <p className="text-sm font-medium">Carregando registros...</p>
+                                </div>
+                            ) : simulacoes.length === 0 ? (
+                                <div className="py-12 text-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200 my-auto p-4">
+                                    <Bookmark size={36} className="mx-auto text-slate-300 mb-2" />
+                                    <p className="font-semibold text-slate-600 text-sm">Nenhum registro salvo</p>
+                                    <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+                                        Preencha os valores e clique em "Salvar Simulação" acima para registrar no banco.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4 overflow-y-auto max-h-[600px] pr-1">
+                                    {simulacoes.map((item) => (
+                                        <div key={item.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 hover:border-[#1D8843] transition-all shadow-xs flex flex-col justify-between space-y-3">
+                                            <div>
+                                                <div className="flex items-start justify-between gap-2 mb-2">
+                                                    <h3 className="font-bold text-slate-800 text-sm line-clamp-2">
+                                                        {item.titulo}
+                                                    </h3>
+                                                    <button 
+                                                        onClick={() => handleExcluirSimulacao(item.id, item.titulo)}
+                                                        title="Excluir do Firestore"
+                                                        className="text-slate-400 hover:text-rose-600 p-1 rounded hover:bg-rose-50 transition-colors shrink-0"
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                </div>
+
+                                                <div className="space-y-1 text-xs text-slate-600 bg-white p-2.5 rounded-lg border border-slate-200">
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-500">Financiamento:</span>
+                                                        <span className="font-bold text-slate-800">{formatCurrency(item.financiamento)}</span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-500">Medição Total:</span>
+                                                        <span className="font-semibold text-slate-700">
+                                                            {formatPercent((item.percTerreno || 0) + (item.percObra || 0))} 
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex justify-between">
+                                                        <span className="text-slate-500">Taxa Juros:</span>
+                                                        <span className="font-semibold text-slate-700">{formatPercent(item.taxaAnual)} a.a.</span>
+                                                    </div>
+                                                    <div className="flex justify-between pt-1 border-t border-slate-100 text-xs font-bold text-[#05532C]">
+                                                        <span>Parcela:</span>
+                                                        <span>{formatCurrency(item.totalParcela)}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <div className="text-[10px] text-slate-400 mb-2 flex items-center justify-between">
+                                                    <span>Salvo por:</span>
+                                                    <span className="font-semibold text-slate-600">{item.criadoPorNome || 'Usuário'}</span>
+                                                </div>
+                                                <div className="text-[10px] text-slate-400 mb-2 flex items-center justify-between">
+                                                    <span>Data:</span>
+                                                    <span>{item.dataTexto || 'Indisponível'}</span>
+                                                </div>
+                                                <button 
+                                                    onClick={() => handleCarregarSimulacao(item)}
+                                                    className="w-full bg-white border border-[#1D8843] text-[#1D8843] hover:bg-[#1D8843] hover:text-white transition-all font-bold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 shadow-xs"
+                                                >
+                                                    <ArrowUpRight size={14} />
+                                                    Carregar no Formulário
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                </div>
+
+                {/* SEÇÃO DE GESTÃO DE USUÁRIOS E PERFIS (APENAS ADMINISTRADOR) */}
+                {userData?.perfil === 'Administrador' && (
+                    <div className="max-w-[1600px] mx-auto mt-8 bg-white rounded-2xl shadow-sm border border-slate-200 p-6 border-t-4 border-t-emerald-600">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200 mb-6">
+                            <div>
+                                <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <Users className="text-emerald-600" size={24} />
+                                    Gestão de Usuários e Controle de Acessos (RBAC - Administrador)
+                                </h2>
+                                <p className="text-slate-500 text-xs mt-1">
+                                    Gerencie permissões (Corretor, Assistente, Analista, Gerente, Administrador), pause acessos ou exclua usuários cadastrados no banco de dados.
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-2 self-start md:self-auto shrink-0 flex-wrap">
+                                <span className="bg-emerald-50 text-emerald-800 font-bold px-3 py-1.5 rounded-full text-xs border border-emerald-200 flex items-center gap-1.5">
+                                    <UserCheck size={14} />
+                                    {listaUsuarios.filter(u => u.status !== 'Pausado').length} Ativos
+                                </span>
+                                {listaUsuarios.filter(u => u.status === 'Pausado').length > 0 && (
+                                    <span className="bg-amber-50 text-amber-800 font-bold px-3 py-1.5 rounded-full text-xs border border-amber-200 flex items-center gap-1.5">
+                                        <Pause size={14} />
+                                        {listaUsuarios.filter(u => u.status === 'Pausado').length} Pausados
+                                    </span>
+                                )}
+                                <span className="bg-slate-100 text-slate-700 font-bold px-3 py-1.5 rounded-full text-xs border border-slate-200">
+                                    Total: {listaUsuarios.length}
+                                </span>
+                                <button
+                                    onClick={() => {
+                                        setAdminNovoError('');
+                                        setShowModalNovoUsuario(true);
+                                    }}
+                                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-1.5 rounded-full text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer ml-1"
+                                >
+                                    <UserPlus size={14} />
+                                    <span>➕ Novo Usuário</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {isLoadingUsuarios ? (
+                            <div className="py-12 text-center text-slate-500 flex flex-col items-center justify-center gap-2">
+                                <RefreshCw size={28} className="animate-spin text-emerald-600" />
+                                <p className="text-xs font-semibold">Carregando lista de usuários do Firestore...</p>
+                            </div>
+                        ) : listaUsuarios.length === 0 ? (
+                            <p className="text-slate-400 text-sm py-6 text-center">Nenhum usuário cadastrado no banco de dados.</p>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {listaUsuarios.map((u) => {
+                                    const isSelf = u.id === currentUser?.uid;
+                                    const isPaused = u.status === 'Pausado';
+
+                                    return (
+                                        <div 
+                                            key={u.id} 
+                                            className={`border rounded-2xl p-4 flex flex-col justify-between space-y-4 transition-all ${
+                                                isPaused 
+                                                    ? 'bg-amber-50/40 border-amber-300 shadow-xs' 
+                                                    : 'bg-slate-50 border-slate-200 hover:border-emerald-500 shadow-xs'
+                                            }`}
+                                        >
+                                            {/* CABEÇALHO DO CARD DO USUÁRIO */}
+                                            <div className="flex items-start justify-between gap-2">
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className={`w-10 h-10 rounded-xl text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs ${
+                                                        isPaused ? 'bg-amber-600' : 'bg-slate-800'
+                                                    }`}>
+                                                        {u.nome ? u.nome.substring(0, 2).toUpperCase() : 'US'}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <h3 className="font-bold text-slate-800 text-sm truncate flex items-center gap-1.5">
+                                                            {u.nome || 'Sem Nome'}
+                                                            {isSelf && (
+                                                                <span className="text-[10px] font-normal text-emerald-700 bg-emerald-100 px-1.5 py-0.2 rounded border border-emerald-200">(Você)</span>
+                                                            )}
+                                                        </h3>
+                                                        <p className="text-xs text-slate-500 truncate mb-1.5">{u.email}</p>
+                                                        
+                                                        {/* DESTAQUE DE CELULAR E CRECI PARA VERIFICAÇÃO */}
+                                                        <div className="flex items-center gap-1.5 flex-wrap font-bold text-[11px] mt-1">
+                                                            {u.celular ? (
+                                                                <span className="flex items-center gap-1 bg-emerald-50 text-emerald-800 px-2 py-0.5 rounded-md border border-emerald-200 shadow-2xs">
+                                                                    <Phone size={11} className="text-emerald-600 shrink-0" />
+                                                                    {u.celular}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="flex items-center gap-1 bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded text-[10px] font-normal border border-slate-200">
+                                                                    Sem Tel
+                                                                </span>
+                                                            )}
+
+                                                            {u.creci ? (
+                                                                <span className="flex items-center gap-1 bg-purple-50 text-purple-900 px-2 py-0.5 rounded-md border border-purple-200 shadow-2xs">
+                                                                    <Award size={11} className="text-purple-600 shrink-0" />
+                                                                    CRECI: {u.creci}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="flex items-center gap-1 bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded text-[10px] font-normal border border-slate-200">
+                                                                    Sem CRECI
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* BADGE DE STATUS */}
+                                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase shrink-0 flex items-center gap-1 ${
+                                                    isPaused 
+                                                        ? 'bg-amber-100 text-amber-800 border-amber-300' 
+                                                        : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                                }`}>
+                                                    {isPaused ? (
+                                                        <>
+                                                            <Pause size={10} /> Pausado
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <CheckCircle2 size={10} /> Ativo
+                                                        </>
+                                                    )}
+                                                </span>
+                                            </div>
+
+                                            {/* SELETOR DE PERFIL (ROLE) */}
+                                            <div className="pt-2 border-t border-slate-200/80">
+                                                <div className="flex items-center justify-between mb-1.5">
+                                                    <label className="text-[11px] font-bold text-slate-600">Perfil de Acesso (Role):</label>
+                                                    <span className={`px-2 py-0.5 rounded-md font-bold text-[10px] border ${getBadgeStyle(u.perfil || 'Corretor')}`}>
+                                                        {u.perfil || 'Corretor'}
+                                                    </span>
+                                                </div>
+                                                <select 
+                                                    value={u.perfil || 'Corretor'}
+                                                    onChange={(e) => handleAtualizarPerfilUsuario(u.id, e.target.value)}
+                                                    className="w-full px-2.5 py-2 text-xs rounded-xl border border-slate-300 font-semibold bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500 outline-none shadow-2xs"
+                                                >
+                                                    <option value="Corretor">Corretor</option>
+                                                    <option value="Assistente">Assistente</option>
+                                                    <option value="Analista">Analista</option>
+                                                    <option value="Gerente">Gerente</option>
+                                                    <option value="Administrador">Administrador</option>
+                                                </select>
+                                            </div>
+
+                                            {/* BOTÕES DE AÇÃO: PAUSAR / REATIVAR & EXCLUIR */}
+                                            <div className="pt-2 border-t border-slate-200/80 flex items-center gap-2">
+                                                <button
+                                                    onClick={() => handleTogglePausarUsuario(u)}
+                                                    disabled={isSelf}
+                                                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs ${
+                                                        isPaused
+                                                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                                            : 'bg-amber-500 hover:bg-amber-600 text-white'
+                                                    } disabled:opacity-40 disabled:cursor-not-allowed`}
+                                                    title={isSelf ? 'Você não pode pausar a sua própria conta' : isPaused ? 'Reativar acesso do usuário' : 'Pausar acesso do usuário'}
+                                                >
+                                                    {isPaused ? (
+                                                        <>
+                                                            <Play size={14} />
+                                                            Reativar
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Pause size={14} />
+                                                            Pausar
+                                                        </>
+                                                    )}
+                                                </button>
+
+                                                <button
+                                                    onClick={() => handleExcluirUsuario(u)}
+                                                    disabled={isSelf}
+                                                    className="py-2 px-3 rounded-xl text-xs font-bold transition-all border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 flex items-center justify-center gap-1.5 shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed"
+                                                    title={isSelf ? 'Você não pode excluir a sua própria conta' : 'Excluir usuário permanentemente'}
+                                                >
+                                                    <Trash2 size={14} />
+                                                    <span>Excluir</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* MODAL PARA CADASTRAR NOVO USUÁRIO (ADMINISTRADOR) */}
+                {showModalNovoUsuario && (
+                    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+                        <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in-95 duration-200">
+                            {/* Cabeçalho do Modal */}
+                            <div className="bg-slate-800 text-white px-6 py-4 flex items-center justify-between">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="bg-emerald-500/20 p-2 rounded-xl border border-emerald-500/30">
+                                        <UserPlus size={20} className="text-emerald-400" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-base text-white">Cadastrar Novo Usuário</h3>
+                                        <p className="text-xs text-slate-300">Criar conta e definir perfil de acesso direto no sistema</p>
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={() => setShowModalNovoUsuario(false)} 
+                                    className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            {/* Formulário de Cadastro */}
+                            <form onSubmit={handleAdminCadastrarUsuario} className="p-6 space-y-4">
+                                {adminNovoError && (
+                                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold flex items-start gap-2">
+                                        <AlertOctagon size={16} className="shrink-0 mt-0.5 text-rose-600" />
+                                        <span>{adminNovoError}</span>
+                                    </div>
+                                )}
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="col-span-1 sm:col-span-2">
+                                        <label className="block text-xs font-bold text-slate-700 mb-1">Nome Completo *</label>
+                                        <div className="relative">
+                                            <User size={16} className="absolute left-3 top-3 text-slate-400" />
+                                            <input 
+                                                type="text"
+                                                value={adminNovoNome}
+                                                onChange={(e) => setAdminNovoNome(e.target.value)}
+                                                placeholder="Ex: Carlos Eduardo Silva"
+                                                required
+                                                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-medium text-slate-800"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="col-span-1 sm:col-span-2">
+                                        <label className="block text-xs font-bold text-slate-700 mb-1">E-mail *</label>
+                                        <div className="relative">
+                                            <Mail size={16} className="absolute left-3 top-3 text-slate-400" />
+                                            <input 
+                                                type="email"
+                                                value={adminNovoEmail}
+                                                onChange={(e) => setAdminNovoEmail(e.target.value)}
+                                                placeholder="corretor@empresa.com.br"
+                                                required
+                                                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-medium text-slate-800"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 mb-1">Celular / WhatsApp *</label>
+                                        <div className="relative">
+                                            <Phone size={16} className="absolute left-3 top-3 text-slate-400" />
+                                            <input 
+                                                type="tel"
+                                                value={adminNovoCelular}
+                                                onChange={(e) => setAdminNovoCelular(e.target.value)}
+                                                placeholder="(11) 99999-9999"
+                                                required
+                                                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-medium text-slate-800"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 mb-1">
+                                            CRECI {adminNovoPerfil === 'Corretor' ? (
+                                                <span className="text-emerald-700 font-bold">* (Obrigatório)</span>
+                                            ) : (
+                                                <span className="text-slate-400 font-normal">(Opcional)</span>
+                                            )}
+                                        </label>
+                                        <div className="relative">
+                                            <Award size={16} className="absolute left-3 top-3 text-slate-400" />
+                                            <input 
+                                                type="text"
+                                                value={adminNovoCreci}
+                                                onChange={(e) => setAdminNovoCreci(e.target.value)}
+                                                placeholder="12345-F"
+                                                required={adminNovoPerfil === 'Corretor'}
+                                                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-medium text-slate-800"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 mb-1">Senha de Acesso *</label>
+                                        <div className="relative">
+                                            <Lock size={16} className="absolute left-3 top-3 text-slate-400" />
+                                            <input 
+                                                type="password"
+                                                value={adminNovoSenha}
+                                                onChange={(e) => setAdminNovoSenha(e.target.value)}
+                                                placeholder="Mínimo 6 caracteres"
+                                                required
+                                                minLength={6}
+                                                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-medium text-slate-800"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-bold text-slate-700 mb-1">Perfil de Acesso (Role) *</label>
+                                        <select 
+                                            value={adminNovoPerfil}
+                                            onChange={(e) => setAdminNovoPerfil(e.target.value)}
+                                            className="w-full px-3 py-2.5 text-xs rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none font-semibold text-slate-800 bg-white"
+                                        >
+                                            <option value="Corretor">Corretor</option>
+                                            <option value="Assistente">Assistente</option>
+                                            <option value="Analista">Analista</option>
+                                            <option value="Gerente">Gerente</option>
+                                            <option value="Administrador">Administrador</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-3">
+                                    <button 
+                                        type="button"
+                                        onClick={() => setShowModalNovoUsuario(false)}
+                                        className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors cursor-pointer"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button 
+                                        type="submit"
+                                        disabled={adminNovoSubmitting}
+                                        className="px-5 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl transition-all shadow-md flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                                    >
+                                        {adminNovoSubmitting ? (
+                                            <>
+                                                <RefreshCw size={14} className="animate-spin" />
+                                                Cadastrando...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <UserPlus size={16} />
+                                                Cadastrar Usuário
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
