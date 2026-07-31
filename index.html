@@ -298,6 +298,9 @@
         const Filter = (p) => <Icon {...p}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></Icon>;
         const Sun = (p) => <Icon {...p}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></Icon>;
         const Moon = (p) => <Icon {...p}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></Icon>;
+        const BookOpen = (p) => <Icon {...p}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></Icon>;
+        const Lightbulb = (p) => <Icon {...p}><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></Icon>;
+        const HelpCircle = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></Icon>;
 
         // ==========================================
         // COMPONENTE SELETOR DE TEMA (MODO CLARO / MODO ESCURO - OTIMIZADO PARA MOBILE & TOUCH)
@@ -538,6 +541,22 @@
             const [selectedUserForPassword, setSelectedUserForPassword] = useState(null);
             const [adminPasswordStatus, setAdminPasswordStatus] = useState({ type: '', message: '' });
             const [isAdminPasswordSubmitting, setIsAdminPasswordSubmitting] = useState(false);
+
+            // Estado para o Modal de Tutorial e Infográfico do Corretor
+            const [showTutorialModal, setShowTutorialModal] = useState(false);
+
+            // Fechamento do Modal do Tutorial ao pressionar a tecla Esc
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (e.key === 'Escape') {
+                        setShowTutorialModal(false);
+                    }
+                };
+                if (showTutorialModal) {
+                    window.addEventListener('keydown', handleKeyDown);
+                }
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, [showTutorialModal]);
 
             // Estados para Pesquisa e Filtro de Usuários
             const [searchTermUsuarios, setSearchTermUsuarios] = useState('');
@@ -1599,6 +1618,17 @@
                         {/* SELETOR DE TEMA */}
                         <ThemeSelector theme={theme} setTheme={setTheme} />
 
+                        {/* BOTÃO TUTORIAL E GUIA DO CORRETOR */}
+                        <button 
+                            type="button"
+                            onClick={() => setShowTutorialModal(true)}
+                            className="bg-[#05532C] hover:bg-[#1D8843] text-white px-3.5 py-2.5 rounded-xl font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 border border-emerald-700/50 hover:scale-[1.02] active:scale-95 touch-manipulation min-h-[44px]"
+                            title="Abrir Tutorial e Guia do Corretor (Memória de Cálculo e Script)"
+                        >
+                            <BookOpen size={18} className="text-amber-300" />
+                            <span className="whitespace-nowrap">Tutorial / Guia</span>
+                        </button>
+
                         {/* BADGE DE USUÁRIO LOGADO E BOTÃO LOGOUT */}
                         <div className="flex items-center gap-3 bg-slate-50 p-2 rounded-xl border border-slate-200 shrink-0">
                             <div className="flex items-center gap-2.5 pl-1 pr-1">
@@ -1696,10 +1726,21 @@
                         </div>
 
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 border-t-4 border-t-[#662B7F]">
-                            <h2 className="text-xl font-bold flex items-center gap-2 mb-6 text-[#05532C]">
-                                <FileText className="text-[#662B7F]" /> 
-                                Dados do Contrato
-                            </h2>
+                            <div className="flex items-center justify-between gap-2 mb-6">
+                                <h2 className="text-xl font-bold flex items-center gap-2 text-[#05532C]">
+                                    <FileText className="text-[#662B7F]" /> 
+                                    Dados do Contrato
+                                </h2>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowTutorialModal(true)}
+                                    className="text-[#1D8843] hover:text-[#05532C] dark:text-[#81C784] dark:hover:text-[#A5D6A7] text-xs font-bold flex items-center gap-1 hover:underline cursor-pointer transition-colors"
+                                    title="Ver Tutorial e Memória de Cálculo"
+                                >
+                                    <BookOpen size={15} />
+                                    <span>Ver Guia</span>
+                                </button>
+                            </div>
                             
                             <div className="space-y-5">
                                 {/* Financiamento */}
@@ -2713,6 +2754,237 @@
                                         Fechar Modal
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* MODAL DO TUTORIAL & GUIA DO CORRETOR */}
+                {showTutorialModal && (
+                    <div 
+                        className="fixed inset-0 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto animate-in fade-in duration-200"
+                        onClick={() => setShowTutorialModal(false)}
+                    >
+                        <div 
+                            className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 my-auto max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Cabeçalho do Modal */}
+                            <div className="bg-gradient-to-r from-[#05532C] to-[#1D8843] text-white px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between shrink-0 shadow-sm">
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-white/10 p-2.5 rounded-xl border border-white/20 shrink-0">
+                                        <BookOpen size={24} className="text-amber-300" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-base sm:text-lg leading-tight flex items-center gap-2">
+                                            Infográfico & Guia do Corretor
+                                        </h3>
+                                        <p className="text-emerald-100 text-xs sm:text-sm font-medium">
+                                            Memória de Cálculo e Script de Atendimento — Evolução de Obra Caixa
+                                        </p>
+                                    </div>
+                                </div>
+                                <button 
+                                    type="button"
+                                    onClick={() => setShowTutorialModal(false)}
+                                    className="text-white/80 hover:text-white p-2 rounded-xl hover:bg-white/15 transition-colors cursor-pointer shrink-0 ml-2 active:scale-95 touch-manipulation"
+                                    title="Fechar Tutorial (Esc)"
+                                >
+                                    <X size={22} />
+                                </button>
+                            </div>
+
+                            {/* Conteúdo com rolagem interna */}
+                            <div className="p-5 sm:p-7 space-y-6 overflow-y-auto text-slate-800 dark:text-slate-200 text-xs sm:text-sm leading-relaxed">
+                                
+                                {/* 1. PAINEL DE INTRODUÇÃO E FORMULÁRIO DE ENTRADA DO CORRETOR */}
+                                <div className="bg-slate-50 dark:bg-slate-800/60 p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-700/80">
+                                    <div className="flex items-center gap-2.5 text-[#05532C] dark:text-[#81C784] font-bold text-sm sm:text-base mb-3">
+                                        <FileText size={20} className="shrink-0" />
+                                        <h4>1. Formulário de Entrada do Corretor (Variáveis Principais)</h4>
+                                    </div>
+                                    <p className="text-slate-600 dark:text-slate-300 text-xs sm:text-sm mb-4">
+                                        Para realizar uma simulação precisa, o corretor deve coletar e preencher no simulador os 5 dados fundamentais do contrato habitacional:
+                                    </p>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+                                        <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                                            <span className="font-bold text-[#05532C] dark:text-[#81C784] block mb-1">1. Valor do Financiamento (R$)</span>
+                                            <p className="text-slate-600 dark:text-slate-400">Total do crédito concedido pela Caixa Econômica Federal para a aquisição.</p>
+                                        </div>
+                                        <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                                            <span className="font-bold text-[#05532C] dark:text-[#81C784] block mb-1">2. Parcela de Amortização (R$)</span>
+                                            <p className="text-slate-600 dark:text-slate-400">Valor projetado da prestação contratual pós-chaves (SAC ou PRICE).</p>
+                                        </div>
+                                        <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                                            <span className="font-bold text-[#05532C] dark:text-[#81C784] block mb-1">3. % Obra Executada (%)</span>
+                                            <p className="text-slate-600 dark:text-slate-400">Evolução física do empreendimento medida mensalmente pelos engenheiros da CEF.</p>
+                                        </div>
+                                        <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                                            <span className="font-bold text-[#05532C] dark:text-[#81C784] block mb-1">4. Juros CEF (% a.a.)</span>
+                                            <p className="text-slate-600 dark:text-slate-400">Taxa nominal/efetiva de juros anual do financiamento contratado.</p>
+                                        </div>
+                                        <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-700 md:col-span-2 lg:col-span-2">
+                                            <span className="font-bold text-[#05532C] dark:text-[#81C784] block mb-1">5. Seguros MIP & DFI (R$)</span>
+                                            <p className="text-slate-600 dark:text-slate-400">Cobertura de Morte/Invalidez Permanente (MIP) e Danos Físicos ao Imóvel (DFI).</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 2. REGRAS E PREMISSAS FIXAS DA CAIXA */}
+                                <div className="bg-emerald-50/80 dark:bg-emerald-950/40 p-4 sm:p-5 rounded-2xl border border-emerald-200 dark:border-emerald-800/60">
+                                    <div className="flex items-center gap-2.5 text-[#05532C] dark:text-[#81C784] font-bold text-sm sm:text-base mb-2">
+                                        <Lock size={20} className="shrink-0 text-emerald-600 dark:text-[#81C784]" />
+                                        <h4>2. Regras Fixas da Operação (Apoio à Produção CEF)</h4>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                                        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800/50 flex items-start gap-3">
+                                            <div className="bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 font-black p-2 rounded-lg text-xs shrink-0">
+                                                6,90%
+                                            </div>
+                                            <div>
+                                                <h5 className="font-bold text-slate-800 dark:text-slate-100 text-xs sm:text-sm">Terreno Liberação Total Travada</h5>
+                                                <p className="text-slate-600 dark:text-slate-300 text-xs mt-0.5">
+                                                    No modelo Apoio à Produção da Caixa, a fração ideal do terreno equivale a <strong>6,90%</strong> do financiamento total e é considerada <strong>100% liberada no 1º mês</strong>.
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800/50 flex items-start gap-3">
+                                            <div className="bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 font-black p-2 rounded-lg text-xs shrink-0">
+                                                R$ 25
+                                            </div>
+                                            <div>
+                                                <h5 className="font-bold text-slate-800 dark:text-slate-100 text-xs sm:text-sm">Taxa de Administração CEF Fixa</h5>
+                                                <p className="text-slate-600 dark:text-slate-300 text-xs mt-0.5">
+                                                    A Caixa cobra uma taxa mensal administrativa fixa de <strong>R$ 25,00</strong> em todas as parcelas durante a fase de construção.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 3. MEMÓRIA DE CÁLCULO PASSO A PASSO (4 ETAPAS) */}
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2.5 text-[#05532C] dark:text-[#81C784] font-bold text-sm sm:text-base">
+                                        <Calculator size={20} className="shrink-0" />
+                                        <h4>3. Memória de Cálculo Passo a Passo (4 Etapas)</h4>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {/* Passo 1 */}
+                                        <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 relative overflow-hidden">
+                                            <div className="absolute top-0 right-0 bg-[#05532C] dark:bg-[#2E5A3C] text-white px-3 py-1 rounded-bl-xl font-black text-[10px] uppercase tracking-wider">
+                                                Passo 1
+                                            </div>
+                                            <h5 className="font-bold text-slate-800 dark:text-slate-100 text-sm mb-1.5 pr-12">
+                                                Quota Liberada (%)
+                                            </h5>
+                                            <p className="text-slate-600 dark:text-slate-300 text-xs mb-2">
+                                                Representa a porcentagem do financiamento liberada pela Caixa até o momento.
+                                            </p>
+                                            <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-lg text-[11px] font-sans text-[#05532C] dark:text-[#81C784] font-bold border border-slate-200 dark:border-slate-700">
+                                                Quota Liberada = Terreno (6,90%) + Avanço da Obra Executada
+                                            </div>
+                                        </div>
+
+                                        {/* Passo 2 */}
+                                        <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 relative overflow-hidden">
+                                            <div className="absolute top-0 right-0 bg-[#05532C] dark:bg-[#2E5A3C] text-white px-3 py-1 rounded-bl-xl font-black text-[10px] uppercase tracking-wider">
+                                                Passo 2
+                                            </div>
+                                            <h5 className="font-bold text-slate-800 dark:text-slate-100 text-sm mb-1.5 pr-12">
+                                                Juros de Obra (R$)
+                                            </h5>
+                                            <p className="text-slate-600 dark:text-slate-300 text-xs mb-2">
+                                                Aplica a taxa de juros mensal proporcional apenas sobre o saldo financiado efetivamente liberado ao construtor.
+                                            </p>
+                                            <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-lg text-[11px] font-mono text-[#05532C] dark:text-[#81C784] font-bold border border-slate-200 dark:border-slate-700">
+                                                Juros = (Financiamento × Quota %) × (Juros % a.a. / 12)
+                                            </div>
+                                        </div>
+
+                                        {/* Passo 3 */}
+                                        <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 relative overflow-hidden">
+                                            <div className="absolute top-0 right-0 bg-[#05532C] dark:bg-[#2E5A3C] text-white px-3 py-1 rounded-bl-xl font-black text-[10px] uppercase tracking-wider">
+                                                Passo 3
+                                            </div>
+                                            <h5 className="font-bold text-slate-800 dark:text-slate-100 text-sm mb-1.5 pr-12">
+                                                Correção Monetária TR (R$)
+                                            </h5>
+                                            <p className="text-slate-600 dark:text-slate-300 text-xs mb-2">
+                                                Atualiza o saldo proporcional com base na Taxa Referencial (TR) oficial divulgada pelo Banco Central do Brasil.
+                                            </p>
+                                            <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-lg text-[11px] font-mono text-[#05532C] dark:text-[#81C784] font-bold border border-slate-200 dark:border-slate-700">
+                                                Correção TR = Saldo Liberado × Taxa TR do Mês
+                                            </div>
+                                        </div>
+
+                                        {/* Passo 4 */}
+                                        <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-slate-200 dark:border-slate-700 relative overflow-hidden">
+                                            <div className="absolute top-0 right-0 bg-[#05532C] dark:bg-[#2E5A3C] text-white px-3 py-1 rounded-bl-xl font-black text-[10px] uppercase tracking-wider">
+                                                Passo 4
+                                            </div>
+                                            <h5 className="font-bold text-slate-800 dark:text-slate-100 text-sm mb-1.5 pr-12">
+                                                Parcela Total de Evolução (R$)
+                                            </h5>
+                                            <p className="text-slate-600 dark:text-slate-300 text-xs mb-2">
+                                                Consolida os juros de obra, correção TR, coberturas securitárias e a taxa fixa administrativa.
+                                            </p>
+                                            <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-lg text-[11px] font-mono text-[#05532C] dark:text-[#81C784] font-bold border border-slate-200 dark:border-slate-700">
+                                                Parcela = Juros + TR + Seguros + Taxa Adm CEF de R$ 25,00
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* 4. SCRIPT DE ATENDIMENTO E DICA DE VENDAS DO CORRETOR */}
+                                <div className="bg-amber-50/90 dark:bg-amber-950/40 p-4 sm:p-5 rounded-2xl border border-amber-200 dark:border-amber-800/60 space-y-3">
+                                    <div className="flex items-center gap-2.5 text-amber-900 dark:text-amber-300 font-bold text-sm sm:text-base">
+                                        <Lightbulb size={20} className="shrink-0 text-amber-600 dark:text-amber-400" />
+                                        <h4>4. Script de Atendimento & Orientação de Vendas para o Corretor</h4>
+                                    </div>
+
+                                    <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-amber-200/80 dark:border-amber-800/50 space-y-2.5 text-xs sm:text-sm">
+                                        <p className="font-semibold text-slate-800 dark:text-slate-100 leading-snug">
+                                            💡 Como apresentar a evolução de obra ao comprador de forma transparente:
+                                        </p>
+                                        <blockquote className="italic border-l-4 border-amber-500 pl-3 text-slate-700 dark:text-slate-300 text-xs leading-relaxed bg-amber-50/50 dark:bg-amber-950/20 py-2 rounded-r-lg">
+                                            "Cliente, durante o período de obra você não paga a prestação cheia do financiamento. Você paga uma parcela de evolução proporcional ao percentual de obra que já foi construído. Nos primeiros meses, a cobrança é mais suave e vai aumentando gradativamente ao longo da obra, à medida que o empreendimento se aproxima da conclusão."
+                                        </blockquote>
+
+                                        <div className="pt-2 border-t border-amber-100 dark:border-slate-800">
+                                            <span className="font-bold text-rose-700 dark:text-rose-400 block mb-1">
+                                                ⚠️ PONTO CRÍTICO: Reta final da obra x Parcela Pós-Chaves
+                                            </span>
+                                            <p className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+                                                Quando a obra atinge <strong>90% a 100% de execução</strong>, a Parcela de Evolução de Obra pode sim ser ligeiramente <strong>MAIOR que a parcela de amortização pós-chaves</strong>!
+                                            </p>
+                                            <div className="mt-2 bg-slate-50 dark:bg-slate-800 p-3 rounded-lg text-slate-600 dark:text-slate-300 text-xs space-y-1">
+                                                <p><strong>Por que isso acontece?</strong></p>
+                                                <p>• Na obra, o cliente paga juros sobre 100% do saldo devedor liberado (sem amortizar a dívida principal) + R$ 25,00 de taxa ADM + Seguros + TR.</p>
+                                                <p>• Pós-chaves, inicia-se o sistema de amortização (ex: SAC/PRICE), onde a dívida principal começa a ser abatida mensalmente.</p>
+                                            </div>
+                                            <p className="text-xs text-amber-800 dark:text-amber-300 font-semibold mt-2">
+                                                ✅ <strong>Dica de Ouro:</strong> Sempre alinhe essa expectativa com o cliente logo na assinatura do contrato para garantir credibilidade total e zero atritos na entrega da chave!
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            {/* Rodapé do Modal */}
+                            <div className="bg-slate-100 dark:bg-slate-800/80 px-6 py-4 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between shrink-0">
+                                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:inline">
+                                    AppJurosObra — Simulador Habitacional CEF
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowTutorialModal(false)}
+                                    className="bg-[#1D8843] hover:bg-[#05532C] text-white font-bold px-6 py-2.5 rounded-xl text-xs transition-all shadow-md ml-auto cursor-pointer active:scale-95 touch-manipulation min-h-[44px]"
+                                >
+                                    Entendi, Fechar Tutorial
+                                </button>
                             </div>
                         </div>
                     </div>
