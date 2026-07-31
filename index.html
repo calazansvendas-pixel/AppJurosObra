@@ -300,38 +300,48 @@
         const Moon = (p) => <Icon {...p}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></Icon>;
 
         // ==========================================
-        // COMPONENTE SELETOR DE TEMA (MODO CLARO / MODO ESCURO)
+        // COMPONENTE SELETOR DE TEMA (MODO CLARO / MODO ESCURO - OTIMIZADO PARA MOBILE & TOUCH)
         // ==========================================
         const ThemeSelector = ({ theme, setTheme }) => {
             const isDark = theme === 'escuro';
 
+            const handleSelect = (selectedTheme) => (e) => {
+                // Previne delay de clique fantasma em dispositivos touch
+                if (e.type === 'touchend') {
+                    e.preventDefault();
+                }
+                setTheme(selectedTheme);
+            };
+
             return (
-                <div className="inline-flex items-center p-1 rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-2xs shrink-0">
+                <div className="inline-flex items-center p-1 rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shadow-2xs shrink-0 relative z-30 select-none touch-manipulation">
                     <button
                         type="button"
-                        onClick={() => setTheme('claro')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                        onClick={handleSelect('claro')}
+                        onTouchEnd={handleSelect('claro')}
+                        className={`min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer select-none active:scale-95 touch-manipulation ${
                             !isDark
                                 ? 'bg-white text-[#05532C] shadow-xs border border-slate-200 font-black'
-                                : 'text-slate-400 hover:text-white'
+                                : 'text-slate-400 dark:text-slate-400 hover:text-white'
                         }`}
                         title="Ativar Modo Claro"
                     >
-                        <Sun size={14} className={!isDark ? 'text-amber-500' : ''} />
+                        <Sun size={16} className={!isDark ? 'text-amber-500' : ''} />
                         <span className="whitespace-nowrap">Modo Claro</span>
                     </button>
 
                     <button
                         type="button"
-                        onClick={() => setTheme('escuro')}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                        onClick={handleSelect('escuro')}
+                        onTouchEnd={handleSelect('escuro')}
+                        className={`min-h-[44px] px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer select-none active:scale-95 touch-manipulation ${
                             isDark
                                 ? 'bg-[#121212] text-amber-300 shadow-xs border border-slate-700 font-black'
-                                : 'text-slate-600 hover:text-slate-900'
+                                : 'text-slate-600 hover:text-slate-900 dark:text-slate-300'
                         }`}
                         title="Ativar Modo Escuro"
                     >
-                        <Moon size={14} className={isDark ? 'text-amber-300' : ''} />
+                        <Moon size={16} className={isDark ? 'text-amber-300' : ''} />
                         <span className="whitespace-nowrap">Modo Escuro</span>
                     </button>
                 </div>
