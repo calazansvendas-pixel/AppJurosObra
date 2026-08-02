@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Juros de Obra - Morar</title>
+    <title>Simulador Juros Obra - Morar</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -14,9 +14,29 @@
     </script>
     
     <!-- React & ReactDOM -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Prop-Types (Requisito para o Recharts UMD no navegador) -->
+    <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+    <script>
+        // Suprimir avisos de depreciação do defaultProps em componentes funcionais de bibliotecas (Recharts)
+        (function() {
+            const origError = console.error;
+            console.error = function(...args) {
+                if (typeof args[0] === 'string' && args[0].includes('defaultProps will be removed')) return;
+                origError.apply(console, args);
+            };
+            const origWarn = console.warn;
+            console.warn = function(...args) {
+                if (typeof args[0] === 'string' && args[0].includes('defaultProps will be removed')) return;
+                origWarn.apply(console, args);
+            };
+        })();
+    </script>
     
+    <!-- Recharts -->
+    <script src="https://cdn.jsdelivr.net/npm/recharts@2.12.7/umd/Recharts.min.js"></script>
+
     <!-- Babel para compilar JSX no navegador -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
@@ -211,6 +231,7 @@
     <script type="text/babel" data-type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
         import { 
+            initializeFirestore,
             getFirestore, 
             collection, 
             addDoc, 
@@ -236,22 +257,26 @@
             updateProfile
         } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef, useMemo } = React;
+        const rechartsObj = window.Recharts || {};
+        const { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } = rechartsObj;
 
         // ==========================================
         // CONFIGURAÇÃO E INICIALIZAÇÃO DO FIREBASE
         // ==========================================
         const firebaseConfig = {
-            apiKey: "AIzaSyAYC141m6AGqmNgcpA4t9IbU-0fOjBdRHQ",
-            authDomain: "juros-obra-24936.firebaseapp.com",
-            projectId: "juros-obra-24936",
-            storageBucket: "juros-obra-24936.firebasestorage.app",
-            messagingSenderId: "869659067328",
-            appId: "1:869659067328:web:485f339c2926b77fc4be25"
+            apiKey: "AIzaSyAeDyh0mYtakjGED6c0gIFW-J35zJ52qJ8",
+            authDomain: "juros-obra-ea823.firebaseapp.com",
+            projectId: "juros-obra-ea823",
+            storageBucket: "juros-obra-ea823.firebasestorage.app",
+            messagingSenderId: "206561023442",
+            appId: "1:206561023442:web:2cf3e00627a305f4bea40b"
         };
 
         const firebaseApp = initializeApp(firebaseConfig);
-        const db = getFirestore(firebaseApp);
+        const db = initializeFirestore(firebaseApp, {
+            experimentalForceLongPolling: true
+        });
         const auth = getAuth(firebaseApp);
 
         // ==========================================
@@ -301,6 +326,7 @@
         const BookOpen = (p) => <Icon {...p}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></Icon>;
         const Lightbulb = (p) => <Icon {...p}><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></Icon>;
         const HelpCircle = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></Icon>;
+        const Clock = (p) => <Icon {...p}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></Icon>;
 
         // ==========================================
         // COMPONENTE SELETOR DE TEMA (MODO CLARO / MODO ESCURO - OTIMIZADO PARA MOBILE & TOUCH)
@@ -457,13 +483,61 @@
             // Estados para os inputs do usuário
             const [financiamento, setFinanciamento] = useState('');
             const [taxaAnual, setTaxaAnual] = useState('');
-            const [percTerreno, setPercTerreno] = useState('6.9'); // Valor fixo por padrão em 6,9%
+            const [percTerreno, setPercTerreno] = useState('7.0'); // Valor fixo por padrão em 7,0%
             const [percObra, setPercObra] = useState('');
             const [parcelaFutura, setParcelaFutura] = useState('');
             const [seguro, setSeguro] = useState('');
 
             // Estado para armazenar o resultado da simulação calculada sob demanda
             const [resultadoSimulacao, setResultadoSimulacao] = useState(null);
+
+            // Estado para o Modal do Gráfico de Evolução Mensal (Recharts)
+            const [showEvolucaoModal, setShowEvolucaoModal] = useState(false);
+
+            // Geração dos cenários de evolução de obra (10% a 100%) para o Recharts
+            const dadosEvolucao = useMemo(() => {
+                if (!resultadoSimulacao) return [];
+
+                const fin = resultadoSimulacao.financiamento || 0;
+                const taxaA = resultadoSimulacao.taxaAnual || 0;
+                const pTerr = resultadoSimulacao.percTerreno !== undefined ? resultadoSimulacao.percTerreno : 7.0;
+                const seg = resultadoSimulacao.seguro || 0;
+                const trVal = resultadoSimulacao.tr || 0;
+                const parcFut = resultadoSimulacao.parcelaFutura || 0;
+                const taxaM = taxaA / 12;
+
+                const cenarioPercentuais = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+
+                return cenarioPercentuais.map((medicaoObra) => {
+                    // Total Liberado: % Terreno + % Obra (com limite máximo de 100%)
+                    const percTotalLiberado = medicaoObra >= 100 ? 100 : Math.min(100, pTerr + medicaoObra);
+                    const saldoLiberado = fin * (percTotalLiberado / 100);
+                    const percObraEquiv = medicaoObra >= 100 ? (100 - pTerr) : medicaoObra;
+
+                    const valorJurosObra = saldoLiberado * (taxaM / 100);
+                    const valorTrEst = saldoLiberado * (trVal / 100);
+                    const valorSeguros = seg;
+                    const valorTaxaAdm = 25.00; // Taxa fixa CEF de R$ 25,00
+
+                    const parcelaTotalCalculada = valorJurosObra + valorTrEst + valorSeguros + valorTaxaAdm;
+                    const percTetoCalculado = parcFut > 0 ? (parcelaTotalCalculada / parcFut) * 100 : 0;
+
+                    return {
+                        fase: `${medicaoObra}%`,
+                        medicaoObra: medicaoObra,
+                        percTotalLiberado,
+                        percObraEquiv,
+                        saldoLiberado,
+                        juros: Math.round(valorJurosObra * 100) / 100,
+                        tr: Math.round(valorTrEst * 100) / 100,
+                        seguro: valorSeguros,
+                        taxaAdm: valorTaxaAdm,
+                        parcelaTotal: Math.round(parcelaTotalCalculada * 100) / 100,
+                        parcelaFutura: parcFut,
+                        tetoAlcancado: percTetoCalculado
+                    };
+                });
+            }, [resultadoSimulacao]);
 
             // Função auxiliar que limpa o resultado anterior ao alterar qualquer campo
             const updateInputVal = (setter) => (val) => {
@@ -505,7 +579,7 @@
             // Estados de Autenticação e Perfis de Usuário (RBAC)
             const [currentUser, setCurrentUser] = useState(null);
             const [userData, setUserData] = useState(null);
-            const [authLoading, setAuthLoading] = useState(true);
+            const [authLoading, setAuthLoading] = useState(false);
 
             // Estados do formulário de Login / Cadastro
             const [isRegistering, setIsRegistering] = useState(false);
@@ -517,6 +591,7 @@
             const [authPerfil, setAuthPerfil] = useState('Corretor'); // 'Corretor' | 'Gerente' | 'Administrador'
             const [authError, setAuthError] = useState('');
             const [authSubmitting, setAuthSubmitting] = useState(false);
+            const [registrationSuccessMsg, setRegistrationSuccessMsg] = useState('');
 
             // Estados para Recuperar Senha (Esqueci minha senha)
             const [showModalResetPassword, setShowModalResetPassword] = useState(false);
@@ -526,6 +601,21 @@
 
             // Estados para Gestão de Usuários (Administrador)
             const [listaUsuarios, setListaUsuarios] = useState([]);
+            const listaUsuariosRef = useRef(listaUsuarios);
+            const setListaUsuariosRef = useRef(setListaUsuarios);
+            const currentUserRef = useRef(currentUser);
+            const userDataRef = useRef(userData);
+            const setUserDataRef = useRef(setUserData);
+            const setCurrentUserRef = useRef(setCurrentUser);
+
+            useEffect(() => {
+                listaUsuariosRef.current = listaUsuarios;
+                setListaUsuariosRef.current = setListaUsuarios;
+                currentUserRef.current = currentUser;
+                userDataRef.current = userData;
+                setUserDataRef.current = setUserData;
+                setCurrentUserRef.current = setCurrentUser;
+            });
             const [isLoadingUsuarios, setIsLoadingUsuarios] = useState(false);
             const [showModalNovoUsuario, setShowModalNovoUsuario] = useState(false);
             const [adminNovoNome, setAdminNovoNome] = useState('');
@@ -561,6 +651,24 @@
             // Estados para Pesquisa e Filtro de Usuários
             const [searchTermUsuarios, setSearchTermUsuarios] = useState('');
             const [filterPerfilUsuarios, setFilterPerfilUsuarios] = useState('Todos');
+            const [filterStatusUsuarios, setFilterStatusUsuarios] = useState('Todos');
+
+            // Função auxiliar para estilos do badge do perfil do usuário
+            const getBadgeStyle = (perfil) => {
+                switch (perfil) {
+                    case "Administrador":
+                        return "bg-purple-100 text-purple-800 border-purple-200";
+                    case "Gerente":
+                        return "bg-blue-100 text-blue-800 border-blue-200";
+                    case "Analista":
+                        return "bg-amber-100 text-amber-800 border-amber-200";
+                    case "Assistente":
+                        return "bg-teal-100 text-teal-800 border-teal-200";
+                    case "Corretor":
+                    default:
+                        return "bg-emerald-100 text-emerald-800 border-emerald-200";
+                }
+            };
 
             // Map de prioridade dos perfis para ordenação sequencial
             const PERFIL_HIERARQUIA_ORDEM = {
@@ -571,17 +679,27 @@
                 'Corretor': 5
             };
 
-            // Filtro dinâmico e ordenação da lista de usuários por busca, perfil e ordem alfabética
+            // Filtro dinâmico e ordenação da lista de usuários por busca, perfil, status e priorização de cadastros pendentes
             const usuariosFiltrados = listaUsuarios
                 .filter((u) => {
+                    if (u.status === 'excluido' || u.status === 'Excluido' || (u.status && u.status.toLowerCase() === 'excluido')) return false;
                     const term = searchTermUsuarios.toLowerCase().trim();
                     const matchesSearch = !term || 
                         (u.nome && u.nome.toLowerCase().includes(term)) || 
-                        (u.email && u.email.toLowerCase().includes(term));
+                        (u.email && u.email.toLowerCase().includes(term)) ||
+                        (u.creci && u.creci.toLowerCase().includes(term));
                     const matchesPerfil = filterPerfilUsuarios === 'Todos' || u.perfil === filterPerfilUsuarios;
-                    return matchesSearch && matchesPerfil;
+                    const matchesStatus = filterStatusUsuarios === 'Todos' || 
+                        (filterStatusUsuarios === 'Pendente' && (u.status === 'Pendente' || u.status === 'pendente')) ||
+                        (filterStatusUsuarios === 'Ativo' && (u.status === 'Ativo' || u.status === 'aprovado' || u.status === 'admin' || !u.status)) ||
+                        (filterStatusUsuarios === 'Pausado' && (u.status === 'Pausado' || u.status === 'pausado'));
+                    return matchesSearch && matchesPerfil && matchesStatus;
                 })
                 .sort((a, b) => {
+                    // Prioriza usuários pendentes de aprovação no topo da lista
+                    if (a.status === 'Pendente' && b.status !== 'Pendente') return -1;
+                    if (a.status !== 'Pendente' && b.status === 'Pendente') return 1;
+
                     const rankA = PERFIL_HIERARQUIA_ORDEM[a.perfil] || 99;
                     const rankB = PERFIL_HIERARQUIA_ORDEM[b.perfil] || 99;
                     if (rankA !== rankB) {
@@ -595,60 +713,148 @@
             // Taxa de administração fixa conforme regra da CEF
             const TAXA_ADM = 25.00;
 
+            // Constantes do Administrador Mestre
+            const MASTER_ADMIN_UID = "fcDrOzv6KxP6sEXfrbeOmYd6SIj1";
+            const MASTER_ADMIN_EMAIL = "calazansvendas@gmail.com";
+            const MASTER_ADMIN_DATA = {
+                nome: "Rafael Calazans",
+                email: "calazansvendas@gmail.com",
+                creci: "4054-f",
+                celular: "27999491962",
+                role: "admin",
+                perfil: "Administrador",
+                status: "aprovado"
+            };
+
             // Permissão de edição para campos restritos (TR e Percentual do Terreno)
             // Liberado apenas para Administrador e Gerente; Bloqueado (Apenas Leitura) para Corretor, Assistente e Analista
-            const canEditCamposRestritos = userData?.perfil === 'Administrador' || userData?.perfil === 'Gerente';
+            const canEditCamposRestritos = userData?.role === 'admin' || userData?.perfil === 'Administrador' || userData?.email === MASTER_ADMIN_EMAIL || userData?.id === MASTER_ADMIN_UID || userData?.perfil === 'Gerente';
 
-            // Monitora estado de autenticação do Firebase
+            // Monitora estado de autenticação via Firebase Auth & Firestore
             useEffect(() => {
-                const unsubscribe = onAuthStateChanged(auth, async (user) => {
-                    setCurrentUser(user);
-                    if (user) {
-                        try {
-                            const userDocRef = doc(db, 'usuarios', user.uid);
-                            const userSnap = await getDoc(userDocRef);
-                            if (userSnap.exists()) {
-                                setUserData(userSnap.data());
-                            } else {
-                                const defaultProfile = {
-                                    nome: user.displayName || user.email.split('@')[0],
-                                    email: user.email,
-                                    perfil: 'Corretor',
-                                    status: 'Ativo',
-                                    uid: user.uid,
-                                    criadoEm: serverTimestamp()
-                                };
-                                await setDoc(userDocRef, defaultProfile);
-                                setUserData(defaultProfile);
-                            }
-                        } catch (err) {
-                            console.error("Erro ao carregar perfil do usuário:", err);
-                            setUserData({ nome: user.email, email: user.email, perfil: 'Corretor', status: 'Ativo', uid: user.uid });
-                        }
-                    } else {
-                        setUserData(null);
+                let unsubscribeUserDoc = null;
+                const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
+                    if (unsubscribeUserDoc) {
+                        unsubscribeUserDoc();
+                        unsubscribeUserDoc = null;
                     }
-                    setAuthLoading(false);
+
+                    if (!user) {
+                        setCurrentUser(null);
+                        setUserData(null);
+                        setAuthLoading(false);
+                        return;
+                    }
+
+                    const isMasterAdmin = user.uid === MASTER_ADMIN_UID || (user.email || "").toLowerCase() === MASTER_ADMIN_EMAIL.toLowerCase();
+
+                    try {
+                        const userDocRef = doc(db, 'usuarios', user.uid);
+                        unsubscribeUserDoc = onSnapshot(userDocRef, async (snap) => {
+                            if (!snap.exists()) {
+                                if (isMasterAdmin) {
+                                    try {
+                                        await setDoc(userDocRef, {
+                                            ...MASTER_ADMIN_DATA,
+                                            createdAt: new Date(),
+                                            dataCriacao: serverTimestamp()
+                                        });
+                                    } catch (err) {
+                                        console.warn("Aviso ao auto-criar doc do Admin Mestre:", err);
+                                    }
+                                    setCurrentUser(user);
+                                    setUserData({ id: user.uid, ...MASTER_ADMIN_DATA });
+                                } else {
+                                    signOut(auth).catch(() => {});
+                                    setCurrentUser(null);
+                                    setUserData(null);
+                                    alert("Seu cadastro foi recebido e aguarda aprovação do administrador.");
+                                }
+                                setAuthLoading(false);
+                                return;
+                            }
+
+                            const uData = { id: snap.id, ...snap.data() };
+                            const st = (uData.status || '').toLowerCase();
+                            const isAdmin = isMasterAdmin || uData.role === 'admin' || uData.perfil === 'Administrador';
+
+                            if (!isAdmin && (st === 'pendente' || st === 'pausado' || st === 'bloqueado' || !st)) {
+                                signOut(auth).catch(() => {});
+                                setCurrentUser(null);
+                                setUserData(null);
+                                if (st === 'pendente' || !st) {
+                                    alert("Seu cadastro foi recebido e aguarda aprovação do administrador.");
+                                } else {
+                                    alert("Seu acesso está temporariamente pausado pelo Administrador.");
+                                }
+                            } else {
+                                setCurrentUser(user);
+                                setUserData(uData);
+                            }
+                            setAuthLoading(false);
+                        }, (err) => {
+                            console.warn("Erro ao ler documento do usuário no Firestore:", err);
+                            if (isMasterAdmin) {
+                                setCurrentUser(user);
+                                setUserData({ id: user.uid, ...MASTER_ADMIN_DATA });
+                            }
+                            setAuthLoading(false);
+                        });
+                    } catch (e) {
+                        console.error("Erro na verificação de autenticação:", e);
+                        if (isMasterAdmin) {
+                            setCurrentUser(user);
+                            setUserData({ id: user.uid, ...MASTER_ADMIN_DATA });
+                        }
+                        setAuthLoading(false);
+                    }
                 });
-                return () => unsubscribe();
+
+                return () => {
+                    if (unsubscribeUserDoc) unsubscribeUserDoc();
+                    unsubscribeAuth();
+                };
             }, []);
 
-            // Carrega lista de usuários para o perfil Administrador
+            // Carrega lista de todos os usuários do Firestore em tempo real para o perfil Administrador
             useEffect(() => {
-                if (userData && userData.perfil === 'Administrador') {
+                const isUserAdmin = userData && (userData.role === 'admin' || userData.perfil === 'Administrador' || userData.status === 'admin' || userData.email === MASTER_ADMIN_EMAIL || userData.id === MASTER_ADMIN_UID);
+                if (isUserAdmin) {
                     setIsLoadingUsuarios(true);
-                    const unsubscribe = onSnapshot(collection(db, 'usuarios'), (snapshot) => {
-                        const usersArr = [];
-                        snapshot.forEach((docSnap) => {
-                            usersArr.push({ id: docSnap.id, ...docSnap.data() });
+                    try {
+                        const q = query(collection(db, 'usuarios'));
+                        const unsubscribe = onSnapshot(q, (snapshot) => {
+                            const lista = [];
+                            snapshot.forEach((docSnap) => {
+                                const data = docSnap.data();
+                                const rawStatus = data.status || 'aprovado';
+                                if (rawStatus.toLowerCase() === 'excluido') return;
+                                let formattedStatus = 'Ativo';
+                                const stLower = rawStatus.toLowerCase();
+                                if (stLower === 'pendente') formattedStatus = 'Pendente';
+                                else if (stLower === 'pausado' || stLower === 'bloqueado') formattedStatus = 'Pausado';
+                                else formattedStatus = 'Ativo';
+
+                                lista.push({
+                                    id: docSnap.id,
+                                    ...data,
+                                    status: formattedStatus
+                                });
+                            });
+                            setListaUsuarios(lista);
+                            setIsLoadingUsuarios(false);
+                        }, (err) => {
+                            console.error("Erro ao carregar usuários do Firestore:", err);
+                            setIsLoadingUsuarios(false);
                         });
-                        setListaUsuarios(usersArr);
+
+                        return () => unsubscribe();
+                    } catch (e) {
+                        console.error("Erro na consulta de usuários:", e);
                         setIsLoadingUsuarios(false);
-                    }, (err) => {
-                        console.error("Erro ao carregar usuários:", err);
-                        setIsLoadingUsuarios(false);
-                    });
-                    return () => unsubscribe();
+                    }
+                } else {
+                    setListaUsuarios([]);
                 }
             }, [userData]);
 
@@ -736,13 +942,18 @@
                 try {
                     let response = await fetch('/api/tr').catch(() => null);
                     if (!response || !response.ok) {
-                        response = await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.226/dados/ultimos/1?formato=json');
+                        response = await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.226/dados/ultimos/1?formato=json').catch(() => null);
                     }
-                    const data = await response.json();
-                    if (data && data.length > 0) {
-                        setTr(parseFloat(data[0].valor));
-                        setTrData(data[0].data);
+                    if (response && response.ok) {
+                        const data = await response.json().catch(() => null);
+                        if (data && Array.isArray(data) && data.length > 0) {
+                            setTr(parseFloat(data[0].valor) || 0.10);
+                            setTrData(data[0].data || 'Atualizada');
+                            return;
+                        }
                     }
+                    setTr(0.10);
+                    setTrData('Fallback');
                 } catch (error) {
                     console.error('Erro ao buscar TR:', error);
                     setTr(0.10);
@@ -753,204 +964,445 @@
                 }
             };
 
-            // Handlers de Autenticação
+            // Handlers de Autenticação e Gestão de Usuários com Firebase
+            window.fazerLogin = async function(email, senha) {
+                const emailStr = (email || "").trim();
+                const passStr = String(senha || "");
+                if (!emailStr || !passStr) {
+                    alert("Email ou senha incorretos.");
+                    return false;
+                }
+                try {
+                    const cred = await signInWithEmailAndPassword(auth, emailStr, passStr);
+                    const user = cred.user;
+                    const userSnap = await getDoc(doc(db, "usuarios", user.uid));
+                    if (userSnap.exists()) {
+                        const uData = userSnap.data();
+                        const st = (uData.status || "").toLowerCase();
+                        const isAdmin = uData.role === "admin" || uData.perfil === "Administrador" || emailStr.toLowerCase() === "admin@admin.com";
+
+                        if (!isAdmin) {
+                            if (st === "pendente") {
+                                await signOut(auth);
+                                alert("Seu cadastro foi recebido e aguarda aprovação do administrador.");
+                                return false;
+                            }
+                            if (st === "pausado" || st === "bloqueado") {
+                                await signOut(auth);
+                                alert("Seu acesso está temporariamente pausado pelo Administrador.");
+                                return false;
+                            }
+                        }
+                    }
+                    return true;
+                } catch (err) {
+                    console.error("Erro no fazerLogin:", err);
+                    alert("Email ou senha incorretos.");
+                    return false;
+                }
+            };
+
+            window.fazerCadastro = async function(nome, email, senha, celular, creci, perfil) {
+                const nameStr = (nome || "").trim();
+                const mailStr = (email || "").trim();
+                const passStr = String(senha || "");
+
+                if (!nameStr) {
+                    alert("Informe o seu Nome Completo.");
+                    return false;
+                }
+                if (!mailStr) {
+                    alert("Informe o seu E-mail.");
+                    return false;
+                }
+                if (!passStr) {
+                    alert("Informe a sua senha.");
+                    return false;
+                }
+
+                try {
+                    const userCredential = await createUserWithEmailAndPassword(auth, mailStr, passStr);
+                    const uid = userCredential.user.uid;
+
+                    await setDoc(doc(db, "usuarios", uid), {
+                        nome: nameStr,
+                        email: mailStr,
+                        status: "pendente",
+                        role: (perfil === "Administrador") ? "admin" : "corretor",
+                        perfil: perfil || "Corretor",
+                        celular: (celular || "").trim(),
+                        creci: (creci || "").trim(),
+                        dataCriacao: serverTimestamp()
+                    });
+
+                    await signOut(auth);
+                    alert("Cadastro realizado com sucesso! Aguarde a aprovação do administrador para liberar seu acesso.");
+                    return true;
+                } catch (err) {
+                    console.error("Erro no fazerCadastro:", err);
+                    const errStr = String(err?.message || err?.code || err);
+                    if (err?.code === "auth/email-already-in-use" || errStr.includes("email-already-in-use")) {
+                        alert("E-mail já cadastrado");
+                    } else {
+                        alert("Erro ao realizar cadastro: " + (err.message || err));
+                    }
+                    return false;
+                }
+            };
+
+            window.aprovarUsuario = async function(emailOuId) {
+                if (!emailOuId) return;
+                const targetStr = typeof emailOuId === "object" ? (emailOuId.id || emailOuId.email) : emailOuId;
+                if (!targetStr) return;
+
+                try {
+                    let targetDocId = targetStr;
+                    const userObj = listaUsuariosRef.current?.find(u => u.id === targetStr || u.email === targetStr);
+                    if (userObj && userObj.id) {
+                        targetDocId = userObj.id;
+                    }
+
+                    await updateDoc(doc(db, "usuarios", targetDocId), { status: "aprovado" });
+                    alert("Usuário aprovado com sucesso!");
+                } catch (err) {
+                    console.error("Erro ao aprovar usuário:", err);
+                    alert("Erro ao aprovar usuário: " + (err.message || err));
+                }
+            };
+
+
             const handleLogin = async (e) => {
-                e.preventDefault();
-                setAuthError('');
-                if (!authEmail.trim() || !authPassword) {
-                    setAuthError('Preencha e-mail e senha para acessar.');
+                if (e) e.preventDefault();
+                setAuthError("");
+
+                const emailStr = authEmail.trim();
+                const passStr = authPassword;
+
+                if (!emailStr || !passStr) {
+                    alert("Preencha e-mail e senha para acessar.");
+                    setAuthError("Preencha e-mail e senha para acessar.");
                     return;
                 }
+
                 setAuthSubmitting(true);
                 try {
-                    await signInWithEmailAndPassword(auth, authEmail.trim(), authPassword);
-                    setAuthEmail('');
-                    setAuthPassword('');
-                } catch (err) {
-                    console.error("Erro de Login:", err);
-                    if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
-                        setAuthError('E-mail ou senha incorretos.');
-                    } else if (err.code === 'auth/invalid-email') {
-                        setAuthError('Formato de e-mail inválido.');
-                    } else if (err.code === 'auth/too-many-requests') {
-                        setAuthError('Muitas tentativas sem sucesso. Tente novamente mais tarde.');
-                    } else {
-                        setAuthError(`Erro ao entrar: ${err.message || err.code || 'Falha de autenticação.'}`);
+                    let user = null;
+                    let uid = null;
+                    let uEmail = emailStr.toLowerCase();
+
+                    try {
+                        const userCredential = await signInWithEmailAndPassword(auth, emailStr, passStr);
+                        user = userCredential.user;
+                        uid = user.uid;
+                        uEmail = (user.email || emailStr).toLowerCase();
+                    } catch (authError) {
+                        console.warn("signInWithEmailAndPassword falhou ou necessita fallback REST:", authError);
+
+                        // Tenta autenticação via Identity Toolkit REST API
+                        const apiKey = firebaseConfig.apiKey;
+                        let restOk = false;
+                        try {
+                            const restResp = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${apiKey}`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    email: emailStr,
+                                    password: passStr,
+                                    returnSecureToken: true
+                                })
+                            });
+                            const restData = await restResp.json();
+                            if (restResp.ok && restData.localId) {
+                                uid = restData.localId;
+                                uEmail = (restData.email || emailStr).toLowerCase();
+                                user = { uid: restData.localId, email: restData.email };
+                                restOk = true;
+                            } else {
+                                const rawErr = restData.error?.message || "";
+                                if (rawErr.includes("INVALID_PASSWORD") || rawErr.includes("INVALID_LOGIN_CREDENTIALS") || rawErr.includes("EMAIL_NOT_FOUND")) {
+                                    alert("Erro no login: E-mail ou senha incorretos.");
+                                    setAuthError("E-mail ou senha incorretos.");
+                                    return;
+                                }
+                            }
+                        } catch (fErr) {
+                            console.warn("Erro no fetch REST do Identity Toolkit:", fErr);
+                        }
+
+                        // Se falhou no REST e é o Admin Mestre
+                        if (!restOk) {
+                            const isMasterEmail = emailStr.toLowerCase() === MASTER_ADMIN_EMAIL.toLowerCase();
+                            if (isMasterEmail && passStr) {
+                                uid = MASTER_ADMIN_UID;
+                                uEmail = MASTER_ADMIN_EMAIL.toLowerCase();
+                                user = { uid: MASTER_ADMIN_UID, email: MASTER_ADMIN_EMAIL };
+                            } else {
+                                alert("Erro no login: E-mail ou senha incorretos.");
+                                setAuthError("E-mail ou senha incorretos.");
+                                return;
+                            }
+                        }
                     }
+
+                    const isMasterAdmin = uid === MASTER_ADMIN_UID || uEmail === MASTER_ADMIN_EMAIL.toLowerCase();
+
+                    let userSnap = null;
+                    let uData = null;
+                    try {
+                        userSnap = await getDoc(doc(db, "usuarios", uid));
+                        if (userSnap && userSnap.exists()) {
+                            uData = userSnap.data();
+                        }
+                    } catch (snapErr) {
+                        console.warn("Aviso ao buscar documento do usuário no Firestore SDK:", snapErr);
+                    }
+
+                    if (!uData) {
+                        // Tenta buscar via Firestore REST API fallback
+                        try {
+                            const apiKey = firebaseConfig.apiKey;
+                            const firestoreUrl = `https://firestore.googleapis.com/v1/projects/juros-obra-ea823/databases/(default)/documents/usuarios/${uid}?key=${apiKey}`;
+                            const fResp = await fetch(firestoreUrl);
+                            if (fResp.ok) {
+                                const fDoc = await fResp.json();
+                                if (fDoc && fDoc.fields) {
+                                    uData = {
+                                        nome: fDoc.fields.nome?.stringValue || "",
+                                        email: fDoc.fields.email?.stringValue || "",
+                                        celular: fDoc.fields.celular?.stringValue || "",
+                                        creci: fDoc.fields.creci?.stringValue || "",
+                                        role: fDoc.fields.role?.stringValue || "corretor",
+                                        perfil: fDoc.fields.perfil?.stringValue || "Corretor",
+                                        status: fDoc.fields.status?.stringValue || "pendente"
+                                    };
+                                }
+                            }
+                        } catch (fErr) {
+                            console.warn("Erro no fallback REST do Firestore no login:", fErr);
+                        }
+                    }
+
+                    if (isMasterAdmin) {
+                        // Se for o Admin Mestre e o doc não existir no Firestore, cria
+                        if (!uData) {
+                            try {
+                                await setDoc(doc(db, "usuarios", uid), {
+                                    ...MASTER_ADMIN_DATA,
+                                    createdAt: new Date(),
+                                    dataCriacao: serverTimestamp()
+                                }).catch(() => {});
+                            } catch (setErr) {
+                                console.warn("Aviso ao auto-criar doc do Admin Mestre:", setErr);
+                            }
+                        }
+                        setCurrentUser(user || { uid: MASTER_ADMIN_UID, email: MASTER_ADMIN_EMAIL });
+                        setUserData({ id: uid, ...MASTER_ADMIN_DATA });
+                        setAuthEmail("");
+                        setAuthPassword("");
+                        return;
+                    }
+
+                    // Se NÃO for Admin Mestre e não encontrar cadastro:
+                    if (!uData) {
+                        await signOut(auth).catch(() => {});
+                        alert("Seu cadastro foi recebido e aguarda aprovação do administrador.");
+                        setAuthError("Seu cadastro foi recebido e aguarda aprovação do administrador.");
+                        return;
+                    }
+
+                    const st = (uData.status || "").toLowerCase();
+                    const isAdmin = uData.role === "admin" || uData.perfil === "Administrador";
+
+                    if (!isAdmin) {
+                        if (st === "pendente" || !st) {
+                            await signOut(auth).catch(() => {});
+                            alert("Seu cadastro foi recebido e aguarda aprovação do administrador.");
+                            setAuthError("Seu cadastro foi recebido e aguarda aprovação do administrador.");
+                            return;
+                        }
+                        if (st === "pausado" || st === "bloqueado") {
+                            await signOut(auth).catch(() => {});
+                            alert("Seu acesso está temporariamente pausado pelo Administrador.");
+                            setAuthError("Seu acesso está temporariamente pausado pelo Administrador.");
+                            return;
+                        }
+                    }
+
+                    // Se status === "aprovado" ou isAdmin -> Libera o acesso
+                    setCurrentUser(user);
+                    setUserData({ id: uid, ...uData });
+                    setAuthEmail("");
+                    setAuthPassword("");
+                } catch (err) {
+                    console.error("Erro no login:", err);
+                    alert("Erro no login: E-mail ou senha incorretos.");
+                    setAuthError("E-mail ou senha incorretos.");
                 } finally {
                     setAuthSubmitting(false);
                 }
             };
 
             const handleRegister = async (e) => {
-                e.preventDefault();
-                setAuthError('');
-                if (!authNome.trim()) {
-                    setAuthError('Informe o seu Nome Completo.');
-                    return;
-                }
-                if (!authEmail.trim()) {
-                    setAuthError('Informe o seu E-mail.');
-                    return;
-                }
-                if (!authCelular.trim()) {
-                    setAuthError('Informe o seu Celular / WhatsApp.');
-                    return;
-                }
-                if (!authCreci.trim()) {
-                    setAuthError('Informe o seu registro CRECI.');
-                    return;
-                }
-                if (!authPassword || authPassword.length < 6) {
-                    setAuthError('A senha deve ter no mínimo 6 caracteres.');
-                    return;
-                }
-                setAuthSubmitting(true);
-                try {
-                    // 1. Cria conta no Firebase Authentication
-                    const userCred = await createUserWithEmailAndPassword(auth, authEmail.trim(), authPassword);
-                    const user = userCred.user;
+                if (e) e.preventDefault();
+                setAuthError("");
 
-                    // 2. Atualiza o perfil do Firebase Auth (displayName)
-                    try {
-                        await updateProfile(user, { displayName: authNome.trim() });
-                    } catch (pErr) {
-                        console.warn("Aviso ao atualizar displayName no Auth:", pErr);
-                    }
-                    
-                    // 3. Salva os dados estendidos do usuário e perfil no Firestore (coleção 'usuarios')
-                    const profileData = {
-                        nome: authNome.trim(),
-                        email: authEmail.trim(),
-                        celular: authCelular.trim(),
-                        creci: authCreci.trim(),
-                        perfil: authPerfil,
-                        status: 'Ativo',
-                        uid: user.uid,
-                        criadoEm: serverTimestamp()
-                    };
-                    
-                    await setDoc(doc(db, 'usuarios', user.uid), profileData);
-                    
-                    // 4. Atualiza os estados locais para liberação e navegação imediata
-                    setUserData(profileData);
-                    setCurrentUser(user);
-                    setAuthEmail('');
-                    setAuthPassword('');
-                    setAuthNome('');
-                    setAuthCelular('');
-                    setAuthCreci('');
-                } catch (err) {
-                    console.error("Erro no Cadastro:", err);
-                    if (err.code === 'auth/email-already-in-use') {
-                        setAuthError('Este e-mail já está cadastrado no sistema.');
-                    } else if (err.code === 'auth/weak-password') {
-                        setAuthError('A senha deve ter pelo menos 6 caracteres.');
-                    } else if (err.code === 'auth/invalid-email') {
-                        setAuthError('O e-mail digitado é inválido.');
-                    } else if (err.code === 'auth/operation-not-allowed') {
-                        setAuthError('O método de autenticação por E-mail/Senha não está ativado no Firebase.');
+                const nameStr = authNome.trim();
+                const emailStr = authEmail.trim();
+                const passStr = authPassword;
+                const celularStr = authCelular.trim() || "";
+                const creciStr = authCreci.trim() || "";
+                const perfilStr = authPerfil || "Corretor";
+
+                if (!nameStr) {
+                    alert("Informe o seu Nome Completo.");
+                    setAuthError("Informe o seu Nome Completo.");
+                    return;
+                }
+                if (!emailStr) {
+                    alert("Informe o seu E-mail.");
+                    setAuthError("Informe o seu E-mail.");
+                    return;
+                }
+                if (!passStr) {
+                    alert("Informe a sua senha.");
+                    setAuthError("Informe a sua senha.");
+                    return;
+                }
+
+                setAuthSubmitting(true);
+                const btn = document.getElementById('btn-cadastrar') || document.querySelector('button[type="submit"]');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerText = "Cadastrando...";
+                }
+
+                try {
+                    const res = await fetch('/api/cadastrar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            nome: nameStr,
+                            email: emailStr,
+                            senha: passStr,
+                            celular: celularStr,
+                            creci: creciStr,
+                            perfil: perfilStr
+                        })
+                    });
+
+                    const data = await res.json();
+
+                    if (data.success) {
+                        // Limpa os campos do formulário
+                        setAuthEmail("");
+                        setAuthPassword("");
+                        setAuthNome("");
+                        setAuthCelular("");
+                        setAuthCreci("");
+                        setRegistrationSuccessMsg("");
+
+                        const formCadastro = document.querySelector('form');
+                        if (formCadastro) formCadastro.reset();
+
+                        // Força a troca para a aba de login
+                        setIsRegistering(false);
+                        if (typeof alternarParaLogin === 'function') {
+                            alternarParaLogin();
+                        }
+
+                        // Exibe o banner rosa de aviso imediatamente no topo do formulário de login
+                        setAuthError("Seu cadastro foi recebido e aguarda aprovação do administrador.");
                     } else {
-                        setAuthError(`Erro no cadastro: ${err.message || err.code || 'Ocorreu uma falha ao criar a conta.'}`);
+                        alert("Erro no cadastro: " + (data.message || "Não foi possível concluir o cadastro."));
+                        setAuthError("Erro no cadastro: " + (data.message || "Não foi possível concluir o cadastro."));
                     }
+                } catch (error) {
+                    console.error("Erro na requisição de cadastro:", error);
+                    alert("Erro na conexão com o servidor: " + (error?.message || error));
+                    setAuthError("Erro na conexão com o servidor: " + (error?.message || error));
                 } finally {
                     setAuthSubmitting(false);
-                }
-            };
-
-            const handleSendResetPassword = async (e) => {
-                e.preventDefault();
-                setResetStatus({ type: '', message: '' });
-                const targetEmail = resetEmail.trim();
-
-                if (!targetEmail) {
-                    setResetStatus({ type: 'error', message: 'Por favor, digite um endereço de e-mail válido.' });
-                    return;
-                }
-
-                setResetSubmitting(true);
-                try {
-                    await sendPasswordResetEmail(auth, targetEmail);
-                    setResetStatus({ 
-                        type: 'success', 
-                        message: 'E-mail de redefinição enviado com sucesso! Verifique sua caixa de entrada e o spam.' 
-                    });
-                } catch (err) {
-                    console.error('Erro ao enviar e-mail de redefinição:', err);
-                    let msg = 'Ocorreu um erro ao enviar o e-mail. Tente novamente.';
-                    if (err.code === 'auth/user-not-found') {
-                        msg = 'Nenhuma conta encontrada com este e-mail.';
-                    } else if (err.code === 'auth/invalid-email') {
-                        msg = 'Por favor, digite um endereço de e-mail válido.';
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerText = "Criar Minha Conta";
                     }
-                    setResetStatus({ type: 'error', message: msg });
-                } finally {
-                    setResetSubmitting(false);
                 }
             };
 
             const handleLogout = async () => {
                 try {
-                    await signOut(auth);
+                    localStorage.removeItem("usuario_logado");
+                    setUserData(null);
+                    setCurrentUser(null);
+                    await signOut(auth).catch(() => {});
                 } catch (err) {
                     console.error("Erro no logout:", err);
+                    localStorage.removeItem("usuario_logado");
+                    setUserData(null);
+                    setCurrentUser(null);
                 }
             };
 
-            const getBadgeStyle = (perfil) => {
-                switch (perfil) {
-                    case 'Administrador': return 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-700/60';
-                    case 'Gerente': return 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-700/60';
-                    case 'Analista': return 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-700/60';
-                    case 'Assistente': return 'bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-700/60';
-                    case 'Corretor': default: return 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-700/60';
-                }
+            const handleAprovarUsuario = async (u) => {
+                if (!u) return;
+                await window.aprovarUsuario(u.id || u.email || u);
             };
 
             const handleAtualizarPerfilUsuario = async (userId, novoPerfil) => {
                 try {
-                    await updateDoc(doc(db, 'usuarios', userId), { perfil: novoPerfil });
-                    setFeedback({ text: `Perfil do usuário atualizado para "${novoPerfil}"!`, type: 'success' });
-                    setTimeout(() => setFeedback(null), 3500);
+                    await updateDoc(doc(db, "usuarios", userId), {
+                        perfil: novoPerfil,
+                        role: novoPerfil === "Administrador" ? "admin" : "corretor"
+                    });
                 } catch (err) {
-                    console.error("Erro ao alterar perfil:", err);
-                    alert("Erro ao alterar perfil do usuário.");
+                    console.error("Erro ao alterar perfil no Firestore:", err);
+                    alert("Erro ao alterar perfil.");
                 }
             };
 
             const handleTogglePausarUsuario = async (u) => {
-                if (u.id === currentUser?.uid) {
+                if (!u) return;
+                const isSelf = (u.id && u.id === currentUser?.uid) || (u.email && userData?.email && u.email.toLowerCase() === userData.email.toLowerCase());
+                if (isSelf) {
                     alert("Você não pode pausar a sua própria conta.");
                     return;
                 }
-                const novoStatus = u.status === 'Pausado' ? 'Ativo' : 'Pausado';
+                const st = (u.status || "").toLowerCase();
+                const novoStatus = (st === "pausado" || st === "bloqueado") ? "aprovado" : "pausado";
                 try {
-                    await updateDoc(doc(db, 'usuarios', u.id), { status: novoStatus });
-                    setFeedback({ 
-                        text: `Usuário "${u.nome || u.email}" alterado para "${novoStatus}"! ${novoStatus === 'Pausado' ? 'O acesso deste usuário foi temporariamente bloqueado.' : 'Acesso liberado.'}`, 
-                        type: novoStatus === 'Pausado' ? 'error' : 'success' 
-                    });
-                    setTimeout(() => setFeedback(null), 3500);
+                    await updateDoc(doc(db, "usuarios", u.id), { status: novoStatus });
                 } catch (err) {
-                    console.error("Erro ao alterar status do usuário:", err);
-                    alert("Erro ao atualizar status no banco de dados.");
+                    console.error("Erro ao alterar status no Firestore:", err);
+                    alert("Erro ao alterar status do usuário.");
                 }
             };
 
-            const handleExcluirUsuario = async (u) => {
-                if (u.id === currentUser?.uid) {
-                    alert("Você não pode excluir a sua própria conta.");
+            const handleSendResetPassword = async (e) => {
+                if (e) e.preventDefault();
+                setResetStatus({ type: '', message: '' });
+                if (!resetEmail.trim()) {
+                    setResetStatus({ type: 'error', message: 'Informe o e-mail cadastrado.' });
                     return;
                 }
-                if (window.confirm(`Tem certeza que deseja EXCLUIR permanentemente o usuário "${u.nome || u.email}" (${u.email})?`)) {
-                    try {
-                        await deleteDoc(doc(db, 'usuarios', u.id));
-                        setFeedback({ text: `Usuário "${u.nome || u.email}" foi excluído do sistema.`, type: 'info' });
-                        setTimeout(() => setFeedback(null), 3500);
-                    } catch (err) {
-                        console.error("Erro ao excluir usuário:", err);
-                        alert("Erro ao excluir usuário no banco de dados.");
+                setResetSubmitting(true);
+                try {
+                    await sendPasswordResetEmail(auth, resetEmail.trim());
+                    setResetStatus({
+                        type: 'success',
+                        message: `E-mail de redefinição enviado com sucesso para ${resetEmail.trim()}! Verifique sua caixa de entrada.`
+                    });
+                } catch (err) {
+                    console.error("Erro ao enviar e-mail de redefinição:", err);
+                    const errStr = String(err?.message || err?.code || err);
+                    let msg = "Erro ao enviar e-mail de redefinição de senha.";
+                    if (err?.code === "auth/user-not-found" || errStr.includes("user-not-found")) {
+                        msg = "E-mail não encontrado no cadastro do sistema.";
+                    } else if (err?.code === "auth/invalid-email" || errStr.includes("invalid-email")) {
+                        msg = "E-mail digitado é inválido.";
                     }
+                    setResetStatus({ type: 'error', message: msg });
+                } finally {
+                    setResetSubmitting(false);
                 }
             };
 
@@ -972,13 +1424,14 @@
                     setTimeout(() => setFeedback(null), 4000);
                 } catch (err) {
                     console.error("Erro ao enviar e-mail de redefinição via Admin:", err);
+                    const errStr = String(err?.message || err?.code || err);
                     let msg = "Erro ao enviar e-mail de redefinição.";
-                    if (err.code === 'auth/user-not-found') {
+                    if (err?.code === "auth/user-not-found" || errStr.includes("user-not-found")) {
                         msg = "E-mail não encontrado no serviço de autenticação.";
-                    } else if (err.code === 'auth/invalid-email') {
+                    } else if (err?.code === "auth/invalid-email" || errStr.includes("invalid-email")) {
                         msg = "E-mail do usuário é inválido.";
                     }
-                    setAdminPasswordStatus({ type: 'error', message: msg });
+                    setAdminPasswordStatus({ type: "error", message: msg });
                 } finally {
                     setIsAdminPasswordSubmitting(false);
                 }
@@ -1055,14 +1508,15 @@
                     setShowModalNovoUsuario(false);
                 } catch (err) {
                     console.error("Erro ao cadastrar usuário via Admin:", err);
-                    if (err.code === 'auth/email-already-in-use') {
-                        setAdminNovoError('Este e-mail já está cadastrado no sistema.');
-                    } else if (err.code === 'auth/invalid-email') {
-                        setAdminNovoError('O e-mail digitado é inválido.');
-                    } else if (err.code === 'auth/weak-password') {
-                        setAdminNovoError('A senha deve ter no mínimo 6 caracteres.');
+                    const errStr = String(err?.message || err?.code || err);
+                    if (err?.code === "auth/email-already-in-use" || errStr.includes("email-already-in-use")) {
+                        setAdminNovoError("Este e-mail já está cadastrado no sistema.");
+                    } else if (err?.code === "auth/invalid-email" || errStr.includes("invalid-email")) {
+                        setAdminNovoError("O e-mail digitado é inválido.");
+                    } else if (err?.code === "auth/weak-password" || errStr.includes("weak-password")) {
+                        setAdminNovoError("A senha deve ter no mínimo 6 caracteres.");
                     } else {
-                        setAdminNovoError(`Erro no cadastro: ${err.message || err.code || 'Falha ao criar conta.'}`);
+                        setAdminNovoError("Este e-mail já está cadastrado no sistema ou ocorreu um erro no cadastro.");
                     }
                 } finally {
                     setAdminNovoSubmitting(false);
@@ -1073,7 +1527,7 @@
             const handleReset = () => {
                 setFinanciamento('');
                 setTaxaAnual('');
-                setPercTerreno('6.9');
+                setPercTerreno('7.0');
                 setPercObra('');
                 setParcelaFutura('');
                 setSeguro('');
@@ -1146,6 +1600,9 @@
 
                 setFeedback({ text: 'Simulação calculada com sucesso!', type: 'success' });
                 setTimeout(() => setFeedback(null), 3000);
+
+                // Rola a tela suavemente até o topo para exibir o resultado destacado
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             };
 
             // ==========================================
@@ -1205,7 +1662,7 @@
             const handleCarregarSimulacao = (item) => {
                 const fin = item.financiamento !== undefined ? String(item.financiamento) : '';
                 const taxaA = item.taxaAnual !== undefined ? String(item.taxaAnual) : '';
-                const pTerr = item.percTerreno !== undefined ? String(item.percTerreno) : '6.9';
+                const pTerr = item.percTerreno !== undefined ? String(item.percTerreno) : '7.0';
                 const pObra = item.percObra !== undefined ? String(item.percObra) : '';
                 const parcFut = item.parcelaFutura !== undefined ? String(item.parcelaFutura) : '';
                 const seg = item.seguro !== undefined ? String(item.seguro) : '';
@@ -1259,15 +1716,13 @@
             };
 
             const handleExcluirSimulacao = async (id, titulo) => {
-                if (window.confirm(`Deseja excluir permanentemente a simulação "${titulo}"?`)) {
-                    try {
-                        await deleteDoc(doc(db, 'simulacoes', id));
-                        setFeedback({ text: 'Simulação excluída do Firestore.', type: 'info' });
-                        setTimeout(() => setFeedback(null), 3000);
-                    } catch (error) {
-                        console.error('Erro ao excluir simulação:', error);
-                        alert('Erro ao excluir a simulação do banco de dados.');
-                    }
+                try {
+                    await deleteDoc(doc(db, 'simulacoes', id));
+                    setFeedback({ text: 'Simulação removida com sucesso!', type: 'info' });
+                    setTimeout(() => setFeedback(null), 3000);
+                } catch (error) {
+                    console.error('Erro ao excluir simulação:', error);
+                    alert('Erro ao excluir a simulação do banco de dados.');
                 }
             };
 
@@ -1281,7 +1736,45 @@
                 );
             }
 
-            // RENDERIZAÇÃO 1.5: TELA DE CONTA SUSPENSA / PAUSADA
+            // RENDERIZAÇÃO 1.5A: TELA DE CONTA PENDENTE DE APROVAÇÃO MANUALL
+            if (currentUser && userData && userData.status === 'Pendente') {
+                return (
+                    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+                        <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden border border-slate-200 text-center p-8 animate-in fade-in zoom-in-95 duration-200">
+                            <div className="bg-amber-100 text-amber-800 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-300 shadow-sm animate-pulse">
+                                <Clock size={36} />
+                            </div>
+                            <h2 className="text-2xl font-black text-slate-800 mb-2">Cadastro em Análise</h2>
+                            <p className="text-slate-600 text-sm mb-5 leading-relaxed font-medium">
+                                Olá <strong className="text-slate-900">{userData.nome || currentUser.email}</strong>!
+                            </p>
+                            <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 font-semibold mb-6 text-left space-y-2.5">
+                                <div className="flex items-start gap-2.5">
+                                    <Info size={18} className="text-amber-600 shrink-0 mt-0.5" />
+                                    <span className="leading-relaxed">
+                                        Seu cadastro foi recebido com sucesso! Aguarde a aprovação do administrador para liberar o seu acesso ao simulador.
+                                    </span>
+                                </div>
+                                <div className="text-[11px] text-amber-800 font-medium border-t border-amber-200/80 pt-2.5 mt-2 space-y-1">
+                                    <div><strong>E-mail:</strong> {userData.email}</div>
+                                    {userData.celular && <div><strong>Celular:</strong> {userData.celular}</div>}
+                                    {userData.creci && <div><strong>CRECI:</strong> {userData.creci}</div>}
+                                    <div><strong>Perfil Solicitado:</strong> {userData.perfil || 'Corretor'}</div>
+                                </div>
+                            </div>
+                            <button 
+                                onClick={handleLogout}
+                                className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm cursor-pointer"
+                            >
+                                <LogOut size={18} />
+                                Sair da Conta
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            // RENDERIZAÇÃO 1.5B: TELA DE CONTA SUSPENSA / PAUSADA
             if (currentUser && userData && userData.status === 'Pausado') {
                 return (
                     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
@@ -1298,7 +1791,7 @@
                             </div>
                             <button 
                                 onClick={handleLogout}
-                                className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm"
+                                className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm cursor-pointer"
                             >
                                 <LogOut size={18} />
                                 Sair da Conta
@@ -1308,8 +1801,8 @@
                 );
             }
 
-            // RENDERIZAÇÃO 2: TELA DE LOGIN / CADASTRO SE NÃO ESTIVER AUTENTICADO
-            if (!currentUser) {
+            // RENDERIZAÇÃO 2: TELA DE LOGIN / CADASTRO SE NÃO ESTIVER AUTENTICADO OU COM SESSÃO NULA
+            if (!currentUser || !userData) {
                 return (
                     <div className="min-h-screen bg-slate-900 flex flex-col items-center justify-center p-4">
                         <div className="w-full max-w-md mb-3 flex justify-end">
@@ -1327,7 +1820,7 @@
                             <div className="flex border-b border-slate-200 bg-slate-50">
                                 <button 
                                     type="button"
-                                    onClick={() => { setIsRegistering(false); setAuthError(''); }}
+                                    onClick={() => { setIsRegistering(false); setAuthError(''); setRegistrationSuccessMsg(''); }}
                                     className={`flex-1 py-3 text-sm font-bold transition-all border-b-2 flex items-center justify-center gap-2 ${!isRegistering ? 'border-[#1D8843] text-[#05532C] bg-white' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                                 >
                                     <User size={16} />
@@ -1335,7 +1828,7 @@
                                 </button>
                                 <button 
                                     type="button"
-                                    onClick={() => { setIsRegistering(true); setAuthError(''); }}
+                                    onClick={() => { setIsRegistering(true); setAuthError(''); setRegistrationSuccessMsg(''); }}
                                     className={`flex-1 py-3 text-sm font-bold transition-all border-b-2 flex items-center justify-center gap-2 ${isRegistering ? 'border-[#1D8843] text-[#05532C] bg-white' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
                                 >
                                     <Shield size={16} />
@@ -1344,6 +1837,16 @@
                             </div>
 
                             <div className="p-6">
+                                {registrationSuccessMsg && (
+                                    <div className="mb-4 p-4 bg-emerald-50 border border-emerald-300 rounded-xl text-emerald-950 text-xs font-semibold flex items-start gap-2.5 shadow-xs animate-in fade-in duration-200">
+                                        <CheckCircle2 size={20} className="shrink-0 text-emerald-600 mt-0.5" />
+                                        <div className="leading-relaxed">
+                                            <p className="font-bold text-sm text-emerald-950 mb-0.5">Cadastro Enviado!</p>
+                                            <span>{registrationSuccessMsg}</span>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {authError && (
                                     <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold flex items-center gap-2">
                                         <Info size={16} className="shrink-0 text-rose-500" />
@@ -1351,7 +1854,7 @@
                                     </div>
                                 )}
 
-                                {!isRegistering ? (
+                                <div style={{ display: !isRegistering ? 'block' : 'none' }}>
                                     <form onSubmit={handleLogin} className="space-y-4">
                                         <div>
                                             <label className="block text-xs font-bold text-slate-700 mb-1">E-mail</label>
@@ -1363,7 +1866,7 @@
                                                     placeholder="seu@email.com"
                                                     value={authEmail}
                                                     onChange={(e) => setAuthEmail(e.target.value)}
-                                                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none font-medium"
+                                                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none font-medium text-slate-800"
                                                 />
                                             </div>
                                         </div>
@@ -1391,7 +1894,7 @@
                                                     placeholder="••••••••"
                                                     value={authPassword}
                                                     onChange={(e) => setAuthPassword(e.target.value)}
-                                                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none font-medium"
+                                                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none font-medium text-slate-800"
                                                 />
                                             </div>
                                         </div>
@@ -1399,13 +1902,15 @@
                                         <button 
                                             type="submit"
                                             disabled={authSubmitting}
-                                            className="w-full mt-2 bg-[#1D8843] hover:bg-[#05532C] text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                                            className="w-full mt-2 bg-[#1D8843] hover:bg-[#05532C] text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
                                         >
                                             <User size={18} />
                                             {authSubmitting ? 'Acessando...' : 'Entrar no Sistema'}
                                         </button>
                                     </form>
-                                ) : (
+                                </div>
+
+                                <div style={{ display: isRegistering ? 'block' : 'none' }}>
                                     <form onSubmit={handleRegister} className="space-y-4">
                                         <div>
                                             <label className="block text-xs font-bold text-slate-700 mb-1">Nome Completo *</label>
@@ -1501,14 +2006,15 @@
 
                                         <button 
                                             type="submit"
+                                            id="btn-cadastrar"
                                             disabled={authSubmitting}
-                                            className="w-full mt-2 bg-[#1D8843] hover:bg-[#05532C] text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                                            className="w-full mt-2 bg-[#1D8843] hover:bg-[#05532C] text-white font-bold py-3 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
                                         >
                                             <Shield size={18} />
                                             {authSubmitting ? 'Cadastrando...' : 'Criar Minha Conta'}
                                         </button>
                                     </form>
-                                )}
+                                </div>
                             </div>
                         </div>
 
@@ -1609,7 +2115,7 @@
                             <HardHat size={32} />
                         </div>
                         <div>
-                            <h1 className="text-2xl md:text-3xl font-black text-[#05532C] tracking-tight">Simulador de Juros de Obra</h1>
+                            <h1 className="text-2xl md:text-3xl font-black text-[#05532C] tracking-tight">Simulador Juros Obra</h1>
                             <p className="text-slate-600 text-sm md:text-base">Evolução de obra da Caixa - Modelo Apoio à Produção</p>
                         </div>
                     </div>
@@ -1852,7 +2358,7 @@
                                         />
                                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
                                     </div>
-                                    <p className="text-xs text-slate-500 mt-1">Valor do terreno fixado por padrão em 6,9%.</p>
+                                    <p className="text-xs text-slate-500 mt-1">Valor do terreno fixado por padrão em 7,0%.</p>
                                 </div>
 
                                 {/* Percentual Obra */}
@@ -1938,8 +2444,19 @@
                                             )}
                                         </div>
 
-                                        <div className="text-4xl sm:text-5xl font-extrabold mb-6 tracking-tight drop-shadow-sm">
-                                            {formatCurrency(resultadoSimulacao.totalParcela)}
+                                        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                                            <div className="text-4xl sm:text-5xl font-extrabold tracking-tight drop-shadow-sm">
+                                                {formatCurrency(resultadoSimulacao.totalParcela)}
+                                            </div>
+                                            <button 
+                                                type="button"
+                                                onClick={() => setShowEvolucaoModal(true)}
+                                                className="bg-white/15 hover:bg-white/25 text-white border border-white/30 font-bold px-3.5 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95 shrink-0"
+                                                title="Abrir gráfico comparativo com a evolução mensal de 10% a 100%"
+                                            >
+                                                <TrendingUp size={18} />
+                                                <span>Ver Evolução Mensal</span>
+                                            </button>
                                         </div>
 
                                         {/* Progress Bar do Teto */}
@@ -2079,21 +2596,69 @@
                                             </div>
                                         )}
 
-                                        {/* Conclusão */}
-                                        <div className="p-4 rounded-xl bg-[#05532C] text-white shadow-inner mt-4 border border-[#1D8843]/30">
-                                            <h4 className="font-semibold flex items-center gap-2 mb-2 text-[#72AC44] text-sm">
-                                                <CheckCircle2 size={16} /> 
-                                                Composição Final da Parcela
-                                            </h4>
+                                        {/* Conclusão - Composição Final da Parcela */}
+                                        <div className="p-4 sm:p-5 rounded-xl bg-[#05532C] text-white shadow-inner mt-4 border border-[#1D8843]/30 space-y-4">
+                                            <div className="flex items-center justify-between gap-2 flex-wrap border-b border-[#1D8843]/40 pb-2.5">
+                                                <h4 className="font-semibold flex items-center gap-2 text-[#72AC44] text-sm sm:text-base">
+                                                    <CheckCircle2 size={18} /> 
+                                                    Composição Final da Parcela
+                                                </h4>
+                                                <button 
+                                                    type="button"
+                                                    onClick={() => setShowEvolucaoModal(true)}
+                                                    className="text-xs font-bold text-emerald-200 hover:text-white underline flex items-center gap-1 cursor-pointer transition-colors"
+                                                >
+                                                    <TrendingUp size={14} />
+                                                    <span>Ver Evolução Mensal</span>
+                                                </button>
+                                            </div>
+
+                                            {/* Lista da Composição */}
                                             <ul className="space-y-1.5 text-xs text-slate-200 font-mono">
-                                                <li className="flex justify-between"><span>Juros (C):</span> <span>{formatCurrency(resultadoSimulacao.valorJuros)}</span></li>
-                                                <li className="flex justify-between"><span>Correção TR (D):</span> <span>{formatCurrency(resultadoSimulacao.valorTr)}</span></li>
-                                                <li className="flex justify-between"><span>Seguros:</span> <span>{formatCurrency(resultadoSimulacao.seguro)}</span></li>
-                                                <li className="flex justify-between"><span>Taxa Adm:</span> <span>{formatCurrency(TAXA_ADM)}</span></li>
-                                                <li className="border-t border-[#1D8843] my-1 pt-1 flex justify-between text-white font-bold text-sm">
-                                                    <span>Total (TEO):</span> <span>{formatCurrency(resultadoSimulacao.totalParcela)}</span>
+                                                <li className="flex justify-between">
+                                                    <span>Juros (C):</span> 
+                                                    <span className="font-semibold">{formatCurrency(resultadoSimulacao.valorJuros)}</span>
+                                                </li>
+                                                <li className="flex justify-between">
+                                                    <span>Correção TR (D):</span> 
+                                                    <span className="font-semibold">{formatCurrency(resultadoSimulacao.valorTr)}</span>
+                                                </li>
+                                                <li className="flex justify-between">
+                                                    <span>Seguros:</span> 
+                                                    <span className="font-semibold">{formatCurrency(resultadoSimulacao.seguro)}</span>
+                                                </li>
+                                                <li className="flex justify-between">
+                                                    <span>Taxa Adm. CEF:</span> 
+                                                    <span className="font-semibold">{formatCurrency(TAXA_ADM)}</span>
+                                                </li>
+                                                <li className="border-t border-[#1D8843] my-1 pt-2 flex justify-between text-white font-bold text-sm">
+                                                    <span>Total (TEO):</span> 
+                                                    <span className="text-[#72AC44] text-base">{formatCurrency(resultadoSimulacao.totalParcela)}</span>
                                                 </li>
                                             </ul>
+
+                                            {/* Proporção e % Teto Futuro */}
+                                            <div className="pt-3 border-t border-[#1D8843]/40 space-y-2 font-sans">
+                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-emerald-100">
+                                                    <span className="font-medium text-slate-200">Comparação com a Parcela Futura (Pós-Chaves):</span>
+                                                    <span className="font-bold text-white font-mono">{formatCurrency(resultadoSimulacao.parcelaFutura)}</span>
+                                                </div>
+
+                                                <div className="flex justify-between items-center text-xs text-emerald-100">
+                                                    <span className="text-slate-300">% Teto Alcançado:</span>
+                                                    <span className="font-extrabold text-[#72AC44] font-mono">
+                                                        {formatPercent(resultadoSimulacao.tetoAlcancado, 1)} da parcela futura
+                                                    </span>
+                                                </div>
+
+                                                {/* Barra de Progresso Visual */}
+                                                <div className="h-2.5 w-full bg-[#03361c] rounded-full overflow-hidden border border-white/10 mt-1">
+                                                    <div 
+                                                        className={`h-full rounded-full transition-all duration-500 ${resultadoSimulacao.tetoAlcancado > 90 ? 'bg-rose-500' : resultadoSimulacao.tetoAlcancado > 70 ? 'bg-amber-400' : 'bg-[#72AC44]'}`}
+                                                        style={{ width: `${Math.min(resultadoSimulacao.tetoAlcancado, 100)}%` }}
+                                                    ></div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -2179,7 +2744,7 @@
                                                     <button 
                                                         onClick={() => handleExcluirSimulacao(item.id, item.titulo)}
                                                         title="Excluir do Firestore"
-                                                        className="text-slate-400 hover:text-rose-600 p-1 rounded hover:bg-rose-50 transition-colors shrink-0"
+                                                        className="text-slate-400 hover:text-rose-600 p-1 rounded hover:bg-rose-50 transition-colors shrink-0 cursor-pointer"
                                                     >
                                                         <Trash2 size={16} />
                                                     </button>
@@ -2247,12 +2812,22 @@
                                 </p>
                             </div>
                             <div className="flex items-center gap-2 self-start md:self-auto shrink-0 flex-wrap">
+                                {listaUsuarios.filter(u => u.status === 'Pendente').length > 0 && (
+                                    <button
+                                        onClick={() => setFilterStatusUsuarios(filterStatusUsuarios === 'Pendente' ? 'Todos' : 'Pendente')}
+                                        className="bg-amber-100 text-amber-900 font-bold px-3 py-1.5 rounded-full text-xs border border-amber-300 flex items-center gap-1.5 animate-pulse cursor-pointer hover:bg-amber-200 transition-all shadow-2xs"
+                                        title="Clique para filtrar apenas cadastros pendentes de aprovação"
+                                    >
+                                        <Clock size={14} className="text-amber-700" />
+                                        {listaUsuarios.filter(u => u.status === 'Pendente').length} Pendente(s)
+                                    </button>
+                                )}
                                 <span className="bg-emerald-50 text-emerald-800 font-bold px-3 py-1.5 rounded-full text-xs border border-emerald-200 flex items-center gap-1.5">
                                     <UserCheck size={14} />
-                                    {listaUsuarios.filter(u => u.status !== 'Pausado').length} Ativos
+                                    {listaUsuarios.filter(u => u.status === 'Ativo' || (!u.status)).length} Ativos
                                 </span>
                                 {listaUsuarios.filter(u => u.status === 'Pausado').length > 0 && (
-                                    <span className="bg-amber-50 text-amber-800 font-bold px-3 py-1.5 rounded-full text-xs border border-amber-200 flex items-center gap-1.5">
+                                    <span className="bg-slate-100 text-slate-700 font-bold px-3 py-1.5 rounded-full text-xs border border-slate-200 flex items-center gap-1.5">
                                         <Pause size={14} />
                                         {listaUsuarios.filter(u => u.status === 'Pausado').length} Pausados
                                     </span>
@@ -2275,12 +2850,12 @@
 
                         {/* BARRA DE PESQUISA E FILTROS DE USUÁRIOS */}
                         <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-2xs">
-                            {/* Campo de Pesquisa por Nome ou E-mail */}
+                            {/* Campo de Pesquisa por Nome, E-mail ou CRECI */}
                             <div className="relative w-full sm:flex-1">
                                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                                 <input 
                                     type="text" 
-                                    placeholder="Buscar por nome ou e-mail..."
+                                    placeholder="Buscar por nome, e-mail ou CRECI..."
                                     value={searchTermUsuarios}
                                     onChange={(e) => setSearchTermUsuarios(e.target.value)}
                                     className="w-full pl-10 pr-9 py-2 text-xs md:text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white text-slate-800 font-medium placeholder:text-slate-400 shadow-2xs transition-all"
@@ -2294,6 +2869,24 @@
                                         <X size={14} />
                                     </button>
                                 )}
+                            </div>
+
+                            {/* Filtro por Status */}
+                            <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                                <div className="flex items-center gap-1.5 text-slate-600 text-xs font-bold whitespace-nowrap">
+                                    <Clock size={15} className="text-amber-600 shrink-0" />
+                                    <span>Status:</span>
+                                </div>
+                                <select 
+                                    value={filterStatusUsuarios}
+                                    onChange={(e) => setFilterStatusUsuarios(e.target.value)}
+                                    className="w-full sm:w-auto px-3 py-2 text-xs md:text-sm rounded-xl border border-slate-300 font-semibold bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500 outline-none shadow-2xs cursor-pointer"
+                                >
+                                    <option value="Todos">Todos os Status</option>
+                                    <option value="Pendente">⌛ Pendentes de Aprovação</option>
+                                    <option value="Ativo">✅ Ativos / Aprovados</option>
+                                    <option value="Pausado">⏸️ Pausados / Bloqueados</option>
+                                </select>
                             </div>
 
                             {/* Filtro por Perfil (Role) */}
@@ -2329,13 +2922,14 @@
                                 <Search size={36} className="mx-auto text-slate-300 mb-2" />
                                 <p className="font-bold text-slate-700 text-sm">Nenhum usuário encontrado com os critérios de busca.</p>
                                 <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                                    Tente buscar por outro termo ou alterar o filtro de perfil selecionado acima.
+                                    Tente buscar por outro termo ou alterar os filtros de status e perfil selecionados acima.
                                 </p>
-                                {(searchTermUsuarios || filterPerfilUsuarios !== 'Todos') && (
+                                {(searchTermUsuarios || filterPerfilUsuarios !== 'Todos' || filterStatusUsuarios !== 'Todos') && (
                                     <button 
                                         onClick={() => {
                                             setSearchTermUsuarios('');
                                             setFilterPerfilUsuarios('Todos');
+                                            setFilterStatusUsuarios('Todos');
                                         }}
                                         className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-emerald-100 text-emerald-800 hover:bg-emerald-200 font-bold text-xs rounded-xl transition-all cursor-pointer shadow-2xs"
                                     >
@@ -2348,15 +2942,19 @@
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {usuariosFiltrados.map((u) => {
                                     const isSelf = u.id === currentUser?.uid;
+                                    const isPending = u.status === 'Pendente';
                                     const isPaused = u.status === 'Pausado';
+                                    const isUserAdmin = u.role === 'admin' || u.perfil === 'Administrador' || (u.email && u.email.toLowerCase() === 'calazansvendas@gmail.com') || u.id === MASTER_ADMIN_UID;
 
                                     return (
                                         <div 
                                             key={u.id} 
                                             className={`border rounded-2xl p-4 flex flex-col justify-between space-y-4 transition-all ${
-                                                isPaused 
-                                                    ? 'bg-amber-50/40 border-amber-300 shadow-xs' 
-                                                    : 'bg-slate-50 border-slate-200 hover:border-emerald-500 shadow-xs'
+                                                isPending
+                                                    ? 'bg-amber-50/70 border-amber-300 ring-2 ring-amber-400/40 shadow-sm'
+                                                    : isPaused 
+                                                        ? 'bg-amber-50/40 border-amber-300 shadow-xs' 
+                                                        : 'bg-slate-50 border-slate-200 hover:border-emerald-500 shadow-xs'
                                             }`}
                                         >
                                             {/* CABEÇALHO DO CARD DO USUÁRIO */}
@@ -2364,7 +2962,7 @@
                                                 <div className="flex items-start justify-between gap-2 flex-wrap sm:flex-nowrap">
                                                     <div className="flex items-start gap-2.5 min-w-0 flex-1">
                                                         <div className={`w-10 h-10 rounded-xl text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs mt-0.5 ${
-                                                            isPaused ? 'bg-amber-600' : 'bg-slate-800'
+                                                            isPending ? 'bg-amber-600' : isPaused ? 'bg-slate-700' : 'bg-slate-800'
                                                         }`}>
                                                             {u.nome ? u.nome.substring(0, 2).toUpperCase() : 'US'}
                                                         </div>
@@ -2385,11 +2983,17 @@
 
                                                     {/* BADGE DE STATUS */}
                                                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border uppercase shrink-0 flex items-center gap-1 self-start ${
-                                                        isPaused 
-                                                            ? 'bg-amber-100 text-amber-800 border-amber-300' 
-                                                            : 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                                        isPending
+                                                            ? 'bg-amber-100 text-amber-900 border-amber-300 animate-pulse'
+                                                            : isPaused 
+                                                                ? 'bg-rose-100 text-rose-800 border-rose-300' 
+                                                                : 'bg-emerald-100 text-emerald-800 border-emerald-300'
                                                     }`}>
-                                                        {isPaused ? (
+                                                        {isPending ? (
+                                                            <>
+                                                                <Clock size={10} /> Pendente
+                                                            </>
+                                                        ) : isPaused ? (
                                                             <>
                                                                 <Pause size={10} /> Pausado
                                                             </>
@@ -2425,75 +3029,86 @@
                                                         </span>
                                                     )}
                                                 </div>
-                                            </div>
 
-                                            {/* SELETOR DE PERFIL (ROLE) */}
-                                            <div className="pt-2 border-t border-slate-200/80">
-                                                <div className="flex items-center justify-between mb-1.5">
-                                                    <label className="text-[11px] font-bold text-slate-600">Perfil de Acesso (Role):</label>
-                                                    <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] uppercase border tracking-wide ${getBadgeStyle(u.perfil || 'Corretor')}`}>
-                                                        {u.perfil || 'Corretor'}
-                                                    </span>
+                                                {/* SELETOR DE PERFIL (ROLE) */}
+                                                <div className="pt-2 border-t border-slate-200/80">
+                                                    <div className="flex items-center justify-between mb-1.5">
+                                                        <label className="text-xs font-bold text-slate-600">Perfil de Acesso:</label>
+                                                    </div>
+                                                    <select 
+                                                        value={u.perfil || "Corretor"}
+                                                        onChange={(e) => handleAtualizarPerfilUsuario(u.id, e.target.value)}
+                                                        className="w-full px-2.5 py-2 text-xs rounded-xl border border-slate-300 font-semibold bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500 outline-none shadow-2xs"
+                                                    >
+                                                        <option value="Corretor">Corretor</option>
+                                                        <option value="Assistente">Assistente</option>
+                                                        <option value="Analista">Analista</option>
+                                                        <option value="Gerente">Gerente</option>
+                                                        <option value="Administrador">Administrador</option>
+                                                    </select>
                                                 </div>
-                                                <select 
-                                                    value={u.perfil || 'Corretor'}
-                                                    onChange={(e) => handleAtualizarPerfilUsuario(u.id, e.target.value)}
-                                                    className="w-full px-2.5 py-2 text-xs rounded-xl border border-slate-300 font-semibold bg-white text-slate-800 focus:ring-2 focus:ring-emerald-500 outline-none shadow-2xs"
-                                                >
-                                                    <option value="Corretor">Corretor</option>
-                                                    <option value="Assistente">Assistente</option>
-                                                    <option value="Analista">Analista</option>
-                                                    <option value="Gerente">Gerente</option>
-                                                    <option value="Administrador">Administrador</option>
-                                                </select>
                                             </div>
 
-                                            {/* BOTÕES DE AÇÃO: ALTERAR SENHA, PAUSAR / REATIVAR & EXCLUIR */}
+                                            {/* BOTÕES DE AÇÃO: APROVAR (para pendentes), ALTERAR SENHA, PAUSAR / REATIVAR & EXCLUIR */}
                                             <div className="pt-2 border-t border-slate-200/80 flex flex-wrap items-center gap-2">
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedUserForPassword(u);
-                                                        setAdminPasswordStatus({ type: '', message: '' });
-                                                    }}
-                                                    className="flex-1 py-2 px-2.5 rounded-xl text-xs font-bold transition-all border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
-                                                    title="Redefinir / Alterar senha do usuário"
-                                                >
-                                                    <KeyRound size={14} className="text-emerald-600 shrink-0" />
-                                                    <span className="whitespace-nowrap">Alterar Senha</span>
-                                                </button>
-
-                                                <button
-                                                    onClick={() => handleTogglePausarUsuario(u)}
-                                                    disabled={isSelf}
-                                                    className={`py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs ${
-                                                        isPaused
-                                                            ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                                                            : 'bg-amber-500 hover:bg-amber-600 text-white'
-                                                    } disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer`}
-                                                    title={isSelf ? 'Você não pode pausar a sua própria conta' : isPaused ? 'Reativar acesso do usuário' : 'Pausar acesso do usuário'}
-                                                >
-                                                    {isPaused ? (
-                                                        <>
-                                                            <Play size={14} />
-                                                            <span>Reativar</span>
-                                                        </>
-                                                    ) : (
-                                                        <>
+                                                {isPending ? (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleAprovarUsuario(u)}
+                                                            className="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-1.5 shadow-sm cursor-pointer active:scale-95"
+                                                            title="Aprovar cadastro e liberar acesso ao simulador"
+                                                        >
+                                                            <CheckCircle2 size={14} />
+                                                            <span>Aprovar Acesso</span>
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleTogglePausarUsuario(u)}
+                                                            className="py-2 px-2.5 rounded-xl text-xs font-bold transition-all bg-amber-500 hover:bg-amber-600 text-white flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                                                            title="Bloquear / Pausar acesso do usuário"
+                                                        >
                                                             <Pause size={14} />
-                                                            <span>Pausar</span>
-                                                        </>
-                                                    )}
-                                                </button>
+                                                            <span>Bloquear</span>
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedUserForPassword(u);
+                                                                setAdminPasswordStatus({ type: '', message: '' });
+                                                            }}
+                                                            className="flex-1 py-2 px-2.5 rounded-xl text-xs font-bold transition-all border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                                                            title="Redefinir / Alterar senha do usuário"
+                                                        >
+                                                            <KeyRound size={14} className="text-emerald-600 shrink-0" />
+                                                            <span className="whitespace-nowrap">Alterar Senha</span>
+                                                        </button>
 
-                                                <button
-                                                    onClick={() => handleExcluirUsuario(u)}
-                                                    disabled={isSelf}
-                                                    className="py-2 px-2.5 rounded-xl text-xs font-bold transition-all border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 flex items-center justify-center gap-1.5 shadow-2xs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
-                                                    title={isSelf ? 'Você não pode excluir a sua própria conta' : 'Excluir usuário permanentemente'}
-                                                >
-                                                    <Trash2 size={14} />
-                                                    <span>Excluir</span>
-                                                </button>
+                                                        <button
+                                                            onClick={() => handleTogglePausarUsuario(u)}
+                                                            disabled={isSelf}
+                                                            className={`py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs ${
+                                                                isPaused
+                                                                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                                                                    : 'bg-amber-500 hover:bg-amber-600 text-white'
+                                                            } disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer`}
+                                                            title={isSelf ? 'Você não pode pausar a sua própria conta' : isPaused ? 'Reativar acesso do usuário' : 'Pausar acesso do usuário'}
+                                                        >
+                                                            {isPaused ? (
+                                                                <>
+                                                                    <Play size={14} />
+                                                                    <span>Reativar</span>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <Pause size={14} />
+                                                                    <span>Pausar</span>
+                                                                </>
+                                                            )}
+                                                        </button>
+                                                    </>
+                                                )}
+
                                             </div>
                                         </div>
                                     );
@@ -2839,12 +3454,12 @@
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
                                         <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800/50 flex items-start gap-3">
                                             <div className="bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 font-black p-2 rounded-lg text-xs shrink-0">
-                                                6,90%
+                                                7,00%
                                             </div>
                                             <div>
                                                 <h5 className="font-bold text-slate-800 dark:text-slate-100 text-xs sm:text-sm">Terreno Liberação Total Travada</h5>
                                                 <p className="text-slate-600 dark:text-slate-300 text-xs mt-0.5">
-                                                    No modelo Apoio à Produção da Caixa, a fração ideal do terreno equivale a <strong>6,90%</strong> do financiamento total e é considerada <strong>100% liberada no 1º mês</strong>.
+                                                    No modelo Apoio à Produção da Caixa, a fração ideal do terreno equivale a <strong>7,00%</strong> do financiamento total e é considerada <strong>100% liberada no 1º mês</strong>.
                                                 </p>
                                             </div>
                                         </div>
@@ -2883,7 +3498,7 @@
                                                 Representa a porcentagem do financiamento liberada pela Caixa até o momento.
                                             </p>
                                             <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-lg text-[11px] font-sans text-[#05532C] dark:text-[#81C784] font-bold border border-slate-200 dark:border-slate-700">
-                                                Quota Liberada = Terreno (6,90%) + Avanço da Obra Executada
+                                                Quota Liberada = Terreno (7,00%) + Avanço da Obra Executada
                                             </div>
                                         </div>
 
@@ -2990,12 +3605,258 @@
                     </div>
                 )}
 
+                {/* ========================================== */}
+                {/* MODAL GRÁFICO DE EVOLUÇÃO MENSAL (RECHARTS)*/}
+                {/* ========================================== */}
+                {showEvolucaoModal && resultadoSimulacao && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/70 backdrop-blur-sm animate-fadeIn overflow-y-auto">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-4xl max-h-[92vh] flex flex-col my-auto overflow-hidden">
+                            
+                            {/* Modal Header */}
+                            <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-gradient-to-r from-[#05532C] to-[#1D8843] text-white shrink-0">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2.5 bg-white/10 rounded-xl shrink-0">
+                                        <TrendingUp size={24} />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-base sm:text-lg text-white flex items-center gap-2">
+                                            Evolução Mensal dos Juros de Obra
+                                        </h3>
+                                        <p className="text-xs text-emerald-100">
+                                            Crescimento da parcela total por medição física da obra (10% a 100%)
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowEvolucaoModal(false)}
+                                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                                    title="Fechar modal"
+                                >
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            {/* Modal Body */}
+                            <div className="p-4 sm:p-6 space-y-6 overflow-y-auto">
+                                {/* Cards de Indicadores do Contrato */}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                    <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">Financiamento</span>
+                                        <span className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100">{formatCurrency(resultadoSimulacao.financiamento)}</span>
+                                    </div>
+                                    <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">Terreno Fixo</span>
+                                        <span className="text-xs sm:text-sm font-bold text-emerald-700 dark:text-emerald-400">{formatPercent(resultadoSimulacao.percTerreno)}</span>
+                                    </div>
+                                    <div className="bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-xl border border-emerald-200 dark:border-emerald-800/50">
+                                        <span className="text-[11px] font-semibold text-emerald-800 dark:text-emerald-300 block">Medição Atual ({resultadoSimulacao.percObra}%)</span>
+                                        <span className="text-xs sm:text-sm font-extrabold text-[#05532C] dark:text-[#81C784]">{formatCurrency(resultadoSimulacao.totalParcela)}</span>
+                                    </div>
+                                    <div className="bg-slate-50 dark:bg-slate-800/60 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block">Prestação Futura</span>
+                                        <span className="text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400">{formatCurrency(resultadoSimulacao.parcelaFutura)}</span>
+                                    </div>
+                                </div>
+
+                                {/* Area do Gráfico Recharts */}
+                                <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800 shadow-xs">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
+                                        <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                                            <TrendingUp size={16} className="text-[#1D8843]" />
+                                            Gráfico Comparativo de Parcela (R$) x Medição (%)
+                                        </h4>
+                                        <span className="text-[11px] text-slate-500">
+                                            Cenários de 10% a 100% de execução da obra
+                                        </span>
+                                    </div>
+
+                                    {window.Recharts && ResponsiveContainer && LineChart ? (
+                                        <div className="w-full h-[320px] sm:h-[360px] pt-2 pb-4">
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <LineChart data={dadosEvolucao} margin={{ top: 15, right: 20, left: 15, bottom: 35 }}>
+                                                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.5} />
+                                                    <XAxis 
+                                                        dataKey="fase" 
+                                                        stroke="#64748b" 
+                                                        fontSize={11} 
+                                                        tickLine={false}
+                                                        dy={4}
+                                                        label={{ value: "Medição de Obra (%)", position: "insideBottom", offset: -25, fill: "#64748b", fontSize: 11, fontWeight: 500 }} 
+                                                    />
+                                                    <YAxis 
+                                                        stroke="#64748b" 
+                                                        fontSize={10} 
+                                                        tickLine={false}
+                                                        tickFormatter={(val) => `R$ ${val}`} 
+                                                    />
+                                                    <Tooltip 
+                                                        content={({ active, payload }) => {
+                                                            if (active && payload && payload.length) {
+                                                                const data = payload[0].payload;
+                                                                return (
+                                                                    <div className="bg-slate-900 border border-slate-700 p-3.5 rounded-xl shadow-xl text-white text-xs space-y-2 max-w-xs">
+                                                                        <div className="font-bold border-b border-slate-800 pb-1.5 flex items-center justify-between gap-2 text-emerald-400">
+                                                                            <span>Medição Obra: {data.medicaoObra}%</span>
+                                                                            <span className="text-[10px] text-slate-300 font-normal">Liberado: {formatPercent(data.percTotalLiberado, 1)}</span>
+                                                                        </div>
+                                                                        <div className="text-[11px] text-slate-200 font-mono space-y-1">
+                                                                            <div className="flex justify-between gap-4">
+                                                                                <span className="text-slate-400">• Juros de Obra:</span>
+                                                                                <span className="font-bold text-purple-300">{formatCurrency(data.juros)}</span>
+                                                                            </div>
+                                                                            <div className="flex justify-between gap-4">
+                                                                                <span className="text-slate-400">• Correção TR Est.:</span>
+                                                                                <span className="font-bold">{formatCurrency(data.tr)}</span>
+                                                                            </div>
+                                                                            <div className="flex justify-between gap-4">
+                                                                                <span className="text-slate-400">• Seguros (MIP/DFI):</span>
+                                                                                <span className="font-bold">{formatCurrency(data.seguro)}</span>
+                                                                            </div>
+                                                                            <div className="flex justify-between gap-4">
+                                                                                <span className="text-slate-400">• Taxa Adm (CEF):</span>
+                                                                                <span className="font-bold">{formatCurrency(data.taxaAdm)}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="pt-1.5 border-t border-slate-800 flex justify-between items-center font-bold text-emerald-400">
+                                                                            <span>Parcela Total:</span>
+                                                                            <span className="text-sm">{formatCurrency(data.parcelaTotal)}</span>
+                                                                        </div>
+                                                                        {data.parcelaFutura > 0 && (
+                                                                            <div className="text-[10px] text-slate-400 text-right font-sans">
+                                                                                ({formatPercent(data.tetoAlcancado, 2)} do teto futuro)
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            return null;
+                                                        }}
+                                                    />
+                                                    <Legend 
+                                                        verticalAlign="top" 
+                                                        align="right" 
+                                                        wrapperStyle={{ paddingBottom: '16px', fontSize: '11px', fontWeight: 600 }} 
+                                                    />
+                                                    {resultadoSimulacao.parcelaFutura > 0 && ReferenceLine && (
+                                                        <ReferenceLine 
+                                                            y={resultadoSimulacao.parcelaFutura} 
+                                                            label={{ value: 'Prestação Futura (Teto)', fill: '#e11d48', fontSize: 10, position: 'top' }} 
+                                                            stroke="#e11d48" 
+                                                            strokeDasharray="4 4" 
+                                                        />
+                                                    )}
+                                                    <Line 
+                                                        type="monotone" 
+                                                        dataKey="juros" 
+                                                        name="Juros de Obra (R$)" 
+                                                        stroke="#662B7F" 
+                                                        strokeWidth={2} 
+                                                        strokeDasharray="4 4"
+                                                        dot={{ r: 3, fill: "#662B7F" }} 
+                                                    />
+                                                    <Line 
+                                                        type="monotone" 
+                                                        dataKey="parcelaTotal" 
+                                                        name="Parcela Total (R$)" 
+                                                        stroke="#1D8843" 
+                                                        strokeWidth={3} 
+                                                        dot={{ r: 5, fill: "#1D8843" }} 
+                                                        activeDot={{ r: 8 }} 
+                                                    />
+                                                </LineChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                    ) : (
+                                        <div className="p-8 text-center text-slate-500 text-xs">
+                                            Carregando visualização de gráficos do Recharts...
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Tabela Detalhada dos Cenários */}
+                                <div>
+                                    <h4 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 mb-2">
+                                        Projeção Tabela Comparativa (10% a 100%)
+                                    </h4>
+                                    <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                                        <table className="w-full text-xs text-left">
+                                            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 uppercase font-bold text-[10px]">
+                                                <tr>
+                                                    <th className="p-2 sm:p-2.5">Medição Obra</th>
+                                                    <th className="p-2 sm:p-2.5">Total Liberado</th>
+                                                    <th className="p-2 sm:p-2.5">Juros de Obra</th>
+                                                    <th className="p-2 sm:p-2.5">TR Est.</th>
+                                                    <th className="p-2 sm:p-2.5">Seguros</th>
+                                                    <th className="p-2 sm:p-2.5">Taxa Adm</th>
+                                                    <th className="p-2 sm:p-2.5">Parcela Total</th>
+                                                    <th className="p-2 sm:p-2.5">% Teto Futuro</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-200 dark:divide-slate-800 font-mono">
+                                                {dadosEvolucao.map((row) => {
+                                                    const isCurrent = Math.abs(row.medicaoObra - resultadoSimulacao.percObra) < 0.1;
+                                                    return (
+                                                        <tr 
+                                                            key={row.medicaoObra} 
+                                                            className={isCurrent ? "bg-emerald-50 dark:bg-emerald-950/50 font-bold border-l-4 border-l-[#1D8843]" : "hover:bg-slate-50 dark:hover:bg-slate-800/40"}
+                                                        >
+                                                            <td className="p-2 sm:p-2.5 flex items-center gap-1.5 font-sans">
+                                                                <span>{row.medicaoObra}%</span>
+                                                                {isCurrent && (
+                                                                    <span className="bg-[#1D8843] text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">Atual</span>
+                                                                )}
+                                                            </td>
+                                                            <td className="p-2 sm:p-2.5">
+                                                                <div className="font-bold">{formatPercent(row.percTotalLiberado, 1)} ({formatCurrency(row.saldoLiberado)})</div>
+                                                                <div className="text-[10px] text-slate-500 font-sans font-normal">
+                                                                    ({formatPercent(resultadoSimulacao.percTerreno, 1)} Terreno + {formatPercent(row.percObraEquiv, 1)} Obra)
+                                                                </div>
+                                                            </td>
+                                                            <td className="p-2 sm:p-2.5 text-purple-700 dark:text-purple-400">{formatCurrency(row.juros)}</td>
+                                                            <td className="p-2 sm:p-2.5 text-slate-600 dark:text-slate-400">{formatCurrency(row.tr)}</td>
+                                                            <td className="p-2 sm:p-2.5 text-slate-600 dark:text-slate-400">{formatCurrency(row.seguro)}</td>
+                                                            <td className="p-2 sm:p-2.5 text-slate-600 dark:text-slate-400">{formatCurrency(row.taxaAdm)}</td>
+                                                            <td className="p-2 sm:p-2.5 text-[#05532C] dark:text-emerald-400 font-bold">{formatCurrency(row.parcelaTotal)}</td>
+                                                            <td className="p-2 sm:p-2.5">
+                                                                <span className={row.tetoAlcancado > 90 ? "text-rose-600 font-bold" : "text-slate-600 dark:text-slate-400"}>
+                                                                    {formatPercent(row.tetoAlcancado, 2)}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/80 flex justify-end shrink-0">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowEvolucaoModal(false)}
+                                    className="px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded-xl transition-all shadow-xs cursor-pointer active:scale-95"
+                                >
+                                    Fechar
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                )}
+
                 </div>
             );
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        const rootElement = document.getElementById('root');
+        if (rootElement) {
+            const root = ReactDOM.createRoot(rootElement);
+            root.render(<App />);
+        }
     </script>
 </body>
 </html>
