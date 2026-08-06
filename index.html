@@ -1078,9 +1078,17 @@
                 const emailStr = authEmail.trim();
                 const passStr = authPassword;
 
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
                 if (!emailStr || !passStr) {
                     alert("Preencha e-mail e senha para acessar.");
                     setAuthError("Preencha e-mail e senha para acessar.");
+                    return;
+                }
+
+                if (!emailRegex.test(emailStr) && emailStr.toLowerCase() !== MASTER_ADMIN_EMAIL.toLowerCase()) {
+                    alert("Informe um e-mail válido para acessar.");
+                    setAuthError("Informe um e-mail válido para acessar.");
                     return;
                 }
 
@@ -1246,86 +1254,88 @@
                 if (e) e.preventDefault();
                 setAuthError("");
 
+                // Aplica o .trim() para remover espaços acidentais antes ou depois dos textos
                 const nameStr = authNome.trim();
-                const emailStr = authEmail.trim();
+                const emailStr = authEmail.trim().toLowerCase();
                 const passStr = authPassword;
-                const celularStr = authCelular.trim() || "";
-                const creciStr = authCreci.trim() || "";
-                const perfilStr = authPerfil || "Corretor";
+                const celularStr = authCelular.trim();
+                const creciStr = authCreci.trim();
+                const perfilStr = "Corretor";
 
-                if (!nameStr) {
-                    alert("Informe o seu Nome Completo.");
-                    setAuthError("Informe o seu Nome Completo.");
-                    return;
+                // Expressão regular para validar o formato estrito do e-mail (garante o @ e o .com/.br)
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                // 1. Validação prévia de todos os campos obrigatórios
+                if (!nameStr) { setAuthError("Informe o seu Nome Completo."); alert("Informe o seu Nome Completo."); return; }
+                if (!emailStr) { setAuthError("Informe o seu E-mail."); alert("Informe o seu E-mail."); return; }
+                if (!emailRegex.test(emailStr)) { 
+                    setAuthError("E-mail inválido. Verifique se digitou o endereço completo (ex: nome@dominio.com)."); 
+                    alert("E-mail inválido. Verifique se digitou o endereço completo (ex: nome@dominio.com)."); 
+                    return; 
                 }
-                if (!emailStr) {
-                    alert("Informe o seu E-mail.");
-                    setAuthError("Informe o seu E-mail.");
-                    return;
-                }
-                if (!passStr) {
-                    alert("Informe a sua senha.");
-                    setAuthError("Informe a sua senha.");
-                    return;
-                }
+                if (!celularStr) { setAuthError("Informe o seu Celular / WhatsApp."); alert("Informe o seu Celular / WhatsApp."); return; }
+                if (!creciStr) { setAuthError("Informe o seu registro CRECI."); alert("Informe o seu registro CRECI."); return; }
+                if (!passStr || passStr.length < 6) { setAuthError("A senha deve ter no mínimo 6 caracteres."); alert("A senha deve ter no mínimo 6 caracteres."); return; }
 
                 setAuthSubmitting(true);
-                const btn = document.getElementById('btn-cadastrar') || document.querySelector('button[type="submit"]');
-                if (btn) {
-                    btn.disabled = true;
-                    btn.innerText = "Cadastrando...";
-                }
 
                 try {
-                    const res = await fetch('/api/cadastrar', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            nome: nameStr,
-                            email: emailStr,
-                            senha: passStr,
-                            celular: celularStr,
-                            creci: creciStr,
-                            perfil: perfilStr
-                        })
+                    // 2. Cria a conta no Firebase Auth diretamente pelo navegador
+                    const userCredential = await createUserWithEmailAndPassword(auth, emailStr, passStr);
+                    const user = userCredential.user;
+
+                    try {
+                        await updateProfile(user, { displayName: nameStr });
+                    } catch (pErr) {
+                        console.warn("Aviso ao atualizar displayName:", pErr);
+                    }
+
+                    // 3. Grava o documento do usuário no Firestore com perfil 'Corretor' e status 'pendente'
+                    await setDoc(doc(db, "usuarios", user.uid), {
+                        nome: nameStr,
+                        email: emailStr,
+                        celular: celularStr,
+                        creci: creciStr,
+                        role: "corretor",
+                        perfil: "Corretor",
+                        status: "pendente",
+                        createdAt: serverTimestamp(),
+                        dataCriacao: new Date().toISOString()
                     });
 
-                    const data = await res.json();
+                    // 4. Efetua o logout automático para aguardar aprovação do Administrador
+                    await signOut(auth);
 
-                    if (data.success) {
-                        // Limpa os campos do formulário
-                        setAuthEmail("");
-                        setAuthPassword("");
-                        setAuthNome("");
-                        setAuthCelular("");
-                        setAuthCreci("");
-                        setRegistrationSuccessMsg("");
+                    // Limpa os campos do formulário
+                    setAuthEmail("");
+                    setAuthPassword("");
+                    setAuthNome("");
+                    setAuthCelular("");
+                    setAuthCreci("");
+                    setIsRegistering(false);
 
-                        const formCadastro = document.querySelector('form');
-                        if (formCadastro) formCadastro.reset();
+                    setAuthError("Seu cadastro foi recebido com sucesso! Aguarde a aprovação do administrador.");
+                    alert("Cadastro realizado com sucesso! Aguarde a aprovação do administrador para liberar seu acesso.");
 
-                        // Força a troca para a aba de login
-                        setIsRegistering(false);
-                        if (typeof alternarParaLogin === 'function') {
-                            alternarParaLogin();
-                        }
-
-                        // Exibe o banner rosa de aviso imediatamente no topo do formulário de login
-                        setAuthError("Seu cadastro foi recebido e aguarda aprovação do administrador.");
-                    } else {
-                        alert("Erro no cadastro: " + (data.message || "Não foi possível concluir o cadastro."));
-                        setAuthError("Erro no cadastro: " + (data.message || "Não foi possível concluir o cadastro."));
-                    }
                 } catch (error) {
-                    console.error("Erro na requisição de cadastro:", error);
-                    alert("Erro na conexão com o servidor: " + (error?.message || error));
-                    setAuthError("Erro na conexão com o servidor: " + (error?.message || error));
+                    console.error("Erro no cadastro:", error);
+                    const errStr = String(error?.message || error?.code || error);
+                    
+                    if (error?.code === "auth/email-already-in-use" || errStr.includes("email-already-in-use")) {
+                        setAuthError("Este e-mail já está cadastrado no sistema.");
+                        alert("Este e-mail já está cadastrado no sistema.");
+                    } else if (error?.code === "auth/invalid-email" || errStr.includes("invalid-email")) {
+                        setAuthError("E-mail inválido. Verifique se digitou o e-mail completo com .com ou .br.");
+                        alert("E-mail inválido. Verifique se digitou o e-mail completo com .com ou .br.");
+                    } else if (error?.code === "auth/weak-password" || errStr.includes("weak-password")) {
+                        setAuthError("A senha deve ter no mínimo 6 caracteres.");
+                        alert("A senha deve ter no mínimo 6 caracteres.");
+                    } else {
+                        setAuthError("Erro ao realizar cadastro: " + (error?.message || "Verifique os dados informados."));
+                        alert("Erro ao realizar cadastro: " + (error?.message || "Verifique os dados informados."));
+                    }
                 } finally {
                     setAuthSubmitting(false);
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.innerText = "Criar Minha Conta";
-                    }
                 }
             };
 
@@ -1987,21 +1997,6 @@
                                                     className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none font-medium text-slate-800"
                                                 />
                                             </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="block text-xs font-bold text-slate-700 mb-1">Perfil de Usuário (Permissão)</label>
-                                            <select 
-                                                value={authPerfil}
-                                                onChange={(e) => setAuthPerfil(e.target.value)}
-                                                className="w-full px-3 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-[#1D8843] focus:border-[#1D8843] outline-none font-semibold text-slate-800 bg-white"
-                                            >
-                                                <option value="Corretor">Corretor (Simulações e atendimento)</option>
-                                                <option value="Assistente">Assistente (Realiza e visualiza simulações)</option>
-                                                <option value="Analista">Analista (Simulações, edições e relatórios)</option>
-                                                <option value="Gerente">Gerente (Simulações, salvamento e relatórios)</option>
-                                                <option value="Administrador">Administrador (Gestão de usuários e acesso total)</option>
-                                            </select>
                                         </div>
 
                                         <button 
