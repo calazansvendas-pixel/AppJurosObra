@@ -11,5 +11,9 @@
   "dependencies": {
     "express": "^4.19.2",
     "firebase-admin": "^14.2.0"
+  },
+  "devDependencies": {
+    "@babel/parser": "^8.0.4",
+    "@babel/preset-react": "^8.0.1"
   }
 }
