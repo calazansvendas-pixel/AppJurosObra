@@ -1985,19 +1985,11 @@
                             <p className="text-slate-600 text-sm mb-5 leading-relaxed font-medium">
                                 Olá <strong className="text-slate-900">{userData.nome || currentUser.email}</strong>!
                             </p>
-                            <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 font-semibold mb-6 text-left space-y-2.5">
-                                <div className="flex items-start gap-2.5">
-                                    <Info size={18} className="text-amber-600 shrink-0 mt-0.5" />
-                                    <span className="leading-relaxed">
-                                        Seu cadastro foi recebido com sucesso! Aguarde a aprovação do administrador para liberar o seu acesso ao simulador.
-                                    </span>
-                                </div>
-                                <div className="text-[11px] text-amber-800 font-medium border-t border-amber-200/80 pt-2.5 mt-2 space-y-1">
-                                    <div><strong>E-mail:</strong> {userData.email}</div>
-                                    {userData.celular && <div><strong>Celular:</strong> {userData.celular}</div>}
-                                    {userData.creci && <div><strong>CRECI:</strong> {userData.creci}</div>}
-                                    <div><strong>Perfil Solicitado:</strong> {userData.perfil || 'Corretor'}</div>
-                                </div>
+                            <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 font-semibold mb-6 text-left flex items-start gap-2.5">
+                                <Info size={18} className="text-amber-600 shrink-0 mt-0.5" />
+                                <span className="leading-relaxed">
+                                    Seu cadastro foi recebido com sucesso! Aguarde a aprovação do administrador para liberar o seu acesso ao simulador.
+                                </span>
                             </div>
                             <button 
                                 onClick={handleLogout}
@@ -2156,18 +2148,6 @@
                                             <User size={18} className="text-[#0284C7]" />
                                             {authSubmitting ? 'Acessando...' : 'Entrar no Sistema'}
                                         </button>
-
-                                        <div className="pt-2 text-center border-t border-[#E2E8F0] dark:border-slate-800 mt-4">
-                                            <p className="text-xs text-[#64748B] dark:text-slate-400 mb-2">Ainda não tem conta de corretor?</p>
-                                            <button
-                                                type="button"
-                                                onClick={() => { setIsRegistering(true); setAuthError(''); setRegistrationSuccessMsg(''); }}
-                                                className="w-full bg-[#E0F2FE] hover:bg-[#BAE6FD] text-[#0369a1] font-bold py-2.5 rounded-xl border border-[#BAE6FD] transition-all text-xs flex items-center justify-center gap-2 cursor-pointer"
-                                            >
-                                                <Shield size={16} className="text-[#0284C7]" />
-                                                Cadastrar como Corretor
-                                            </button>
-                                        </div>
                                     </form>
                                 ) : (
                                     /* TELA 2: CADASTRO */
@@ -2469,29 +2449,6 @@
                                     <p className="text-[#64748B] dark:text-slate-300 text-sm mt-1 font-medium">
                                         {userData.nome || currentUser.email}
                                     </p>
-                                </div>
-
-                                <div className="bg-[#F8FAFC] dark:bg-slate-800/80 p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-700 text-xs text-[#0F172A] dark:text-slate-300 text-left space-y-2">
-                                    <div className="flex justify-between border-b border-slate-200 dark:border-slate-700/60 pb-2">
-                                        <span className="text-slate-500 font-medium">E-mail:</span>
-                                        <span className="font-bold text-[#0F172A] dark:text-white">{userData.email || currentUser.email}</span>
-                                    </div>
-                                    {userData.creci && (
-                                        <div className="flex justify-between border-b border-slate-200 dark:border-slate-700/60 pb-2">
-                                            <span className="text-slate-500 font-medium">CRECI:</span>
-                                            <span className="font-bold text-[#0F172A] dark:text-white">{userData.creci}</span>
-                                        </div>
-                                    )}
-                                    {(userData.imobiliaria || userData.empresa) && (
-                                        <div className="flex justify-between border-b border-slate-200 dark:border-slate-700/60 pb-2">
-                                            <span className="text-slate-500 font-medium">Imobiliária:</span>
-                                            <span className="font-bold text-[#0F172A] dark:text-white">{userData.imobiliaria || userData.empresa}</span>
-                                        </div>
-                                    )}
-                                    <div className="flex justify-between">
-                                        <span className="text-slate-500 font-medium">Perfil:</span>
-                                        <span className="font-bold text-[#0284C7]">{userData.perfil || 'Corretor'}</span>
-                                    </div>
                                 </div>
 
                                 <div className="pt-2 space-y-3">
