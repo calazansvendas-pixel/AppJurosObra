@@ -625,8 +625,11 @@
 
             // Helper para formatar o período de referência da TR
             const formatTrPeriodo = (dataStr) => {
-                if (!dataStr || dataStr === 'Buscando...' || dataStr === 'Fallback') {
-                    return 'Ref. Julho/2026';
+                if (!dataStr || dataStr === 'Buscando...') {
+                    return 'Ref. buscando...';
+                }
+                if (dataStr === 'Fallback') {
+                    return 'Ref. valor padrão (offline)';
                 }
                 if (dataStr.includes('/')) {
                     const parts = dataStr.split('/');
@@ -1242,29 +1245,67 @@
                 }
             }, [userData, currentUser]);
 
+            // Valor de último recurso, usado apenas se a API do BCB e o proxy local
+            // estiverem indisponíveis e nenhuma busca anterior tiver tido sucesso nesta sessão.
+            // Referência: TR de 0,17% a.m. (aprox. média observada em 2026). Revisar periodicamente.
+            const TR_FALLBACK_ESTATICO = 0.17;
+            const BCB_TR_URL = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.226/dados/ultimos/1?formato=json';
+
+            // Faz um fetch com timeout (AbortController) para evitar que a busca de TR
+            // fique "pendurada" indefinidamente em caso de rede lenta ou indisponível.
+            const fetchComTimeout = async (url, timeoutMs = 6000) => {
+                const controller = new AbortController();
+                const timer = setTimeout(() => controller.abort(), timeoutMs);
+                try {
+                    return await fetch(url, { signal: controller.signal });
+                } finally {
+                    clearTimeout(timer);
+                }
+            };
+
             const fetchTR = async () => {
                 setIsFetchingTr(true);
                 try {
-                    let response = await fetch('/api/tr').catch(() => null);
+                    // 1ª tentativa: proxy local/serverless (evita eventual bloqueio de CORS e
+                    // esconde a URL do BCB do cliente). Ver server.js e api/tr.js.
+                    let response = await fetchComTimeout('/api/tr').catch((err) => {
+                        console.warn('TR: proxy /api/tr indisponível, tentando API do BCB diretamente.', err?.message || err);
+                        return null;
+                    });
+
+                    // 2ª tentativa: chamada direta à API do BCB (SGS série 226 - TR).
+                    // A API do BCB responde com Access-Control-Allow-Origin: *, então funciona
+                    // também direto do navegador caso o proxy não exista (ex.: hospedagem estática).
                     if (!response || !response.ok) {
-                        response = await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.226/dados/ultimos/1?formato=json').catch(() => null);
+                        response = await fetchComTimeout(BCB_TR_URL).catch((err) => {
+                            console.warn('TR: falha ao buscar diretamente na API do BCB.', err?.message || err);
+                            return null;
+                        });
                     }
+
                     if (response && response.ok) {
                         const data = await response.json().catch(() => null);
-                        if (data && Array.isArray(data) && data.length > 0) {
-                            setTr(parseFloat(data[0].valor) || 0.10);
+                        const valorBruto = Array.isArray(data) && data.length > 0 ? data[0].valor : undefined;
+                        const valorNum = parseFloat(valorBruto);
+                        if (Number.isFinite(valorNum)) {
+                            setTr(valorNum);
                             setTrData(data[0].data || 'Atualizada');
                             return;
                         }
+                        console.warn('TR: resposta da API em formato inesperado.', data);
+                    } else {
+                        console.warn('TR: nenhuma das fontes (proxy local e API do BCB) respondeu com sucesso.');
                     }
-                    setTr(0.10);
-                    setTrData('Fallback');
+
+                    // Nenhuma fonte respondeu: mantém o último valor obtido com sucesso nesta
+                    // sessão (se houver) em vez de sobrescrever com o fallback estático.
+                    setTr((valorAtual) => (valorAtual && valorAtual > 0 ? valorAtual : TR_FALLBACK_ESTATICO));
+                    setTrData((dataAtual) => (dataAtual && dataAtual !== 'Buscando...' && dataAtual !== 'Fallback' ? dataAtual : 'Fallback'));
                 } catch (error) {
-                    console.error('Erro ao buscar TR:', error);
-                    setTr(0.10);
+                    console.error('Erro inesperado ao buscar TR:', error);
+                    setTr((valorAtual) => (valorAtual && valorAtual > 0 ? valorAtual : TR_FALLBACK_ESTATICO));
                     setTrData('Fallback');
-                }
-                finally {
+                } finally {
                     setIsFetchingTr(false);
                 }
             };
@@ -2737,7 +2778,7 @@
                                     </div>
                                     <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1 flex items-center justify-between">
                                         <span>Base: TR de {formatTrPeriodo(trData).replace('Ref. ', '')}</span>
-                                        <span>Atualizado em: {trData && trData !== 'Buscando...' && trData !== 'Fallback' ? trData : new Date().toLocaleDateString('pt-BR')}</span>
+                                        <span>Atualizado em: {trData && trData !== 'Buscando...' && trData !== 'Fallback' ? trData : 'indisponível'}</span>
                                     </p>
                                 </div>
 
