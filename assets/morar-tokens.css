@@ -1,0 +1,56 @@
+/* MORAR Design System — tokens oficiais aplicados ao Simulador Juros Obra */
+:root {
+  --morar-primary: #006B3F;
+  --morar-primary-dark: #004F32;
+  --morar-primary-light: #14915B;
+  --morar-bg: #FFFFFF;
+  --morar-bg-soft: #F8F9F8;
+  --morar-bg-green: #F3FAF6;
+  --morar-text: #252B27;
+  --morar-text-secondary: #626A65;
+  --morar-text-muted: #7B837E;
+  --morar-text-white: #FFFFFF;
+  --morar-border: #E5E8E6;
+  --morar-success: #168653;
+  --morar-warning: #D69A24;
+  --morar-danger: #C94343;
+  --morar-info: #3478A8;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, .06);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, .08);
+
+  --font-display: 'Montserrat', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-size-base: 15px;
+
+  --space1: 4px;
+  --space2: 8px;
+  --space3: 12px;
+  --space4: 16px;
+  --space5: 20px;
+  --space6: 24px;
+  --space8: 32px;
+  --space10: 40px;
+  --space12: 48px;
+  --space16: 64px;
+  --space20: 80px;
+  --space24: 96px;
+}
+
+/* Tipografia institucional: Montserrat para títulos, Inter para o corpo */
+h1, h2, h3, h4, h5, h6,
+.morar-display, .morar-h1, .morar-h2, .morar-h3 {
+  font-family: var(--font-display);
+}
+
+.morar-display { font-size: 48px; line-height: 1.08; font-weight: 700; letter-spacing: -0.02em; }
+.morar-h1 { font-size: 40px; line-height: 1.1; font-weight: 700; }
+.morar-h2 { font-size: 30px; line-height: 1.15; font-weight: 700; }
+.morar-h3 { font-size: 24px; line-height: 1.2; font-weight: 600; }
+.morar-body { font-family: var(--font-body); font-size: var(--font-size-base); line-height: 1.5; font-weight: 400; }
+.morar-button { font-family: var(--font-body); font-size: 15px; line-height: 1; font-weight: 600; }

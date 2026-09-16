@@ -3,21 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#006B3F">
     <title>Simulador Juros Obra - Morar</title>
-    
-    <!-- Google Fonts Inter & Plus Jakarta Sans -->
+
+    <!-- Favicon oficial Morar (mark "M") -->
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="assets/favicon-48.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="assets/favicon-512.png">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+    <!-- Google Fonts: Montserrat (headings) & Inter (corpo) — Design System Morar -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- MORAR Design System — tokens oficiais -->
+    <link rel="stylesheet" href="assets/morar-tokens.css">
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        morar: {
+                            50: '#F3FAF6',
+                            100: '#E5F3EB',
+                            200: '#B9DFC9',
+                            300: '#82C7A5',
+                            400: '#48AD7D',
+                            500: '#14915B',
+                            600: '#087A4A',
+                            700: '#006B3F',
+                            800: '#005D39',
+                            900: '#004F32',
+                            950: '#003D25',
+                        },
+                    },
+                    fontFamily: {
+                        display: ['Montserrat', 'sans-serif'],
+                    },
+                },
+            },
         }
     </script>
-    
+
     <!-- React & ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -56,7 +89,7 @@
             padding: 0; 
             background-color: #F0F4F8; 
             color: #0F172A;
-            font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
         /* TEMA ESCURO (DARK MODE) */
@@ -145,9 +178,9 @@
             background-color: rgba(217, 119, 6, 0.3) !important;
             color: #FDE68A !important;
         }
-        html.dark .bg-sky-50 {
+        html.dark .bg-morar-50 {
             background-color: rgba(2, 132, 199, 0.3) !important;
-            color: #7DD3FC !important;
+            color: #82C7A5 !important;
         }
         html.dark .bg-purple-50 {
             background-color: rgba(102, 43, 127, 0.4) !important;
@@ -482,7 +515,7 @@
                             onFocus={handleFocus}
                             onBlur={handleBlur}
                             placeholder={placeholder}
-                            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] dark:bg-slate-800 focus:ring-2 focus:ring-[#0284C7] focus:border-[#0284C7] outline-none transition-all font-semibold text-[#0F172A] dark:text-slate-100 placeholder-slate-400"
+                            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] dark:bg-slate-800 focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none transition-all font-semibold text-[#0F172A] dark:text-slate-100 placeholder-slate-400"
                         />
                     </div>
                     {helpText && <p className="text-xs text-slate-500 mt-1">{helpText}</p>}
@@ -1083,14 +1116,14 @@
                         <title>Ficha Cadastral - ${selectedUserProfile.nome || 'Usuário'}</title>
                         <style>
                             body { font-family: Arial, sans-serif; padding: 40px; color: #0F172A; max-width: 800px; margin: 0 auto; line-height: 1.5; }
-                            .header { border-bottom: 2px solid #0284C7; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
-                            .title { color: #005C8A; font-size: 22px; font-weight: bold; margin: 0; }
+                            .header { border-bottom: 2px solid #006B3F; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+                            .title { color: #004F32; font-size: 22px; font-weight: bold; margin: 0; }
                             .subtitle { color: #64748B; font-size: 13px; margin-top: 4px; }
                             .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 30px; }
                             .field { background: #F8FAFC; border: 1px solid #E2E8F0; padding: 12px 16px; border-radius: 8px; }
                             .field-label { font-size: 11px; font-weight: bold; color: #64748B; text-transform: uppercase; letter-spacing: 0.5px; }
                             .field-value { font-size: 14px; font-weight: bold; color: #0F172A; margin-top: 4px; }
-                            .badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: bold; background: #E0F2FE; color: #0284C7; border: 1px solid #BAE6FD; }
+                            .badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: bold; background: #E5F3EB; color: #006B3F; border: 1px solid #B9DFC9; }
                             .footer { text-align: center; font-size: 11px; color: #94A3B8; border-top: 1px solid #E2E8F0; padding-top: 20px; margin-top: 40px; }
                             @media print { body { padding: 20px; } }
                         </style>
@@ -2054,12 +2087,12 @@
 
                         <div id="authCard" className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-xl overflow-hidden border border-[#E2E8F0] dark:border-slate-800 text-slate-800 dark:text-slate-100">
                             {/* CABEÇALHO CALAZANS IMOB */}
-                            <div id="authCardHeader" className="bg-[#F0F9FF] dark:bg-slate-900 border-b border-[#BAE6FD] dark:border-slate-800 p-6 text-center">
-                                <div className="bg-[#E0F2FE] dark:bg-sky-950/80 border border-[#BAE6FD] dark:border-sky-800 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-2xs">
-                                    <HardHat size={36} className="text-[#0284C7] dark:text-sky-300" />
+                            <div id="authCardHeader" className="bg-[#F3FAF6] dark:bg-slate-900 border-b border-[#B9DFC9] dark:border-slate-800 p-6 text-center">
+                                <div className="bg-[#E5F3EB] dark:bg-morar-950/80 border border-[#B9DFC9] dark:border-morar-800 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-2xs p-2.5">
+                                    <img src="assets/morar-m-mark.png" alt="Morar" className="w-full h-full object-contain" />
                                 </div>
                                 <h1 className="text-xl md:text-2xl font-black text-[#0F172A] dark:text-white tracking-tight">Simulador Evolução de Obra</h1>
-                                <p className="text-[#075985] dark:text-sky-300 text-xs mt-1 font-bold uppercase tracking-wider">CALAZANS IMOB</p>
+                                <p className="text-[#004F32] dark:text-morar-300 text-xs mt-1 font-bold uppercase tracking-wider">CALAZANS IMOB</p>
                             </div>
 
                             {/* ABA DE NAVEGAÇÃO: ENTRAR / CRIAR CONTA */}
@@ -2067,7 +2100,7 @@
                                 <button 
                                     type="button"
                                     onClick={() => { setIsRegistering(false); setAuthError(''); setRegistrationSuccessMsg(''); }}
-                                    className={`flex-1 py-3.5 text-sm font-bold transition-all border-b-2 flex items-center justify-center gap-2 cursor-pointer ${!isRegistering ? 'border-[#0284C7] text-[#0284C7] dark:text-sky-400 bg-white dark:bg-slate-900 font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 font-semibold'}`}
+                                    className={`flex-1 py-3.5 text-sm font-bold transition-all border-b-2 flex items-center justify-center gap-2 cursor-pointer ${!isRegistering ? 'border-[#006B3F] text-[#006B3F] dark:text-morar-400 bg-white dark:bg-slate-900 font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 font-semibold'}`}
                                 >
                                     <User size={16} />
                                     Entrar
@@ -2075,7 +2108,7 @@
                                 <button 
                                     type="button"
                                     onClick={() => { setIsRegistering(true); setAuthError(''); setRegistrationSuccessMsg(''); }}
-                                    className={`flex-1 py-3.5 text-sm font-bold transition-all border-b-2 flex items-center justify-center gap-2 cursor-pointer ${isRegistering ? 'border-[#0284C7] text-[#0284C7] dark:text-sky-400 bg-white dark:bg-slate-900 font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 font-semibold'}`}
+                                    className={`flex-1 py-3.5 text-sm font-bold transition-all border-b-2 flex items-center justify-center gap-2 cursor-pointer ${isRegistering ? 'border-[#006B3F] text-[#006B3F] dark:text-morar-400 bg-white dark:bg-slate-900 font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 font-semibold'}`}
                                 >
                                     <Shield size={16} />
                                     Criar Conta
@@ -2084,10 +2117,10 @@
 
                             <div className="p-6">
                                 {registrationSuccessMsg && (
-                                    <div className="mb-4 p-4 bg-sky-50 dark:bg-sky-950/80 border border-sky-200 dark:border-sky-500/40 rounded-xl text-[#0284C7] dark:text-sky-200 text-xs font-semibold flex items-start gap-2.5 shadow-xs animate-in fade-in duration-200">
-                                        <CheckCircle2 size={20} className="shrink-0 text-[#0284C7] dark:text-sky-400 mt-0.5" />
+                                    <div className="mb-4 p-4 bg-morar-50 dark:bg-morar-950/80 border border-morar-200 dark:border-morar-500/40 rounded-xl text-[#006B3F] dark:text-morar-200 text-xs font-semibold flex items-start gap-2.5 shadow-xs animate-in fade-in duration-200">
+                                        <CheckCircle2 size={20} className="shrink-0 text-[#006B3F] dark:text-morar-400 mt-0.5" />
                                         <div className="leading-relaxed">
-                                            <p className="font-bold text-sm text-[#075985] dark:text-sky-100 mb-0.5">Cadastro Enviado!</p>
+                                            <p className="font-bold text-sm text-[#004F32] dark:text-morar-100 mb-0.5">Cadastro Enviado!</p>
                                             <span>{registrationSuccessMsg}</span>
                                         </div>
                                     </div>
@@ -2113,7 +2146,7 @@
                                                     placeholder="seu.email@imobiliaria.com"
                                                     value={authEmail}
                                                     onChange={(e) => setAuthEmail(e.target.value)}
-                                                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] focus:border-[#0284C7] outline-none font-medium placeholder-slate-400"
+                                                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none font-medium placeholder-slate-400"
                                                 />
                                             </div>
                                         </div>
@@ -2128,7 +2161,7 @@
                                                         setResetStatus({ type: '', message: '' });
                                                         setShowModalResetPassword(true);
                                                     }}
-                                                    className="text-xs font-bold text-[#0284C7] dark:text-sky-400 hover:underline transition-all cursor-pointer"
+                                                    className="text-xs font-bold text-[#006B3F] dark:text-morar-400 hover:underline transition-all cursor-pointer"
                                                 >
                                                     Esqueceu a senha?
                                                 </button>
@@ -2141,7 +2174,7 @@
                                                     placeholder="••••••••"
                                                     value={authPassword}
                                                     onChange={(e) => setAuthPassword(e.target.value)}
-                                                    className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] focus:border-[#0284C7] outline-none font-medium placeholder-slate-400"
+                                                    className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none font-medium placeholder-slate-400"
                                                 />
                                                 <button
                                                     type="button"
@@ -2157,9 +2190,9 @@
                                         <button 
                                             type="submit"
                                             disabled={authSubmitting}
-                                            className="w-full mt-2 bg-[#E0F2FE] hover:bg-[#BAE6FD] text-[#0369a1] border border-[#BAE6FD] font-bold py-3 rounded-xl transition-all shadow-2xs flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
+                                            className="w-full mt-2 bg-[#E5F3EB] hover:bg-[#B9DFC9] text-[#004F32] border border-[#B9DFC9] font-bold py-3 rounded-xl transition-all shadow-2xs flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
                                         >
-                                            <User size={18} className="text-[#0284C7]" />
+                                            <User size={18} className="text-[#006B3F]" />
                                             {authSubmitting ? 'Acessando...' : 'Entrar no Sistema'}
                                         </button>
                                     </form>
@@ -2176,7 +2209,7 @@
                                                     placeholder="Ex: João da Silva"
                                                     value={authNome}
                                                     onChange={(e) => setAuthNome(e.target.value)}
-                                                    className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] outline-none font-medium placeholder-slate-400"
+                                                    className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] outline-none font-medium placeholder-slate-400"
                                                 />
                                             </div>
                                         </div>
@@ -2193,7 +2226,7 @@
                                                         value={authCpf}
                                                         onChange={(e) => setAuthCpf(maskCPF(e.target.value))}
                                                         maxLength={14}
-                                                        className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] outline-none font-medium placeholder-slate-400"
+                                                        className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] outline-none font-medium placeholder-slate-400"
                                                     />
                                                 </div>
                                             </div>
@@ -2209,7 +2242,7 @@
                                                         value={authCelular}
                                                         onChange={(e) => setAuthCelular(maskPhone(e.target.value))}
                                                         maxLength={15}
-                                                        className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] outline-none font-medium placeholder-slate-400"
+                                                        className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] outline-none font-medium placeholder-slate-400"
                                                     />
                                                 </div>
                                             </div>
@@ -2225,7 +2258,7 @@
                                                     placeholder="seu.email@imobiliaria.com"
                                                     value={authEmail}
                                                     onChange={(e) => setAuthEmail(e.target.value)}
-                                                    className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] outline-none font-medium placeholder-slate-400"
+                                                    className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] outline-none font-medium placeholder-slate-400"
                                                 />
                                             </div>
                                         </div>
@@ -2241,7 +2274,7 @@
                                                         placeholder="12345-F"
                                                         value={authCreci}
                                                         onChange={(e) => setAuthCreci(e.target.value)}
-                                                        className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] outline-none font-medium placeholder-slate-400"
+                                                        className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] outline-none font-medium placeholder-slate-400"
                                                     />
                                                 </div>
                                             </div>
@@ -2256,7 +2289,7 @@
                                                         placeholder="Ex: Calazans Imóveis"
                                                         value={authImobiliaria}
                                                         onChange={(e) => setAuthImobiliaria(e.target.value)}
-                                                        className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] outline-none font-medium placeholder-slate-400"
+                                                        className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] outline-none font-medium placeholder-slate-400"
                                                     />
                                                 </div>
                                             </div>
@@ -2273,7 +2306,7 @@
                                                         placeholder="••••••••"
                                                         value={authPassword}
                                                         onChange={(e) => setAuthPassword(e.target.value)}
-                                                        className="w-full pl-10 pr-9 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] outline-none font-medium placeholder-slate-400"
+                                                        className="w-full pl-10 pr-9 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] outline-none font-medium placeholder-slate-400"
                                                     />
                                                     <button
                                                         type="button"
@@ -2295,7 +2328,7 @@
                                                         placeholder="••••••••"
                                                         value={authConfirmPassword}
                                                         onChange={(e) => setAuthConfirmPassword(e.target.value)}
-                                                        className="w-full pl-10 pr-9 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] outline-none font-medium placeholder-slate-400"
+                                                        className="w-full pl-10 pr-9 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] outline-none font-medium placeholder-slate-400"
                                                     />
                                                     <button
                                                         type="button"
@@ -2312,9 +2345,9 @@
                                             type="submit"
                                             id="btn-cadastrar"
                                             disabled={authSubmitting}
-                                            className="w-full mt-3 bg-[#E0F2FE] hover:bg-[#BAE6FD] text-[#0369a1] border border-[#BAE6FD] font-bold py-3 rounded-xl transition-all shadow-2xs flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
+                                            className="w-full mt-3 bg-[#E5F3EB] hover:bg-[#B9DFC9] text-[#004F32] border border-[#B9DFC9] font-bold py-3 rounded-xl transition-all shadow-2xs flex items-center justify-center gap-2 text-sm cursor-pointer disabled:opacity-50"
                                         >
-                                            <Shield size={18} className="text-[#0284C7]" />
+                                            <Shield size={18} className="text-[#006B3F]" />
                                             {authSubmitting ? 'Cadastrando...' : 'Cadastrar'}
                                         </button>
 
@@ -2322,9 +2355,9 @@
                                             <button
                                                 type="button"
                                                 onClick={() => { setIsRegistering(false); setAuthError(''); setRegistrationSuccessMsg(''); }}
-                                                className="text-xs text-[#64748B] dark:text-slate-400 hover:text-[#0284C7] transition-colors font-medium cursor-pointer"
+                                                className="text-xs text-[#64748B] dark:text-slate-400 hover:text-[#006B3F] transition-colors font-medium cursor-pointer"
                                             >
-                                                Já possui conta? <strong className="text-[#0284C7] dark:text-sky-400 underline">Fazer Login</strong>
+                                                Já possui conta? <strong className="text-[#006B3F] dark:text-morar-400 underline">Fazer Login</strong>
                                             </button>
                                         </div>
                                     </form>
@@ -2351,14 +2384,14 @@
                             <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
                                 <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-[#E2E8F0] dark:border-slate-800 text-slate-800 dark:text-slate-100 animate-in fade-in zoom-in-95 duration-200">
                                     {/* Cabeçalho do Modal */}
-                                    <div className="bg-[#F0F9FF] dark:bg-slate-900 border-b border-[#BAE6FD] dark:border-slate-800 text-[#0F172A] dark:text-white px-6 py-5 flex items-center justify-between">
+                                    <div className="bg-[#F3FAF6] dark:bg-slate-900 border-b border-[#B9DFC9] dark:border-slate-800 text-[#0F172A] dark:text-white px-6 py-5 flex items-center justify-between">
                                         <div className="flex items-center gap-3">
-                                            <div className="bg-[#E0F2FE] p-2.5 rounded-xl border border-[#BAE6FD]">
-                                                <KeyRound size={22} className="text-[#0284C7]" />
+                                            <div className="bg-[#E5F3EB] p-2.5 rounded-xl border border-[#B9DFC9]">
+                                                <KeyRound size={22} className="text-[#006B3F]" />
                                             </div>
                                             <div>
                                                 <h3 className="font-bold text-base leading-tight text-[#0F172A] dark:text-white">Recuperar Senha</h3>
-                                                <p className="text-[#075985] dark:text-sky-300 text-xs font-medium">Redefinição de acesso seguro</p>
+                                                <p className="text-[#004F32] dark:text-morar-300 text-xs font-medium">Redefinição de acesso seguro</p>
                                             </div>
                                         </div>
                                         <button 
@@ -2379,11 +2412,11 @@
                                         {resetStatus.message && (
                                             <div className={`p-3 rounded-xl text-xs font-semibold flex items-start gap-2.5 ${
                                                 resetStatus.type === 'success' 
-                                                    ? 'bg-sky-50 dark:bg-sky-950/80 border border-sky-200 text-[#0284C7]' 
+                                                    ? 'bg-morar-50 dark:bg-morar-950/80 border border-morar-200 text-[#006B3F]' 
                                                     : 'bg-rose-50 dark:bg-rose-950/80 border border-rose-200 text-[#EF4444]'
                                             }`}>
                                                 {resetStatus.type === 'success' ? (
-                                                    <CheckCircle2 size={16} className="shrink-0 text-[#0284C7] mt-0.5" />
+                                                    <CheckCircle2 size={16} className="shrink-0 text-[#006B3F] mt-0.5" />
                                                 ) : (
                                                     <Info size={16} className="shrink-0 text-[#EF4444] mt-0.5" />
                                                 )}
@@ -2401,7 +2434,7 @@
                                                     placeholder="seu.email@imobiliaria.com"
                                                     value={resetEmail}
                                                     onChange={(e) => setResetEmail(e.target.value)}
-                                                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] outline-none font-medium placeholder-slate-400"
+                                                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] outline-none font-medium placeholder-slate-400"
                                                 />
                                             </div>
                                         </div>
@@ -2410,9 +2443,9 @@
                                             <button
                                                 type="submit"
                                                 disabled={resetSubmitting}
-                                                className="w-full sm:flex-1 bg-[#E0F2FE] hover:bg-[#BAE6FD] text-[#0369a1] border border-[#BAE6FD] font-bold py-3 px-4 rounded-xl transition-all shadow-2xs flex items-center justify-center gap-2 text-xs disabled:opacity-50 cursor-pointer"
+                                                className="w-full sm:flex-1 bg-[#E5F3EB] hover:bg-[#B9DFC9] text-[#004F32] border border-[#B9DFC9] font-bold py-3 px-4 rounded-xl transition-all shadow-2xs flex items-center justify-center gap-2 text-xs disabled:opacity-50 cursor-pointer"
                                             >
-                                                <Send size={16} className="text-[#0284C7]" />
+                                                <Send size={16} className="text-[#006B3F]" />
                                                 {resetSubmitting ? 'Enviando...' : 'Enviar e-mail'}
                                             </button>
                                             <button
@@ -2442,21 +2475,21 @@
 
                         <div id="authCard" className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-xl overflow-hidden border border-[#E2E8F0] dark:border-slate-800 text-slate-800 dark:text-slate-100">
                             {/* CABEÇALHO CALAZANS IMOB */}
-                            <div id="authCardHeader" className="bg-[#F0F9FF] dark:bg-slate-900 border-b border-[#BAE6FD] dark:border-slate-800 p-6 text-center">
-                                <div className="bg-[#E0F2FE] dark:bg-sky-950/80 border border-[#BAE6FD] dark:border-sky-800 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-2xs">
-                                    <HardHat size={36} className="text-[#0284C7] dark:text-sky-300" />
+                            <div id="authCardHeader" className="bg-[#F3FAF6] dark:bg-slate-900 border-b border-[#B9DFC9] dark:border-slate-800 p-6 text-center">
+                                <div className="bg-[#E5F3EB] dark:bg-morar-950/80 border border-[#B9DFC9] dark:border-morar-800 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-2xs p-2.5">
+                                    <img src="assets/morar-m-mark.png" alt="Morar" className="w-full h-full object-contain" />
                                 </div>
                                 <h1 className="text-xl md:text-2xl font-black text-[#0F172A] dark:text-white tracking-tight">Simulador Evolução de Obra</h1>
-                                <p className="text-[#075985] dark:text-sky-300 text-xs mt-1 font-bold uppercase tracking-wider">CALAZANS IMOB</p>
+                                <p className="text-[#004F32] dark:text-morar-300 text-xs mt-1 font-bold uppercase tracking-wider">CALAZANS IMOB</p>
                             </div>
 
                             <div className="p-6 text-center space-y-5">
-                                <div className="bg-sky-50 dark:bg-sky-950/40 text-[#0284C7] dark:text-sky-400 w-16 h-16 rounded-full flex items-center justify-center mx-auto border border-sky-200 dark:border-sky-500/30 shadow-inner">
+                                <div className="bg-morar-50 dark:bg-morar-950/40 text-[#006B3F] dark:text-morar-400 w-16 h-16 rounded-full flex items-center justify-center mx-auto border border-morar-200 dark:border-morar-500/30 shadow-inner">
                                     <CheckCircle2 size={36} />
                                 </div>
 
                                 <div>
-                                    <span className="inline-block px-3 py-1 bg-sky-100 dark:bg-sky-950 text-[#0284C7] dark:text-sky-300 border border-sky-200 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
+                                    <span className="inline-block px-3 py-1 bg-morar-100 dark:bg-morar-950 text-[#006B3F] dark:text-morar-300 border border-morar-200 rounded-full text-xs font-bold uppercase tracking-wider mb-2">
                                         Sua Conta Está Ativa e Aprovada!
                                     </span>
                                     <h2 className="text-2xl font-black text-[#0F172A] dark:text-white">Bem-vindo(a)!</h2>
@@ -2469,9 +2502,9 @@
                                     <button
                                         type="button"
                                         onClick={() => setAppUnlocked(true)}
-                                        className="w-full bg-[#E0F2FE] hover:bg-[#BAE6FD] text-[#0369a1] border border-[#BAE6FD] font-black py-3.5 px-4 rounded-xl transition-all shadow-2xs flex items-center justify-center gap-2 text-sm cursor-pointer active:scale-95"
+                                        className="w-full bg-[#E5F3EB] hover:bg-[#B9DFC9] text-[#004F32] border border-[#B9DFC9] font-black py-3.5 px-4 rounded-xl transition-all shadow-2xs flex items-center justify-center gap-2 text-sm cursor-pointer active:scale-95"
                                     >
-                                        <PlayCircle size={20} className="text-[#0284C7]" />
+                                        <PlayCircle size={20} className="text-[#006B3F]" />
                                         Acessar Painel do Corretor
                                     </button>
 
@@ -2509,13 +2542,18 @@
                 <div className="min-h-screen p-4 md:p-8 font-sans text-[#0F172A] bg-[#F0F4F8] dark:bg-slate-950 dark:text-slate-100">
                 
                 {/* HEADER COM IDENTIFICAÇÃO DO USUÁRIO LOGADO, TROCA DE TEMA E LOGOUT */}
-                <div className="w-[90%] max-w-[1200px] mx-auto mb-6 bg-white dark:bg-slate-900 p-6 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div className="w-[90%] max-w-[1200px] mx-auto mb-6 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 overflow-hidden">
+                {/* FAIXA DE IDENTIDADE OFICIAL MORAR */}
+                <div className="px-6 pt-4 pb-3 border-b border-[#E5E8E6] dark:border-slate-800">
+                    <img src="assets/morar-logo.png" alt="Morar Construtora e Incorporadora" className="h-6 md:h-7 w-auto dark:brightness-0 dark:invert" />
+                </div>
+                <div className="p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="bg-[#E0F2FE] border border-[#BAE6FD] p-3 rounded-xl text-[#0284C7] shadow-2xs shrink-0">
+                        <div className="bg-[#E5F3EB] border border-[#B9DFC9] p-3 rounded-xl text-[#006B3F] shadow-2xs shrink-0">
                             <HardHat size={32} />
                         </div>
                         <div>
-                            <h1 className="text-2xl md:text-3xl font-black text-[#075985] dark:text-sky-300 tracking-tight">Simulador Juros Obra</h1>
+                            <h1 className="text-2xl md:text-3xl font-black text-[#004F32] dark:text-morar-300 tracking-tight">Simulador Juros Obra</h1>
                             <p className="text-[#64748B] dark:text-slate-400 text-sm md:text-base font-medium">Evolução de obra da Caixa - Modelo Apoio à Produção</p>
                         </div>
                     </div>
@@ -2528,17 +2566,17 @@
                         <button 
                             type="button"
                             onClick={() => setShowTutorialModal(true)}
-                            className="bg-[#E0F2FE] hover:bg-[#BAE6FD] text-[#0369a1] px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 border border-[#BAE6FD] hover:scale-[1.02] active:scale-95 touch-manipulation min-h-[44px]"
+                            className="bg-[#E5F3EB] hover:bg-[#B9DFC9] text-[#004F32] px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 border border-[#B9DFC9] hover:scale-[1.02] active:scale-95 touch-manipulation min-h-[44px]"
                             title="Abrir Tutorial e Guia do Corretor (Memória de Cálculo e Script)"
                         >
-                            <BookOpen size={18} className="text-[#0284C7]" />
+                            <BookOpen size={18} className="text-[#006B3F]" />
                             <span className="whitespace-nowrap">Tutorial / Guia</span>
                         </button>
 
                         {/* BADGE DE USUÁRIO LOGADO E BOTÃO LOGOUT */}
                         <div className="flex items-center gap-3 bg-[#F8FAFC] dark:bg-slate-800 p-2 rounded-xl border border-[#E2E8F0] dark:border-slate-700 shrink-0">
                             <div className="flex items-center gap-2.5 pl-1 pr-1">
-                                <div className="w-9 h-9 rounded-lg bg-[#E0F2FE] border border-[#BAE6FD] text-[#0284C7] flex items-center justify-center font-bold text-sm shadow-2xs shrink-0">
+                                <div className="w-9 h-9 rounded-lg bg-[#E5F3EB] border border-[#B9DFC9] text-[#006B3F] flex items-center justify-center font-bold text-sm shadow-2xs shrink-0">
                                     {userData?.nome ? userData.nome.substring(0, 2).toUpperCase() : 'US'}
                                 </div>
                                 <div className="text-xs">
@@ -2554,7 +2592,7 @@
                                 </div>
                             </div>
 
-                            <button 
+                            <button
                                 onClick={handleLogout}
                                 title="Sair do Sistema"
                                 className="bg-[#FEE2E2] hover:bg-rose-200 text-[#EF4444] p-2 rounded-lg border border-rose-200 transition-colors flex items-center gap-1.5 text-xs font-bold cursor-pointer"
@@ -2565,13 +2603,14 @@
                         </div>
                     </div>
                 </div>
+                </div>
 
                 {/* BANNER DE FEEDBACK */}
                 {feedback && (
                     <div className={`w-[90%] max-w-[1200px] mx-auto mb-6 p-4 rounded-xl font-semibold flex items-center gap-3 shadow-sm ${
-                        feedback.type === 'success' ? 'bg-sky-50 border border-sky-200 text-[#0284C7]' :
+                        feedback.type === 'success' ? 'bg-morar-50 border border-morar-200 text-[#006B3F]' :
                         feedback.type === 'error' ? 'bg-rose-50 border border-rose-200 text-[#EF4444]' :
-                        'bg-sky-50 border border-sky-200 text-[#0284C7]'
+                        'bg-morar-50 border border-morar-200 text-[#006B3F]'
                     }`}>
                         <CheckCircle2 size={20} />
                         <span>{feedback.text}</span>
@@ -2580,10 +2619,10 @@
 
                 {/* SEÇÃO ESPECIAL PARA GERENTE / ANALISTA / ADMINISTRADOR: PAINEL GERENCIAL */}
                 {(userData?.perfil === 'Gerente' || userData?.perfil === 'Analista' || userData?.perfil === 'Administrador') && (
-                    <div className="w-[90%] max-w-[1200px] mx-auto mb-6 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-5 border-l-4 border-l-[#0284C7]">
+                    <div className="w-[90%] max-w-[1200px] mx-auto mb-6 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-5 border-l-4 border-l-[#006B3F]">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div className="flex items-center gap-3">
-                                <div className="bg-[#E0F2FE] text-[#0284C7] p-2.5 rounded-xl border border-sky-200 shrink-0">
+                                <div className="bg-[#E5F3EB] text-[#006B3F] p-2.5 rounded-xl border border-morar-200 shrink-0">
                                     <BarChart2 size={24} />
                                 </div>
                                 <div>
@@ -2600,7 +2639,7 @@
                                 <div className="h-9 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
                                 <div className="flex flex-col items-center text-center">
                                     <span className="text-[#64748B] block mb-0.5">Volume Total Financiado:</span>
-                                    <span className="text-[#005C8A] dark:text-sky-400 font-bold text-sm">
+                                    <span className="text-[#004F32] dark:text-morar-400 font-bold text-sm">
                                         {formatCurrency(simulacoes.reduce((acc, c) => acc + (c.financiamento || 0), 0))}
                                     </span>
                                 </div>
@@ -2617,13 +2656,13 @@
                     {/* ========================================== */}
                     <div className="space-y-6">
                         {/* BOTÃO "ZERAR TODOS OS VALORES" NO TOPO DO PAINEL */}
-                        <div className="flex items-center justify-between bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-4 border-l-4 border-l-[#0284C7]">
+                        <div className="flex items-center justify-between bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-4 border-l-4 border-l-[#006B3F]">
                             <div>
                                 <span className="font-bold text-[#0F172A] dark:text-white text-sm">Limpar Formulário</span>
                             </div>
                             <button 
                                 onClick={handleReset}
-                                className="bg-[#E0F2FE] hover:bg-sky-200 text-[#0284C7] border border-sky-200 transition-all px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-2xs cursor-pointer"
+                                className="bg-[#E5F3EB] hover:bg-morar-200 text-[#006B3F] border border-morar-200 transition-all px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-2xs cursor-pointer"
                                 title="Zerar todos os valores e resultados"
                             >
                                 <RotateCcw size={15} />
@@ -2631,16 +2670,16 @@
                             </button>
                         </div>
 
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6 border-t-4 border-t-[#0284C7]">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6 border-t-4 border-t-[#006B3F]">
                             <div className="flex items-center justify-between gap-2 mb-6">
-                                <h2 className="text-xl font-bold flex items-center gap-2 text-[#075985] dark:text-sky-300">
-                                    <FileText className="text-[#0284C7]" /> 
+                                <h2 className="text-xl font-bold flex items-center gap-2 text-[#004F32] dark:text-morar-300">
+                                    <FileText className="text-[#006B3F]" /> 
                                     Dados do Contrato
                                 </h2>
                                 <button
                                     type="button"
                                     onClick={() => setShowTutorialModal(true)}
-                                    className="text-[#0284C7] dark:text-sky-400 text-xs font-bold flex items-center gap-1 hover:underline cursor-pointer transition-colors"
+                                    className="text-[#006B3F] dark:text-morar-400 text-xs font-bold flex items-center gap-1 hover:underline cursor-pointer transition-colors"
                                     title="Ver Tutorial e Memória de Cálculo"
                                 >
                                     <BookOpen size={15} />
@@ -2666,7 +2705,7 @@
                                             step="0.01"
                                             value={taxaAnual} 
                                             onChange={(e) => updateInputVal(setTaxaAnual)(e.target.value)}
-                                            className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] focus:border-[#0284C7] outline-none transition-all font-semibold"
+                                            className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none transition-all font-semibold"
                                         />
                                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
                                     </div>
@@ -2689,7 +2728,7 @@
                                             readOnly={!canEditCamposRestritos}
                                             className={`w-full pl-4 pr-16 py-2.5 rounded-xl border outline-none transition-all font-semibold ${
                                                 canEditCamposRestritos 
-                                                    ? 'border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 focus:ring-2 focus:ring-[#0284C7] focus:border-[#0284C7] text-[#0F172A] dark:text-white' 
+                                                    ? 'border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] text-[#0F172A] dark:text-white' 
                                                     : 'border-[#E2E8F0] dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-400 cursor-not-allowed'
                                             }`}
                                             placeholder="0.0000"
@@ -2728,9 +2767,9 @@
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6 border-t-4 border-t-[#0284C7]">
-                            <h2 className="text-xl font-bold flex items-center gap-2 mb-6 text-[#075985] dark:text-sky-300">
-                                <TrendingUp className="text-[#0284C7]" /> 
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6 border-t-4 border-t-[#006B3F]">
+                            <h2 className="text-xl font-bold flex items-center gap-2 mb-6 text-[#004F32] dark:text-morar-300">
+                                <TrendingUp className="text-[#006B3F]" /> 
                                 Evolução da Obra (Medição)
                             </h2>
                             
@@ -2752,7 +2791,7 @@
                                             readOnly={!canEditCamposRestritos}
                                             className={`w-full pl-4 pr-10 py-2.5 rounded-xl border outline-none transition-all font-semibold ${
                                                 canEditCamposRestritos 
-                                                    ? 'border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 focus:ring-2 focus:ring-[#0284C7] focus:border-[#0284C7] text-[#0F172A] dark:text-white' 
+                                                    ? 'border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] text-[#0F172A] dark:text-white' 
                                                     : 'border-[#E2E8F0] dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-400 cursor-not-allowed'
                                             }`}
                                         />
@@ -2770,7 +2809,7 @@
                                             step="0.1"
                                             value={percObra} 
                                             onChange={(e) => updateInputVal(setPercObra)(e.target.value)}
-                                            className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] focus:border-[#0284C7] outline-none transition-all font-semibold"
+                                            className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none transition-all font-semibold"
                                         />
                                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
                                     </div>
@@ -2782,9 +2821,9 @@
                         {/* BOTÃO PRINCIPAL "CALCULAR SIMULAÇÃO" */}
                         <button 
                             onClick={handleCalcularSimulacao}
-                            className="w-full bg-[#E0F2FE] hover:bg-[#BAE6FD] text-[#0369a1] border border-[#BAE6FD] transition-all py-3.5 px-4 rounded-xl font-black text-base flex items-center justify-center gap-2 shadow-2xs active:scale-[0.99] cursor-pointer"
+                            className="w-full bg-[#E5F3EB] hover:bg-[#B9DFC9] text-[#004F32] border border-[#B9DFC9] transition-all py-3.5 px-4 rounded-xl font-black text-base flex items-center justify-center gap-2 shadow-2xs active:scale-[0.99] cursor-pointer"
                         >
-                            <Calculator size={22} className="text-[#0284C7]" />
+                            <Calculator size={22} className="text-[#006B3F]" />
                             Calcular Simulação
                         </button>
                     </div>
@@ -2796,18 +2835,18 @@
                         
                         {!resultadoSimulacao ? (
                             <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-8 text-center flex flex-col items-center justify-center min-h-[380px]">
-                                <div className="w-16 h-16 rounded-full bg-[#E0F2FE] text-[#0284C7] flex items-center justify-center mb-4 border border-sky-200 shadow-2xs">
+                                <div className="w-16 h-16 rounded-full bg-[#E5F3EB] text-[#006B3F] flex items-center justify-center mb-4 border border-morar-200 shadow-2xs">
                                     <Calculator size={32} />
                                 </div>
                                 <h3 className="text-xl font-bold text-[#0F172A] dark:text-white mb-2">
                                     Simulação Pronta para Cálculo
                                 </h3>
                                 <p className="text-sm text-[#64748B] dark:text-slate-400 max-w-sm mb-6 leading-relaxed font-medium">
-                                    Preencha os dados do contrato e a evolução da obra na coluna ao lado e clique no botão <span className="font-bold text-[#0284C7]">"Calcular Simulação"</span> para visualizar os resultados.
+                                    Preencha os dados do contrato e a evolução da obra na coluna ao lado e clique no botão <span className="font-bold text-[#006B3F]">"Calcular Simulação"</span> para visualizar os resultados.
                                 </p>
                                 <button 
                                     onClick={handleCalcularSimulacao}
-                                    className="bg-[#0284C7] hover:bg-[#0073AD] text-white transition-all px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-sm cursor-pointer"
+                                    className="bg-[#006B3F] hover:bg-[#004F32] text-white transition-all px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-sm cursor-pointer"
                                 >
                                     <Play size={16} />
                                     Calcular Agora
@@ -2816,11 +2855,11 @@
                         ) : (
                             <>
                                 {/* CARD DE RESULTADO PRINCIPAL */}
-                                <div className="bg-[#F0F9FF] dark:bg-slate-900 border border-[#BAE6FD] dark:border-slate-800 rounded-2xl shadow-sm p-6 sm:p-8 text-[#0F172A] dark:text-white relative overflow-hidden">
+                                <div className="bg-[#F3FAF6] dark:bg-slate-900 border border-[#B9DFC9] dark:border-slate-800 rounded-2xl shadow-sm p-6 sm:p-8 text-[#0F172A] dark:text-white relative overflow-hidden">
                                     <div className="relative z-10">
                                         <div className="flex items-center justify-between mb-4 gap-2">
-                                            <span className="text-[#075985] dark:text-sky-300 font-bold uppercase tracking-wider text-xs sm:text-sm flex items-center gap-2 shrink-0">
-                                                <Calculator size={18} className="shrink-0 text-[#0284C7]" /> VALOR DA PARCELA
+                                            <span className="text-[#004F32] dark:text-morar-300 font-bold uppercase tracking-wider text-xs sm:text-sm flex items-center gap-2 shrink-0">
+                                                <Calculator size={18} className="shrink-0 text-[#006B3F]" /> VALOR DA PARCELA
                                             </span>
                                             
                                             {/* TR Badge */}
@@ -2829,42 +2868,42 @@
                                                     type="button"
                                                     onClick={fetchTR}
                                                     disabled={isFetchingTr}
-                                                    className="bg-[#E0F2FE] hover:bg-[#BAE6FD] border border-[#BAE6FD] rounded-full px-3 py-1 text-xs font-bold text-[#0369a1] transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                                                    className="bg-[#E5F3EB] hover:bg-[#B9DFC9] border border-[#B9DFC9] rounded-full px-3 py-1 text-xs font-bold text-[#004F32] transition-all cursor-pointer disabled:opacity-50 shrink-0"
                                                     title="Clique para atualizar a TR no Banco Central"
                                                 >
                                                     <span>TR: {isFetchingTr ? '...' : formatPercent(resultadoSimulacao.tr, 4)}</span>
                                                 </button>
                                             ) : (
-                                                <div className="bg-[#E0F2FE] border border-[#BAE6FD] rounded-full px-3 py-1 text-xs font-bold text-[#0369a1] shrink-0">
+                                                <div className="bg-[#E5F3EB] border border-[#B9DFC9] rounded-full px-3 py-1 text-xs font-bold text-[#004F32] shrink-0">
                                                     <span>TR: {isFetchingTr ? '...' : formatPercent(resultadoSimulacao.tr, 4)}</span>
                                                 </div>
                                             )}
                                         </div>
 
                                         <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-                                            <div className="text-4xl sm:text-5xl font-black tracking-tight text-[#0284C7] dark:text-sky-400 drop-shadow-2xs">
+                                            <div className="text-4xl sm:text-5xl font-black tracking-tight text-[#006B3F] dark:text-morar-400 drop-shadow-2xs">
                                                 {formatCurrency(resultadoSimulacao.totalParcela)}
                                             </div>
                                             <button 
                                                 type="button"
                                                 onClick={() => setShowEvolucaoModal(true)}
-                                                className="bg-[#E0F2FE] hover:bg-[#BAE6FD] text-[#0369a1] border border-[#BAE6FD] font-bold px-3.5 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-2xs active:scale-95 shrink-0"
+                                                className="bg-[#E5F3EB] hover:bg-[#B9DFC9] text-[#004F32] border border-[#B9DFC9] font-bold px-3.5 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-2xs active:scale-95 shrink-0"
                                                 title="Abrir gráfico comparativo com a evolução mensal de 10% a 100%"
                                             >
-                                                <TrendingUp size={18} className="text-[#0284C7]" />
+                                                <TrendingUp size={18} className="text-[#006B3F]" />
                                                 <span>Ver Evolução Mensal</span>
                                             </button>
                                         </div>
 
                                         {/* Progress Bar do Teto */}
                                         <div className="space-y-2">
-                                            <div className="flex justify-between text-xs sm:text-sm font-medium text-[#075985] dark:text-slate-300">
+                                            <div className="flex justify-between text-xs sm:text-sm font-medium text-[#004F32] dark:text-slate-300">
                                                 <span>Proporção / Parcela Futura</span>
-                                                <span className="font-bold text-[#0284C7] dark:text-sky-300">{formatPercent(resultadoSimulacao.tetoAlcancado, 1)} da parcela</span>
+                                                <span className="font-bold text-[#006B3F] dark:text-morar-300">{formatPercent(resultadoSimulacao.tetoAlcancado, 1)} da parcela</span>
                                             </div>
-                                            <div className="h-2.5 w-full bg-[#E0F2FE] dark:bg-slate-800 rounded-full overflow-hidden border border-[#BAE6FD] dark:border-slate-700">
+                                            <div className="h-2.5 w-full bg-[#E5F3EB] dark:bg-slate-800 rounded-full overflow-hidden border border-[#B9DFC9] dark:border-slate-700">
                                                 <div 
-                                                    className={`h-full rounded-full transition-all duration-500 ${resultadoSimulacao.tetoAlcancado > 90 ? 'bg-rose-500' : resultadoSimulacao.tetoAlcancado > 70 ? 'bg-amber-500' : 'bg-[#0284C7]'}`}
+                                                    className={`h-full rounded-full transition-all duration-500 ${resultadoSimulacao.tetoAlcancado > 90 ? 'bg-rose-500' : resultadoSimulacao.tetoAlcancado > 70 ? 'bg-amber-500' : 'bg-[#006B3F]'}`}
                                                     style={{ width: `${Math.min(resultadoSimulacao.tetoAlcancado, 100)}%` }}
                                                 ></div>
                                             </div>
@@ -2877,8 +2916,8 @@
 
                                 {/* MEMÓRIA DE CÁLCULO */}
                                 <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6">
-                                    <h3 className="text-lg font-bold text-[#075985] dark:text-sky-300 mb-4 flex items-center gap-2">
-                                        <Info className="text-[#0284C7]" /> 
+                                    <h3 className="text-lg font-bold text-[#004F32] dark:text-morar-300 mb-4 flex items-center gap-2">
+                                        <Info className="text-[#006B3F]" /> 
                                         Memória de Cálculo (Passo a Passo)
                                     </h3>
                                     
@@ -2886,14 +2925,14 @@
                                         {/* Passo A */}
                                         <div className="p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC] dark:bg-slate-800/50">
                                             <div className="flex items-start gap-3">
-                                                <div className="bg-[#0284C7]/10 text-[#0284C7] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">A</div>
+                                                <div className="bg-[#006B3F]/10 text-[#006B3F] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">A</div>
                                                 <div>
-                                                    <h4 className="font-semibold text-[#075985] dark:text-sky-300 text-sm">Saldo Liberado</h4>
+                                                    <h4 className="font-semibold text-[#004F32] dark:text-morar-300 text-sm">Saldo Liberado</h4>
                                                     <p className="text-xs text-[#64748B] dark:text-slate-400 mt-0.5">Terreno + obra executada emprestados.</p>
                                                     <div className="mt-2 font-mono text-xs bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-[#E2E8F0] dark:border-slate-700 text-[#0F172A] dark:text-slate-200 overflow-x-auto">
                                                         <span className="text-slate-400">% =</span> {formatPercent(resultadoSimulacao.percTerreno)} + {formatPercent(resultadoSimulacao.percObra)} = <b>{formatPercent(resultadoSimulacao.percTotalLiberado)}</b><br/>
                                                         <span className="text-slate-400">Saldo =</span> {formatCurrency(resultadoSimulacao.financiamento)} × {formatPercent(resultadoSimulacao.percTotalLiberado)}<br/>
-                                                        <span className="text-[#0284C7] font-semibold">= {formatCurrency(resultadoSimulacao.saldoLiberado)}</span>
+                                                        <span className="text-[#006B3F] font-semibold">= {formatCurrency(resultadoSimulacao.saldoLiberado)}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -2902,13 +2941,13 @@
                                         {/* Passo B */}
                                         <div className="p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC] dark:bg-slate-800/50">
                                             <div className="flex items-start gap-3">
-                                                <div className="bg-[#0284C7]/10 text-[#0284C7] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">B</div>
+                                                <div className="bg-[#006B3F]/10 text-[#006B3F] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">B</div>
                                                 <div>
-                                                    <h4 className="font-semibold text-[#075985] dark:text-sky-300 text-sm">Taxa do Mês</h4>
+                                                    <h4 className="font-semibold text-[#004F32] dark:text-morar-300 text-sm">Taxa do Mês</h4>
                                                     <p className="text-xs text-[#64748B] dark:text-slate-400 mt-0.5">Taxa anual ({formatPercent(resultadoSimulacao.taxaAnual)}) dividida por 12.</p>
                                                     <div className="mt-2 font-mono text-xs bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-[#E2E8F0] dark:border-slate-700 text-[#0F172A] dark:text-slate-200 overflow-x-auto">
                                                         <span className="text-slate-400">Taxa Mês =</span> {formatPercent(resultadoSimulacao.taxaAnual)} ÷ 12 <br/>
-                                                        <span className="text-[#0284C7] font-semibold">= {formatPercent(resultadoSimulacao.taxaMensal, 4)} ao mês</span>
+                                                        <span className="text-[#006B3F] font-semibold">= {formatPercent(resultadoSimulacao.taxaMensal, 4)} ao mês</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -2917,13 +2956,13 @@
                                         {/* Passo C */}
                                         <div className="p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC] dark:bg-slate-800/50">
                                             <div className="flex items-start gap-3">
-                                                <div className="bg-[#0284C7]/10 text-[#0284C7] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">C</div>
+                                                <div className="bg-[#006B3F]/10 text-[#006B3F] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">C</div>
                                                 <div>
-                                                    <h4 className="font-semibold text-[#075985] dark:text-sky-300 text-sm">Juros sobre Saldo</h4>
+                                                    <h4 className="font-semibold text-[#004F32] dark:text-morar-300 text-sm">Juros sobre Saldo</h4>
                                                     <p className="text-xs text-[#64748B] dark:text-slate-400 mt-0.5">Taxa mensal × valor liberado.</p>
                                                     <div className="mt-2 font-mono text-xs bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-[#E2E8F0] dark:border-slate-700 text-[#0F172A] dark:text-slate-200 overflow-x-auto">
                                                         <span className="text-slate-400">Juros =</span> {formatCurrency(resultadoSimulacao.saldoLiberado)} × {formatPercent(resultadoSimulacao.taxaMensal, 4)}<br/>
-                                                        <span className="text-[#0284C7] font-semibold">= {formatCurrency(resultadoSimulacao.valorJuros)}</span>
+                                                        <span className="text-[#006B3F] font-semibold">= {formatCurrency(resultadoSimulacao.valorJuros)}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -2932,15 +2971,15 @@
                                         {/* Passo D */}
                                         {canEditCamposRestritos ? (
                                             /* Visão Administrador e Gerente: Card completo com destaque visual, opções de atualização e edição */
-                                            <div className="p-4 rounded-xl border border-sky-200 dark:border-sky-800 bg-[#E0F2FE]/50 dark:bg-sky-950/30">
+                                            <div className="p-4 rounded-xl border border-morar-200 dark:border-morar-800 bg-[#E5F3EB]/50 dark:bg-morar-950/30">
                                                 <div className="flex items-start gap-3">
-                                                    <div className="bg-[#0284C7] text-white font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm shadow-2xs">D</div>
+                                                    <div className="bg-[#006B3F] text-white font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm shadow-2xs">D</div>
                                                     <div className="w-full">
                                                         <div className="flex items-center justify-between">
-                                                            <h4 className="font-semibold text-[#075985] dark:text-sky-300 text-sm flex items-center gap-1.5">
+                                                            <h4 className="font-semibold text-[#004F32] dark:text-morar-300 text-sm flex items-center gap-1.5">
                                                                 Correção pela TR (Banco Central)
                                                             </h4>
-                                                            <span className="text-[11px] font-medium text-[#0284C7] bg-sky-100 dark:bg-sky-900/60 px-2 py-0.5 rounded-full border border-sky-200">
+                                                            <span className="text-[11px] font-medium text-[#006B3F] bg-morar-100 dark:bg-morar-900/60 px-2 py-0.5 rounded-full border border-morar-200">
                                                                 {formatTrPeriodo(trData)}
                                                             </span>
                                                         </div>
@@ -2954,7 +2993,7 @@
                                                                     step="0.0001"
                                                                     value={tr} 
                                                                     onChange={(e) => updateInputVal(setTr)(e.target.value)}
-                                                                    className="w-full pl-2.5 pr-8 py-1.5 text-xs rounded-lg border border-sky-300 bg-white dark:bg-slate-800 font-mono font-bold text-[#0F172A] dark:text-white shadow-2xs focus:ring-2 focus:ring-[#0284C7] outline-none"
+                                                                    className="w-full pl-2.5 pr-8 py-1.5 text-xs rounded-lg border border-morar-300 bg-white dark:bg-slate-800 font-mono font-bold text-[#0F172A] dark:text-white shadow-2xs focus:ring-2 focus:ring-[#006B3F] outline-none"
                                                                 />
                                                                 <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">% a.m.</span>
                                                             </div>
@@ -2962,16 +3001,16 @@
                                                             <button 
                                                                 onClick={fetchTR}
                                                                 disabled={isFetchingTr}
-                                                                className="px-2.5 py-1.5 bg-[#0284C7] text-white hover:bg-[#0073AD] transition-all rounded-lg text-xs font-bold flex items-center gap-1 disabled:opacity-50 shadow-2xs cursor-pointer"
+                                                                className="px-2.5 py-1.5 bg-[#006B3F] text-white hover:bg-[#004F32] transition-all rounded-lg text-xs font-bold flex items-center gap-1 disabled:opacity-50 shadow-2xs cursor-pointer"
                                                                 title="Atualizar via API SGS do Banco Central"
                                                             >
                                                                 <RefreshCw size={12} className={isFetchingTr ? "animate-spin" : ""} />
                                                                 Atualizar
                                                             </button>
                                                         </div>
-                                                        <div className="mt-2 font-mono text-xs bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-sky-200 dark:border-slate-700 text-[#0F172A] dark:text-slate-200 overflow-x-auto shadow-2xs">
+                                                        <div className="mt-2 font-mono text-xs bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-morar-200 dark:border-slate-700 text-[#0F172A] dark:text-slate-200 overflow-x-auto shadow-2xs">
                                                             <span className="text-slate-400">TR =</span> {formatCurrency(resultadoSimulacao.saldoLiberado)} × {formatPercent(resultadoSimulacao.tr, 4)}<br/>
-                                                            <span className="text-[#0284C7] font-semibold">= {formatCurrency(resultadoSimulacao.valorTr)}</span>
+                                                            <span className="text-[#006B3F] font-semibold">= {formatCurrency(resultadoSimulacao.valorTr)}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -2980,13 +3019,13 @@
                                             /* Visão Corretor, Assistente e Analista: Card simplificado */
                                             <div className="p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC] dark:bg-slate-800/50">
                                                 <div className="flex items-start gap-3">
-                                                    <div className="bg-[#0284C7]/10 text-[#0284C7] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">D</div>
+                                                    <div className="bg-[#006B3F]/10 text-[#006B3F] font-bold rounded-lg w-7 h-7 flex items-center justify-center shrink-0 text-sm">D</div>
                                                     <div className="w-full">
-                                                        <h4 className="font-semibold text-[#075985] dark:text-sky-300 text-sm">Correção pela TR</h4>
+                                                        <h4 className="font-semibold text-[#004F32] dark:text-morar-300 text-sm">Correção pela TR</h4>
                                                         <p className="text-xs text-[#64748B] dark:text-slate-400 mt-0.5">Taxa Referencial aplicada sobre o saldo devedor liberado ({formatCurrency(resultadoSimulacao.saldoLiberado)}).</p>
                                                         <div className="mt-2 font-mono text-xs bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-[#E2E8F0] dark:border-slate-700 text-[#0F172A] dark:text-slate-200 overflow-x-auto">
                                                             <span className="text-slate-400">TR =</span> {formatCurrency(resultadoSimulacao.saldoLiberado)} × {formatPercent(resultadoSimulacao.tr, 4)}<br/>
-                                                            <span className="text-[#0284C7] font-semibold">= {formatCurrency(resultadoSimulacao.valorTr)}</span>
+                                                            <span className="text-[#006B3F] font-semibold">= {formatCurrency(resultadoSimulacao.valorTr)}</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -2994,16 +3033,16 @@
                                         )}
 
                                         {/* Conclusão - Composição Final da Parcela */}
-                                        <div className="p-4 sm:p-5 rounded-xl bg-[#F0F9FF] dark:bg-slate-900 text-[#0F172A] dark:text-white border border-[#BAE6FD] dark:border-slate-800 space-y-4 shadow-2xs">
-                                            <div className="flex items-center justify-between gap-2 flex-wrap border-b border-[#BAE6FD] dark:border-slate-800 pb-2.5">
-                                                <h4 className="font-bold flex items-center gap-2 text-[#075985] dark:text-sky-300 text-sm sm:text-base">
-                                                    <CheckCircle2 size={18} className="text-[#0284C7]" /> 
+                                        <div className="p-4 sm:p-5 rounded-xl bg-[#F3FAF6] dark:bg-slate-900 text-[#0F172A] dark:text-white border border-[#B9DFC9] dark:border-slate-800 space-y-4 shadow-2xs">
+                                            <div className="flex items-center justify-between gap-2 flex-wrap border-b border-[#B9DFC9] dark:border-slate-800 pb-2.5">
+                                                <h4 className="font-bold flex items-center gap-2 text-[#004F32] dark:text-morar-300 text-sm sm:text-base">
+                                                    <CheckCircle2 size={18} className="text-[#006B3F]" /> 
                                                     Composição Final da Parcela
                                                 </h4>
                                                 <button 
                                                     type="button"
                                                     onClick={() => setShowEvolucaoModal(true)}
-                                                    className="text-xs font-bold text-[#0284C7] dark:text-sky-400 hover:underline flex items-center gap-1 cursor-pointer transition-colors"
+                                                    className="text-xs font-bold text-[#006B3F] dark:text-morar-400 hover:underline flex items-center gap-1 cursor-pointer transition-colors"
                                                 >
                                                     <TrendingUp size={14} />
                                                     <span>Ver Evolução Mensal</span>
@@ -3028,14 +3067,14 @@
                                                     <span className="text-slate-500">Taxa Adm. CEF:</span> 
                                                     <span className="font-semibold">{formatCurrency(TAXA_ADM)}</span>
                                                 </li>
-                                                <li className="border-t border-[#BAE6FD] dark:border-slate-800 my-1 pt-2 flex justify-between font-bold text-sm text-[#0F172A] dark:text-white">
+                                                <li className="border-t border-[#B9DFC9] dark:border-slate-800 my-1 pt-2 flex justify-between font-bold text-sm text-[#0F172A] dark:text-white">
                                                     <span>Total (TEO):</span> 
-                                                    <span className="text-[#0284C7] dark:text-sky-400 text-base font-black">{formatCurrency(resultadoSimulacao.totalParcela)}</span>
+                                                    <span className="text-[#006B3F] dark:text-morar-400 text-base font-black">{formatCurrency(resultadoSimulacao.totalParcela)}</span>
                                                 </li>
                                             </ul>
 
                                             {/* Proporção e % Teto Futuro */}
-                                            <div className="pt-3 border-t border-[#BAE6FD] dark:border-slate-800 space-y-2 font-sans">
+                                            <div className="pt-3 border-t border-[#B9DFC9] dark:border-slate-800 space-y-2 font-sans">
                                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-[#64748B] dark:text-slate-300">
                                                     <span className="font-medium">Comparação com a Parcela Futura (Pós-Chaves):</span>
                                                     <span className="font-bold text-[#0F172A] dark:text-white font-mono">{formatCurrency(resultadoSimulacao.parcelaFutura)}</span>
@@ -3043,15 +3082,15 @@
 
                                                 <div className="flex justify-between items-center text-xs">
                                                     <span className="text-slate-500">% Teto Alcançado:</span>
-                                                    <span className="font-extrabold text-[#0284C7] dark:text-sky-300 font-mono">
+                                                    <span className="font-extrabold text-[#006B3F] dark:text-morar-300 font-mono">
                                                         {formatPercent(resultadoSimulacao.tetoAlcancado, 1)} da parcela futura
                                                     </span>
                                                 </div>
 
                                                 {/* Barra de Progresso Visual */}
-                                                <div className="h-2.5 w-full bg-[#E0F2FE] dark:bg-slate-800 rounded-full overflow-hidden border border-[#BAE6FD] dark:border-slate-700 mt-1">
+                                                <div className="h-2.5 w-full bg-[#E5F3EB] dark:bg-slate-800 rounded-full overflow-hidden border border-[#B9DFC9] dark:border-slate-700 mt-1">
                                                     <div 
-                                                        className={`h-full rounded-full transition-all duration-500 ${resultadoSimulacao.tetoAlcancado > 90 ? 'bg-rose-500' : resultadoSimulacao.tetoAlcancado > 70 ? 'bg-amber-500' : 'bg-[#0284C7]'}`}
+                                                        className={`h-full rounded-full transition-all duration-500 ${resultadoSimulacao.tetoAlcancado > 90 ? 'bg-rose-500' : resultadoSimulacao.tetoAlcancado > 70 ? 'bg-amber-500' : 'bg-[#006B3F]'}`}
                                                         style={{ width: `${Math.min(resultadoSimulacao.tetoAlcancado, 100)}%` }}
                                                     ></div>
                                                 </div>
@@ -3069,9 +3108,9 @@
                     {/* ========================================== */}
                     <div className="space-y-6">
                         {/* CARD SALVAR SIMULAÇÃO NO FIRESTORE (NO TOPO DA COLUNA 3) */}
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6 border-t-4 border-t-[#0284C7]">
-                            <h3 className="text-lg font-bold text-[#075985] dark:text-sky-300 mb-4 flex items-center gap-2">
-                                <Bookmark className="text-[#0284C7]" size={20} />
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6 border-t-4 border-t-[#006B3F]">
+                            <h3 className="text-lg font-bold text-[#004F32] dark:text-morar-300 mb-4 flex items-center gap-2">
+                                <Bookmark className="text-[#006B3F]" size={20} />
                                 Salvar Simulação
                             </h3>
 
@@ -3083,38 +3122,38 @@
                                         placeholder="Ex: Ap 302, Cliente João, Medição 50%..."
                                         value={nomeSimulacao}
                                         onChange={(e) => setNomeSimulacao(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] focus:border-[#0284C7] outline-none font-medium placeholder-slate-400"
+                                        className="w-full px-3 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none font-medium placeholder-slate-400"
                                     />
                                 </div>
 
                                 <button 
                                     onClick={handleSalvarSimulacao}
                                     disabled={isSaving}
-                                    className="w-full bg-[#E0F2FE] hover:bg-[#BAE6FD] text-[#0369a1] border border-[#BAE6FD] font-bold py-3 rounded-xl transition-all shadow-2xs flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                                    className="w-full bg-[#E5F3EB] hover:bg-[#B9DFC9] text-[#004F32] border border-[#B9DFC9] font-bold py-3 rounded-xl transition-all shadow-2xs flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                                 >
-                                    <Save size={18} className="text-[#0284C7]" />
+                                    <Save size={18} className="text-[#006B3F]" />
                                     {isSaving ? 'Salvando no Firestore...' : 'Salvar Simulação'}
                                 </button>
                             </div>
                         </div>
 
                         {/* LISTA DE SIMULAÇÕES SALVAS DO FIRESTORE */}
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6 border-t-4 border-t-[#0284C7] flex flex-col">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6 border-t-4 border-t-[#006B3F] flex flex-col">
                             <div className="flex items-center justify-between gap-2 pb-4 border-b border-[#E2E8F0] dark:border-slate-800 mb-6">
                                 <div>
-                                    <h2 className="text-xl font-bold text-[#075985] dark:text-sky-300 flex items-center gap-2">
-                                        <Bookmark className="text-[#0284C7]" size={22} />
+                                    <h2 className="text-xl font-bold text-[#004F32] dark:text-morar-300 flex items-center gap-2">
+                                        <Bookmark className="text-[#006B3F]" size={22} />
                                         Simulações Salvas
                                     </h2>
                                 </div>
-                                <div className="bg-[#E0F2FE] dark:bg-slate-800 text-[#0284C7] dark:text-sky-300 px-3 py-1 rounded-full font-bold text-xs border border-sky-200 dark:border-slate-700 shrink-0">
+                                <div className="bg-[#E5F3EB] dark:bg-slate-800 text-[#006B3F] dark:text-morar-300 px-3 py-1 rounded-full font-bold text-xs border border-morar-200 dark:border-slate-700 shrink-0">
                                     {simulacoes.length}
                                 </div>
                             </div>
 
                             {isLoadingSimulacoes ? (
                                 <div className="py-12 text-center text-slate-500 flex flex-col items-center justify-center gap-2 my-auto">
-                                    <RefreshCw size={24} className="animate-spin text-[#0284C7]" />
+                                    <RefreshCw size={24} className="animate-spin text-[#006B3F]" />
                                     <p className="text-sm font-medium">Carregando registros...</p>
                                 </div>
                             ) : simulacoes.length === 0 ? (
@@ -3134,7 +3173,7 @@
                                     {simulacoes.map((item) => {
                                         const isAdmin = userData?.role === "admin" || userData?.perfil === "Administrador" || currentUser?.uid === MASTER_ADMIN_UID;
                                         return (
-                                            <div key={item.id} className="bg-[#F8FAFC] dark:bg-slate-800/60 border border-[#E2E8F0] dark:border-slate-700/80 rounded-xl p-4 hover:border-[#0284C7] transition-all shadow-2xs flex flex-col justify-between space-y-3">
+                                            <div key={item.id} className="bg-[#F8FAFC] dark:bg-slate-800/60 border border-[#E2E8F0] dark:border-slate-700/80 rounded-xl p-4 hover:border-[#006B3F] transition-all shadow-2xs flex flex-col justify-between space-y-3">
                                                 <div>
                                                     <div className="flex items-start justify-between gap-2 mb-2">
                                                         <h3 className="font-bold text-[#0F172A] dark:text-white text-sm line-clamp-2">
@@ -3171,7 +3210,7 @@
                                                         <span className="text-slate-400">Taxa Juros:</span>
                                                         <span className="font-semibold text-slate-700 dark:text-slate-300">{formatPercent(item.taxaAnual)} a.a.</span>
                                                     </div>
-                                                    <div className="flex justify-between pt-1 border-t border-slate-100 dark:border-slate-800 text-xs font-bold text-[#005C8A] dark:text-sky-300">
+                                                    <div className="flex justify-between pt-1 border-t border-slate-100 dark:border-slate-800 text-xs font-bold text-[#004F32] dark:text-morar-300">
                                                         <span>Parcela:</span>
                                                         <span>{formatCurrency(item.totalParcela)}</span>
                                                     </div>
@@ -3189,7 +3228,7 @@
                                                 </div>
                                                 <button 
                                                     onClick={() => handleCarregarSimulacao(item)}
-                                                    className="w-full bg-[#E0F2FE] hover:bg-sky-200 dark:bg-slate-800 border border-sky-200 dark:border-slate-700 text-[#0284C7] dark:text-sky-300 font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+                                                    className="w-full bg-[#E5F3EB] hover:bg-morar-200 dark:bg-slate-800 border border-morar-200 dark:border-slate-700 text-[#006B3F] dark:text-morar-300 font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer"
                                                 >
                                                     <ArrowUpRight size={14} />
                                                     Carregar no Formulário
@@ -3207,15 +3246,15 @@
 
                 {/* SEÇÃO DE GESTÃO DE USUÁRIOS E PERFIS (APENAS ADMINISTRADOR) */}
                 {userData?.perfil === 'Administrador' && (
-                    <div className="w-[90%] max-w-[1200px] mx-auto mt-8 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6 border-t-4 border-t-[#005C8A]">
+                    <div className="w-[90%] max-w-[1200px] mx-auto mt-8 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6 border-t-4 border-t-[#004F32]">
                         {/* ABAS DE NAVEGAÇÃO DO PAINEL ADMINISTRATIVO */}
                         <div className="flex flex-wrap items-center gap-3 mb-6 border-b border-[#E2E8F0] dark:border-slate-800 pb-4">
                             <button
                                 onClick={() => setTabAdminActive('usuarios')}
                                 className={`px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2 transition-all cursor-pointer ${
                                     tabAdminActive === 'usuarios'
-                                        ? 'bg-[#0284C7] text-white shadow-sm'
-                                        : 'bg-[#F8FAFC] dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-[#E0F2FE] hover:text-[#0284C7] border border-[#E2E8F0] dark:border-slate-700'
+                                        ? 'bg-[#006B3F] text-white shadow-sm'
+                                        : 'bg-[#F8FAFC] dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-[#E5F3EB] hover:text-[#006B3F] border border-[#E2E8F0] dark:border-slate-700'
                                 }`}
                             >
                                 <Users size={18} />
@@ -3229,8 +3268,8 @@
                                 onClick={() => setTabAdminActive('auditoria')}
                                 className={`px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm flex items-center gap-2 transition-all cursor-pointer ${
                                     tabAdminActive === 'auditoria'
-                                        ? 'bg-[#0284C7] text-white shadow-sm'
-                                        : 'bg-[#F8FAFC] dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-[#E0F2FE] hover:text-[#0284C7] border border-[#E2E8F0] dark:border-slate-700'
+                                        ? 'bg-[#006B3F] text-white shadow-sm'
+                                        : 'bg-[#F8FAFC] dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-[#E5F3EB] hover:text-[#006B3F] border border-[#E2E8F0] dark:border-slate-700'
                                 }`}
                             >
                                 <Activity size={18} />
@@ -3246,8 +3285,8 @@
                             <div>
                                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#E2E8F0] dark:border-slate-800 mb-6">
                                     <div className="flex-1 min-w-0">
-                                        <h2 className="text-lg md:text-xl font-bold text-[#005C8A] dark:text-sky-300 flex items-start sm:items-center gap-2 flex-wrap leading-snug break-words">
-                                            <Users className="text-[#0284C7] shrink-0 mt-0.5 sm:mt-0" size={24} />
+                                        <h2 className="text-lg md:text-xl font-bold text-[#004F32] dark:text-morar-300 flex items-start sm:items-center gap-2 flex-wrap leading-snug break-words">
+                                            <Users className="text-[#006B3F] shrink-0 mt-0.5 sm:mt-0" size={24} />
                                             <span className="break-words">Gestão de Usuários e Controle de Acessos (RBAC)</span>
                                         </h2>
                                         <p className="text-[#64748B] dark:text-slate-400 text-xs mt-1 break-words">
@@ -3265,7 +3304,7 @@
                                                 {listaUsuarios.filter(u => u.status === 'Pendente').length} Pendente(s)
                                             </button>
                                         )}
-                                        <span className="bg-[#E0F2FE] text-[#0284C7] font-bold px-3 py-1.5 rounded-full text-xs border border-sky-200 flex items-center gap-1.5">
+                                        <span className="bg-[#E5F3EB] text-[#006B3F] font-bold px-3 py-1.5 rounded-full text-xs border border-morar-200 flex items-center gap-1.5">
                                             <UserCheck size={14} />
                                             {listaUsuarios.filter(u => u.status === 'Ativo' || (!u.status)).length} Ativos
                                         </span>
@@ -3283,7 +3322,7 @@
                                                 setAdminNovoError('');
                                                 setShowModalNovoUsuario(true);
                                             }}
-                                            className="bg-[#0284C7] hover:bg-[#0073AD] text-white font-bold px-4 py-1.5 rounded-full text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer ml-1"
+                                            className="bg-[#006B3F] hover:bg-[#004F32] text-white font-bold px-4 py-1.5 rounded-full text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer ml-1"
                                         >
                                             <UserPlus size={14} />
                                             <span>➕ Novo Usuário</span>
@@ -3300,7 +3339,7 @@
                                             placeholder="Buscar por nome, e-mail ou CRECI..."
                                             value={searchTermUsuarios}
                                             onChange={(e) => setSearchTermUsuarios(e.target.value)}
-                                            className="w-full pl-10 pr-9 py-2 text-xs md:text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-slate-900 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] focus:border-[#0284C7] outline-none font-medium placeholder:text-slate-400 shadow-2xs transition-all"
+                                            className="w-full pl-10 pr-9 py-2 text-xs md:text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-slate-900 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none font-medium placeholder:text-slate-400 shadow-2xs transition-all"
                                         />
                                         {searchTermUsuarios && (
                                             <button 
@@ -3321,7 +3360,7 @@
                                         <select 
                                             value={filterStatusUsuarios}
                                             onChange={(e) => setFilterStatusUsuarios(e.target.value)}
-                                            className="w-full sm:w-auto px-3 py-2 text-xs md:text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 font-semibold bg-white dark:bg-slate-900 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] outline-none shadow-2xs cursor-pointer"
+                                            className="w-full sm:w-auto px-3 py-2 text-xs md:text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 font-semibold bg-white dark:bg-slate-900 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] outline-none shadow-2xs cursor-pointer"
                                         >
                                             <option value="Todos">Todos os Status</option>
                                             <option value="Pendente">⌛ Pendentes de Aprovação</option>
@@ -3332,13 +3371,13 @@
 
                                     <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
                                         <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 text-xs font-bold whitespace-nowrap">
-                                            <Filter size={15} className="text-[#0284C7] shrink-0" />
+                                            <Filter size={15} className="text-[#006B3F] shrink-0" />
                                             <span>Perfil:</span>
                                         </div>
                                         <select 
                                             value={filterPerfilUsuarios}
                                             onChange={(e) => setFilterPerfilUsuarios(e.target.value)}
-                                            className="w-full sm:w-auto px-3 py-2 text-xs md:text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 font-semibold bg-white dark:bg-slate-900 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] outline-none shadow-2xs cursor-pointer"
+                                            className="w-full sm:w-auto px-3 py-2 text-xs md:text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 font-semibold bg-white dark:bg-slate-900 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] outline-none shadow-2xs cursor-pointer"
                                         >
                                             <option value="Todos">Todos os Perfis</option>
                                             <option value="Corretor">Corretor</option>
@@ -3352,7 +3391,7 @@
 
                                 {isLoadingUsuarios ? (
                                     <div className="py-12 text-center text-slate-500 flex flex-col items-center justify-center gap-2">
-                                        <RefreshCw size={28} className="animate-spin text-[#0284C7]" />
+                                        <RefreshCw size={28} className="animate-spin text-[#006B3F]" />
                                         <p className="text-xs font-semibold">Carregando lista de usuários do Firestore...</p>
                                     </div>
                                 ) : listaUsuarios.length === 0 ? (
@@ -3371,7 +3410,7 @@
                                                     setFilterPerfilUsuarios('Todos');
                                                     setFilterStatusUsuarios('Todos');
                                                 }}
-                                                className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#E0F2FE] text-[#0284C7] hover:bg-sky-200 font-bold text-xs rounded-xl transition-all cursor-pointer shadow-2xs"
+                                                className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#E5F3EB] text-[#006B3F] hover:bg-morar-200 font-bold text-xs rounded-xl transition-all cursor-pointer shadow-2xs"
                                             >
                                                 <RotateCcw size={13} />
                                                 Limpar filtros
@@ -3393,7 +3432,7 @@
                                                             ? 'bg-amber-50/70 border-amber-300 ring-2 ring-amber-400/40 shadow-sm dark:bg-amber-950/30'
                                                             : isPaused 
                                                                 ? 'bg-rose-50/40 border-rose-200 dark:bg-slate-800/40 dark:border-slate-700 shadow-xs' 
-                                                                : 'bg-white dark:bg-slate-800/80 border-[#E2E8F0] dark:border-slate-700 hover:border-[#0284C7] shadow-xs'
+                                                                : 'bg-white dark:bg-slate-800/80 border-[#E2E8F0] dark:border-slate-700 hover:border-[#006B3F] shadow-xs'
                                                     }`}
                                                 >
                                                     {/* CABEÇALHO DO CARD DO USUÁRIO */}
@@ -3403,7 +3442,7 @@
                                                                 <button
                                                                     onClick={() => openUserProfileModal(u)}
                                                                     className={`w-10 h-10 rounded-xl text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs mt-0.5 hover:opacity-80 transition-opacity cursor-pointer ${
-                                                                        isPending ? 'bg-amber-600' : isPaused ? 'bg-slate-700' : 'bg-[#005C8A]'
+                                                                        isPending ? 'bg-amber-600' : isPaused ? 'bg-slate-700' : 'bg-[#004F32]'
                                                                     }`}
                                                                     title="Clique para abrir Ficha Cadastral do Usuário"
                                                                 >
@@ -3413,13 +3452,13 @@
                                                                     <div className="flex items-center gap-1.5 flex-wrap">
                                                                         <button
                                                                             onClick={() => openUserProfileModal(u)}
-                                                                            className="font-bold text-[#0F172A] dark:text-white text-sm leading-snug break-words hover:text-[#0284C7] hover:underline cursor-pointer text-left"
+                                                                            className="font-bold text-[#0F172A] dark:text-white text-sm leading-snug break-words hover:text-[#006B3F] hover:underline cursor-pointer text-left"
                                                                             title="Clique para abrir Ficha Cadastral do Usuário"
                                                                         >
                                                                             {u.nome || 'Sem Nome'}
                                                                         </button>
                                                                         {isSelf && (
-                                                                            <span className="text-[10px] font-bold text-[#0284C7] bg-[#E0F2FE] px-2 py-0.5 rounded-md border border-sky-200 shrink-0 inline-flex items-center">
+                                                                            <span className="text-[10px] font-bold text-[#006B3F] bg-[#E5F3EB] px-2 py-0.5 rounded-md border border-morar-200 shrink-0 inline-flex items-center">
                                                                                 (Você)
                                                                             </span>
                                                                         )}
@@ -3433,7 +3472,7 @@
                                                                     ? 'bg-amber-100 text-amber-900 border-amber-300 animate-pulse'
                                                                     : isPaused 
                                                                         ? 'bg-rose-100 text-rose-800 border-rose-300' 
-                                                                        : 'bg-[#E0F2FE] text-[#0284C7] border-sky-200'
+                                                                        : 'bg-[#E5F3EB] text-[#006B3F] border-morar-200'
                                                             }`}>
                                                                 {isPending ? (
                                                                     <>
@@ -3454,8 +3493,8 @@
                                                         {/* DESTAQUE DE CELULAR E CRECI PARA VERIFICAÇÃO */}
                                                         <div className="flex items-center gap-1.5 flex-wrap font-bold text-[11px] pt-1">
                                                             {u.celular ? (
-                                                                <span className="flex items-center gap-1 bg-[#E0F2FE] text-[#0284C7] px-2 py-0.5 rounded-md border border-sky-200 shadow-2xs">
-                                                                    <Phone size={11} className="text-[#0284C7] shrink-0" />
+                                                                <span className="flex items-center gap-1 bg-[#E5F3EB] text-[#006B3F] px-2 py-0.5 rounded-md border border-morar-200 shadow-2xs">
+                                                                    <Phone size={11} className="text-[#006B3F] shrink-0" />
                                                                     {u.celular}
                                                                 </span>
                                                             ) : (
@@ -3465,8 +3504,8 @@
                                                             )}
 
                                                             {u.creci ? (
-                                                                <span className="flex items-center gap-1 bg-sky-50 text-sky-900 px-2 py-0.5 rounded-md border border-sky-200 shadow-2xs">
-                                                                    <Award size={11} className="text-[#0284C7] shrink-0" />
+                                                                <span className="flex items-center gap-1 bg-morar-50 text-morar-900 px-2 py-0.5 rounded-md border border-morar-200 shadow-2xs">
+                                                                    <Award size={11} className="text-[#006B3F] shrink-0" />
                                                                     CRECI: {u.creci}
                                                                 </span>
                                                             ) : (
@@ -3484,7 +3523,7 @@
                                                             <select 
                                                                 value={u.perfil || "Corretor"}
                                                                 onChange={(e) => handleAtualizarPerfilUsuario(u.id, e.target.value)}
-                                                                className="w-full px-2.5 py-2 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 font-semibold bg-white dark:bg-slate-900 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] outline-none shadow-2xs"
+                                                                className="w-full px-2.5 py-2 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 font-semibold bg-white dark:bg-slate-900 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] outline-none shadow-2xs"
                                                             >
                                                                 <option value="Corretor">Corretor</option>
                                                                 <option value="Assistente">Assistente</option>
@@ -3499,10 +3538,10 @@
                                                     <div className="pt-2 border-t border-[#E2E8F0] dark:border-slate-700 flex flex-wrap items-center gap-2">
                                                         <button
                                                             onClick={() => openUserProfileModal(u)}
-                                                            className="w-full py-1.5 px-2.5 rounded-xl text-xs font-bold transition-all border border-sky-200 bg-[#E0F2FE] hover:bg-sky-200 text-[#0284C7] flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                                                            className="w-full py-1.5 px-2.5 rounded-xl text-xs font-bold transition-all border border-morar-200 bg-[#E5F3EB] hover:bg-morar-200 text-[#006B3F] flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
                                                             title="Visualizar Ficha Cadastral e Exportar PDF"
                                                         >
-                                                            <FileText size={14} className="text-[#0284C7] shrink-0" />
+                                                            <FileText size={14} className="text-[#006B3F] shrink-0" />
                                                             <span>📄 Abrir Ficha Cadastral</span>
                                                         </button>
 
@@ -3510,7 +3549,7 @@
                                                             <>
                                                                 <button
                                                                     onClick={() => handleAprovarUsuario(u)}
-                                                                    className="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all bg-[#0284C7] hover:bg-[#0073AD] text-white flex items-center justify-center gap-1.5 shadow-sm cursor-pointer active:scale-95"
+                                                                    className="flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all bg-[#006B3F] hover:bg-[#004F32] text-white flex items-center justify-center gap-1.5 shadow-sm cursor-pointer active:scale-95"
                                                                     title="Aprovar cadastro e liberar acesso ao simulador"
                                                                 >
                                                                     <CheckCircle2 size={14} />
@@ -3532,10 +3571,10 @@
                                                                         setSelectedUserForPassword(u);
                                                                         setAdminPasswordStatus({ type: '', message: '' });
                                                                     }}
-                                                                    className="flex-1 py-2 px-2.5 rounded-xl text-xs font-bold transition-all border border-sky-200 bg-[#E0F2FE] hover:bg-sky-200 text-[#0284C7] flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
+                                                                    className="flex-1 py-2 px-2.5 rounded-xl text-xs font-bold transition-all border border-morar-200 bg-[#E5F3EB] hover:bg-morar-200 text-[#006B3F] flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer"
                                                                     title="Redefinir / Alterar senha do usuário"
                                                                 >
-                                                                    <KeyRound size={14} className="text-[#0284C7] shrink-0" />
+                                                                    <KeyRound size={14} className="text-[#006B3F] shrink-0" />
                                                                     <span className="whitespace-nowrap">Alterar Senha</span>
                                                                 </button>
 
@@ -3544,7 +3583,7 @@
                                                                     disabled={isSelf}
                                                                     className={`py-2 px-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs ${
                                                                         isPaused
-                                                                            ? 'bg-[#0284C7] hover:bg-[#0073AD] text-white'
+                                                                            ? 'bg-[#006B3F] hover:bg-[#004F32] text-white'
                                                                             : 'bg-amber-500 hover:bg-amber-600 text-white'
                                                                     } disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer`}
                                                                     title={isSelf ? 'Você não pode pausar a sua própria conta' : isPaused ? 'Reativar acesso do usuário' : 'Pausar acesso do usuário'}
@@ -3577,8 +3616,8 @@
                             <div>
                                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#E2E8F0] dark:border-slate-800 mb-6">
                                     <div>
-                                        <h2 className="text-lg md:text-xl font-bold text-[#005C8A] dark:text-sky-300 flex items-center gap-2">
-                                            <Activity className="text-[#0284C7]" size={22} />
+                                        <h2 className="text-lg md:text-xl font-bold text-[#004F32] dark:text-morar-300 flex items-center gap-2">
+                                            <Activity className="text-[#006B3F]" size={22} />
                                             <span>Logs de Auditoria e Histórico de Atividades</span>
                                         </h2>
                                         <p className="text-[#64748B] dark:text-slate-400 text-xs mt-1">
@@ -3588,7 +3627,7 @@
 
                                     <button
                                         onClick={handleExportarLogsCSV}
-                                        className="bg-[#0284C7] hover:bg-[#0073AD] text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer self-start md:self-auto shrink-0"
+                                        className="bg-[#006B3F] hover:bg-[#004F32] text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer self-start md:self-auto shrink-0"
                                     >
                                         <Download size={15} />
                                         <span>Exportar Relatório (CSV)</span>
@@ -3604,7 +3643,7 @@
                                             placeholder="Buscar por nome, e-mail, ação ou detalhes..."
                                             value={searchTermLogs}
                                             onChange={(e) => setSearchTermLogs(e.target.value)}
-                                            className="w-full pl-10 pr-9 py-2 text-xs md:text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-slate-900 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] focus:border-[#0284C7] outline-none font-medium placeholder:text-slate-400 shadow-2xs transition-all"
+                                            className="w-full pl-10 pr-9 py-2 text-xs md:text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-white dark:bg-slate-900 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none font-medium placeholder:text-slate-400 shadow-2xs transition-all"
                                         />
                                         {searchTermLogs && (
                                             <button
@@ -3622,7 +3661,7 @@
                                         <select
                                             value={filterAcaoLogs}
                                             onChange={(e) => setFilterAcaoLogs(e.target.value)}
-                                            className="w-full md:w-auto px-3 py-2 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 font-semibold bg-white dark:bg-slate-900 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] outline-none shadow-2xs cursor-pointer"
+                                            className="w-full md:w-auto px-3 py-2 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 font-semibold bg-white dark:bg-slate-900 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] outline-none shadow-2xs cursor-pointer"
                                         >
                                             <option value="Todas">Todas as Ações</option>
                                             <option value="LOGIN">🟢 LOGIN</option>
@@ -3643,7 +3682,7 @@
                                         <select
                                             value={filterPeriodoLogs}
                                             onChange={(e) => setFilterPeriodoLogs(e.target.value)}
-                                            className="w-full md:w-auto px-3 py-2 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 font-semibold bg-white dark:bg-slate-900 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] outline-none shadow-2xs cursor-pointer"
+                                            className="w-full md:w-auto px-3 py-2 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 font-semibold bg-white dark:bg-slate-900 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] outline-none shadow-2xs cursor-pointer"
                                         >
                                             <option value="Todos">Todos os Períodos</option>
                                             <option value="Hoje">Hoje</option>
@@ -3656,7 +3695,7 @@
                                 {/* TABELA DE LOGS EM TEMPO REAL */}
                                 {isLoadingLogs ? (
                                     <div className="py-12 text-center text-slate-500 flex flex-col items-center justify-center gap-2">
-                                        <RefreshCw size={28} className="animate-spin text-[#0284C7]" />
+                                        <RefreshCw size={28} className="animate-spin text-[#006B3F]" />
                                         <p className="text-xs font-semibold">Carregando logs de acesso do Firestore...</p>
                                     </div>
                                 ) : logsFiltrados.length === 0 ? (
@@ -3684,7 +3723,7 @@
                                                     const actionStyle = 
                                                         log.acao === 'LOGIN' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' :
                                                         log.acao === 'LOGOUT' ? 'bg-slate-100 text-slate-700 border-slate-300' :
-                                                        log.acao === 'CÁLCULO_SIMULAÇÃO' ? 'bg-sky-100 text-sky-800 border-sky-300' :
+                                                        log.acao === 'CÁLCULO_SIMULAÇÃO' ? 'bg-morar-100 text-morar-800 border-morar-300' :
                                                         log.acao === 'SIMULAÇÃO_SALVA' ? 'bg-teal-100 text-teal-800 border-teal-300' :
                                                         log.acao === 'EXCLUSÃO_SIMULAÇÃO' ? 'bg-rose-100 text-rose-800 border-rose-300' :
                                                         log.acao === 'APROVAÇÃO_USUÁRIO' ? 'bg-amber-100 text-amber-900 border-amber-300' :
@@ -3701,7 +3740,7 @@
                                                             <td className="p-3.5 whitespace-nowrap">
                                                                 <button
                                                                     onClick={() => openUserProfileModal(log)}
-                                                                    className="text-left font-bold text-[#0F172A] dark:text-white hover:text-[#0284C7] hover:underline cursor-pointer flex flex-col"
+                                                                    className="text-left font-bold text-[#0F172A] dark:text-white hover:text-[#006B3F] hover:underline cursor-pointer flex flex-col"
                                                                     title="Clique para abrir Ficha Cadastral do Usuário"
                                                                 >
                                                                     <span>{log.usuarioNome || 'Anônimo'}</span>
@@ -3738,14 +3777,14 @@
                     <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-4 z-50">
                         <div className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden border border-[#E2E8F0] dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
                             {/* Cabeçalho do Modal */}
-                            <div className="bg-gradient-to-r from-[#005C8A] to-[#004F7A] text-white px-6 py-5 flex items-center justify-between">
+                            <div className="bg-gradient-to-r from-[#004F32] to-[#003D25] text-white px-6 py-5 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="bg-white/10 p-2.5 rounded-xl border border-white/20">
                                         <FileText size={22} className="text-white" />
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-base md:text-lg leading-tight">Ficha Cadastral do Usuário</h3>
-                                        <p className="text-sky-200 text-xs font-medium">CALAZANS IMOB — Simulador Juros Obra</p>
+                                        <p className="text-morar-200 text-xs font-medium">CALAZANS IMOB — Simulador Juros Obra</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -3770,7 +3809,7 @@
                             <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
                                 {/* Identificação Principal */}
                                 <div className="flex items-center gap-4 bg-[#F8FAFC] dark:bg-slate-800/60 p-4 rounded-2xl border border-[#E2E8F0] dark:border-slate-700">
-                                    <div className="w-14 h-14 rounded-2xl bg-[#005C8A] text-white font-bold text-xl flex items-center justify-center shadow-md shrink-0">
+                                    <div className="w-14 h-14 rounded-2xl bg-[#004F32] text-white font-bold text-xl flex items-center justify-center shadow-md shrink-0">
                                         {selectedUserProfile.nome ? selectedUserProfile.nome.substring(0, 2).toUpperCase() : 'US'}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -3852,7 +3891,7 @@
 
                                     <div className="bg-[#F8FAFC] dark:bg-slate-800/40 p-3.5 rounded-xl border border-[#E2E8F0] dark:border-slate-800">
                                         <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Simulações Registradas</p>
-                                        <p className="text-sm font-bold text-[#0284C7] dark:text-sky-300 mt-1">
+                                        <p className="text-sm font-bold text-[#006B3F] dark:text-morar-300 mt-1">
                                             {simulacoes.filter(s => 
                                                 s.criadoPorUid === selectedUserProfile.id || 
                                                 s.criadoPorUid === selectedUserProfile.uid || 
@@ -3868,7 +3907,7 @@
                                     <button
                                         type="button"
                                         onClick={handleImprimirFicha}
-                                        className="w-full sm:w-auto bg-[#0284C7] hover:bg-[#0073AD] text-white font-bold py-2.5 px-5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+                                        className="w-full sm:w-auto bg-[#006B3F] hover:bg-[#004F32] text-white font-bold py-2.5 px-5 rounded-xl text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
                                     >
                                         <Printer size={16} />
                                         <span>Imprimir / Exportar PDF</span>
@@ -3891,14 +3930,14 @@
                     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
                         <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden border border-[#E2E8F0] dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
                             {/* Cabeçalho do Modal */}
-                            <div className="bg-[#005C8A] text-white px-6 py-4 flex items-center justify-between">
+                            <div className="bg-[#004F32] text-white px-6 py-4 flex items-center justify-between">
                                 <div className="flex items-center gap-2.5">
                                     <div className="bg-white/10 p-2 rounded-xl border border-white/20">
                                         <UserPlus size={20} className="text-white" />
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-base text-white">Cadastrar Novo Usuário</h3>
-                                        <p className="text-xs text-sky-100">Criar conta e definir perfil de acesso direto no sistema</p>
+                                        <p className="text-xs text-morar-100">Criar conta e definir perfil de acesso direto no sistema</p>
                                     </div>
                                 </div>
                                 <button 
@@ -3929,7 +3968,7 @@
                                                 onChange={(e) => setAdminNovoNome(e.target.value)}
                                                 placeholder="Ex: Carlos Eduardo Silva"
                                                 required
-                                                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] focus:border-[#0284C7] outline-none font-medium"
+                                                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none font-medium"
                                             />
                                         </div>
                                     </div>
@@ -3944,7 +3983,7 @@
                                                 onChange={(e) => setAdminNovoEmail(e.target.value)}
                                                 placeholder="corretor@empresa.com.br"
                                                 required
-                                                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] focus:border-[#0284C7] outline-none font-medium"
+                                                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none font-medium"
                                             />
                                         </div>
                                     </div>
@@ -3959,7 +3998,7 @@
                                                 onChange={(e) => setAdminNovoCelular(e.target.value)}
                                                 placeholder="(11) 99999-9999"
                                                 required
-                                                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] focus:border-[#0284C7] outline-none font-medium"
+                                                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none font-medium"
                                             />
                                         </div>
                                     </div>
@@ -3967,7 +4006,7 @@
                                     <div>
                                         <label className="block text-xs font-bold text-[#0F172A] dark:text-slate-300 mb-1">
                                             CRECI {adminNovoPerfil === 'Corretor' ? (
-                                                <span className="text-[#0284C7] font-bold">* (Obrigatório)</span>
+                                                <span className="text-[#006B3F] font-bold">* (Obrigatório)</span>
                                             ) : (
                                                 <span className="text-slate-400 font-normal">(Opcional)</span>
                                             )}
@@ -3980,7 +4019,7 @@
                                                 onChange={(e) => setAdminNovoCreci(e.target.value)}
                                                 placeholder="12345-F"
                                                 required={adminNovoPerfil === 'Corretor'}
-                                                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] focus:border-[#0284C7] outline-none font-medium"
+                                                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none font-medium"
                                             />
                                         </div>
                                     </div>
@@ -3996,7 +4035,7 @@
                                                 placeholder="Mínimo 6 caracteres"
                                                 required
                                                 minLength={6}
-                                                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#0284C7] focus:border-[#0284C7] outline-none font-medium"
+                                                className="w-full pl-9 pr-3 py-2.5 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none font-medium"
                                             />
                                         </div>
                                     </div>
@@ -4006,7 +4045,7 @@
                                         <select 
                                             value={adminNovoPerfil}
                                             onChange={(e) => setAdminNovoPerfil(e.target.value)}
-                                            className="w-full px-3 py-2.5 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 focus:ring-2 focus:ring-[#0284C7] focus:border-[#0284C7] outline-none font-semibold text-[#0F172A] dark:text-white bg-white dark:bg-slate-800"
+                                            className="w-full px-3 py-2.5 text-xs rounded-xl border border-[#E2E8F0] dark:border-slate-700 focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none font-semibold text-[#0F172A] dark:text-white bg-white dark:bg-slate-800"
                                         >
                                             <option value="Corretor">Corretor</option>
                                             <option value="Assistente">Assistente</option>
@@ -4028,7 +4067,7 @@
                                     <button 
                                         type="submit"
                                         disabled={adminNovoSubmitting}
-                                        className="px-5 py-2.5 text-xs font-bold text-white bg-[#0284C7] hover:bg-[#0073AD] rounded-xl transition-all shadow-md flex items-center gap-2 disabled:opacity-50 cursor-pointer"
+                                        className="px-5 py-2.5 text-xs font-bold text-white bg-[#006B3F] hover:bg-[#004F32] rounded-xl transition-all shadow-md flex items-center gap-2 disabled:opacity-50 cursor-pointer"
                                     >
                                         {adminNovoSubmitting ? (
                                             <>
@@ -4053,14 +4092,14 @@
                     <div className="fixed inset-0 bg-slate-900/75 backdrop-blur-xs flex items-center justify-center p-4 z-50">
                         <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-[#E2E8F0] dark:border-slate-800 animate-in fade-in zoom-in-95 duration-200">
                             {/* Cabeçalho do Modal */}
-                            <div className="bg-gradient-to-r from-[#005C8A] to-[#004F7A] text-white px-6 py-5 flex items-center justify-between">
+                            <div className="bg-gradient-to-r from-[#004F32] to-[#003D25] text-white px-6 py-5 flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="bg-white/10 p-2.5 rounded-xl border border-white/20">
                                         <KeyRound size={22} className="text-white" />
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-base leading-tight">Alterar Senha do Usuário</h3>
-                                        <p className="text-sky-200 text-xs font-medium">Gestão de Acessos (Administrador)</p>
+                                        <p className="text-morar-200 text-xs font-medium">Gestão de Acessos (Administrador)</p>
                                     </div>
                                 </div>
                                 <button 
@@ -4123,7 +4162,7 @@
                                         type="button"
                                         onClick={() => handleAdminSendResetEmail(selectedUserForPassword.email)}
                                         disabled={isAdminPasswordSubmitting}
-                                        className="w-full bg-[#0284C7] hover:bg-[#0073AD] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-xs disabled:opacity-50 cursor-pointer"
+                                        className="w-full bg-[#006B3F] hover:bg-[#004F32] text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-xs disabled:opacity-50 cursor-pointer"
                                     >
                                         <Send size={16} />
                                         {isAdminPasswordSubmitting ? 'Disparando e-mail...' : 'Enviar E-mail de Redefinição de Senha'}
@@ -4153,7 +4192,7 @@
                             onClick={(e) => e.stopPropagation()}
                         >
                             {/* Cabeçalho do Modal */}
-                            <div className="bg-gradient-to-r from-[#005C8A] to-[#004F7A] text-white px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between shrink-0 shadow-sm">
+                            <div className="bg-gradient-to-r from-[#004F32] to-[#003D25] text-white px-5 sm:px-6 py-4 sm:py-5 flex items-center justify-between shrink-0 shadow-sm">
                                 <div className="flex items-center gap-3">
                                     <div className="bg-white/10 p-2.5 rounded-xl border border-white/20 shrink-0">
                                         <BookOpen size={24} className="text-amber-300" />
@@ -4162,7 +4201,7 @@
                                         <h3 className="font-bold text-base sm:text-lg leading-tight flex items-center gap-2">
                                             Infográfico & Guia do Corretor
                                         </h3>
-                                        <p className="text-sky-100 text-xs sm:text-sm font-medium">
+                                        <p className="text-morar-100 text-xs sm:text-sm font-medium">
                                             Memória de Cálculo e Script de Atendimento — Evolução de Obra Caixa
                                         </p>
                                     </div>
@@ -4182,7 +4221,7 @@
                                 
                                 {/* 1. PAINEL DE INTRODUÇÃO E FORMULÁRIO DE ENTRADA DO CORRETOR */}
                                 <div className="bg-[#F8FAFC] dark:bg-slate-800/60 p-4 sm:p-5 rounded-2xl border border-[#E2E8F0] dark:border-slate-700/80">
-                                    <div className="flex items-center gap-2.5 text-[#005C8A] dark:text-sky-300 font-bold text-sm sm:text-base mb-3">
+                                    <div className="flex items-center gap-2.5 text-[#004F32] dark:text-morar-300 font-bold text-sm sm:text-base mb-3">
                                         <FileText size={20} className="shrink-0" />
                                         <h4>1. Formulário de Entrada do Corretor (Variáveis Principais)</h4>
                                     </div>
@@ -4191,37 +4230,37 @@
                                     </p>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
                                         <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-[#E2E8F0] dark:border-slate-700">
-                                            <span className="font-bold text-[#005C8A] dark:text-sky-300 block mb-1">1. Valor do Financiamento (R$)</span>
+                                            <span className="font-bold text-[#004F32] dark:text-morar-300 block mb-1">1. Valor do Financiamento (R$)</span>
                                             <p className="text-[#64748B] dark:text-slate-400">Total do crédito concedido pela Caixa Econômica Federal para a aquisição.</p>
                                         </div>
                                         <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-[#E2E8F0] dark:border-slate-700">
-                                            <span className="font-bold text-[#005C8A] dark:text-sky-300 block mb-1">2. Parcela de Amortização (R$)</span>
+                                            <span className="font-bold text-[#004F32] dark:text-morar-300 block mb-1">2. Parcela de Amortização (R$)</span>
                                             <p className="text-[#64748B] dark:text-slate-400">Valor projetado da prestação contratual pós-chaves (SAC ou PRICE).</p>
                                         </div>
                                         <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-[#E2E8F0] dark:border-slate-700">
-                                            <span className="font-bold text-[#005C8A] dark:text-sky-300 block mb-1">3. % Obra Executada (%)</span>
+                                            <span className="font-bold text-[#004F32] dark:text-morar-300 block mb-1">3. % Obra Executada (%)</span>
                                             <p className="text-[#64748B] dark:text-slate-400">Evolução física do empreendimento medida mensalmente pelos engenheiros da CEF.</p>
                                         </div>
                                         <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-[#E2E8F0] dark:border-slate-700">
-                                            <span className="font-bold text-[#005C8A] dark:text-sky-300 block mb-1">4. Juros CEF (% a.a.)</span>
+                                            <span className="font-bold text-[#004F32] dark:text-morar-300 block mb-1">4. Juros CEF (% a.a.)</span>
                                             <p className="text-[#64748B] dark:text-slate-400">Taxa nominal/efetiva de juros anual do financiamento contratado.</p>
                                         </div>
                                         <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-[#E2E8F0] dark:border-slate-700 md:col-span-2 lg:col-span-2">
-                                            <span className="font-bold text-[#005C8A] dark:text-sky-300 block mb-1">5. Seguros MIP & DFI (R$)</span>
+                                            <span className="font-bold text-[#004F32] dark:text-morar-300 block mb-1">5. Seguros MIP & DFI (R$)</span>
                                             <p className="text-[#64748B] dark:text-slate-400">Cobertura de Morte/Invalidez Permanente (MIP) e Danos Físicos ao Imóvel (DFI).</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* 2. REGRAS E PREMISSAS FIXAS DA CAIXA */}
-                                <div className="bg-[#E0F2FE]/80 dark:bg-sky-950/40 p-4 sm:p-5 rounded-2xl border border-sky-200 dark:border-sky-800/60">
-                                    <div className="flex items-center gap-2.5 text-[#005C8A] dark:text-sky-300 font-bold text-sm sm:text-base mb-2">
-                                        <Lock size={20} className="shrink-0 text-[#0284C7] dark:text-sky-300" />
+                                <div className="bg-[#E5F3EB]/80 dark:bg-morar-950/40 p-4 sm:p-5 rounded-2xl border border-morar-200 dark:border-morar-800/60">
+                                    <div className="flex items-center gap-2.5 text-[#004F32] dark:text-morar-300 font-bold text-sm sm:text-base mb-2">
+                                        <Lock size={20} className="shrink-0 text-[#006B3F] dark:text-morar-300" />
                                         <h4>2. Regras Fixas da Operação (Apoio à Produção CEF)</h4>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-                                        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-sky-200 dark:border-sky-800/50 flex items-start gap-3">
-                                            <div className="bg-[#E0F2FE] dark:bg-sky-900/60 text-[#0284C7] dark:text-sky-300 font-black p-2 rounded-lg text-xs shrink-0">
+                                        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-morar-200 dark:border-morar-800/50 flex items-start gap-3">
+                                            <div className="bg-[#E5F3EB] dark:bg-morar-900/60 text-[#006B3F] dark:text-morar-300 font-black p-2 rounded-lg text-xs shrink-0">
                                                 7,00%
                                             </div>
                                             <div>
@@ -4232,8 +4271,8 @@
                                             </div>
                                         </div>
 
-                                        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-sky-200 dark:border-sky-800/50 flex items-start gap-3">
-                                            <div className="bg-[#E0F2FE] dark:bg-sky-900/60 text-[#0284C7] dark:text-sky-300 font-black p-2 rounded-lg text-xs shrink-0">
+                                        <div className="bg-white dark:bg-slate-900 p-3.5 rounded-xl border border-morar-200 dark:border-morar-800/50 flex items-start gap-3">
+                                            <div className="bg-[#E5F3EB] dark:bg-morar-900/60 text-[#006B3F] dark:text-morar-300 font-black p-2 rounded-lg text-xs shrink-0">
                                                 R$ 25
                                             </div>
                                             <div>
@@ -4248,7 +4287,7 @@
 
                                 {/* 3. MEMÓRIA DE CÁLCULO PASSO A PASSO (4 ETAPAS) */}
                                 <div className="space-y-3">
-                                    <div className="flex items-center gap-2.5 text-[#005C8A] dark:text-sky-300 font-bold text-sm sm:text-base">
+                                    <div className="flex items-center gap-2.5 text-[#004F32] dark:text-morar-300 font-bold text-sm sm:text-base">
                                         <Calculator size={20} className="shrink-0" />
                                         <h4>3. Memória de Cálculo Passo a Passo (4 Etapas)</h4>
                                     </div>
@@ -4256,7 +4295,7 @@
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {/* Passo 1 */}
                                         <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-700 relative overflow-hidden">
-                                            <div className="absolute top-0 right-0 bg-[#005C8A] dark:bg-sky-900 text-white px-3 py-1 rounded-bl-xl font-black text-[10px] uppercase tracking-wider">
+                                            <div className="absolute top-0 right-0 bg-[#004F32] dark:bg-morar-900 text-white px-3 py-1 rounded-bl-xl font-black text-[10px] uppercase tracking-wider">
                                                 Passo 1
                                             </div>
                                             <h5 className="font-bold text-[#0F172A] dark:text-slate-100 text-sm mb-1.5 pr-12">
@@ -4265,14 +4304,14 @@
                                             <p className="text-[#64748B] dark:text-slate-300 text-xs mb-2">
                                                 Representa a porcentagem do financiamento liberada pela Caixa até o momento.
                                             </p>
-                                            <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-lg text-[11px] font-sans text-[#005C8A] dark:text-sky-300 font-bold border border-[#E2E8F0] dark:border-slate-700">
+                                            <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-lg text-[11px] font-sans text-[#004F32] dark:text-morar-300 font-bold border border-[#E2E8F0] dark:border-slate-700">
                                                 Quota Liberada = Terreno (7,00%) + Avanço da Obra Executada
                                             </div>
                                         </div>
 
                                         {/* Passo 2 */}
                                         <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-700 relative overflow-hidden">
-                                            <div className="absolute top-0 right-0 bg-[#005C8A] dark:bg-sky-900 text-white px-3 py-1 rounded-bl-xl font-black text-[10px] uppercase tracking-wider">
+                                            <div className="absolute top-0 right-0 bg-[#004F32] dark:bg-morar-900 text-white px-3 py-1 rounded-bl-xl font-black text-[10px] uppercase tracking-wider">
                                                 Passo 2
                                             </div>
                                             <h5 className="font-bold text-[#0F172A] dark:text-slate-100 text-sm mb-1.5 pr-12">
@@ -4281,14 +4320,14 @@
                                             <p className="text-[#64748B] dark:text-slate-300 text-xs mb-2">
                                                 Aplica a taxa de juros mensal proporcional apenas sobre o saldo financiado efetivamente liberado ao construtor.
                                             </p>
-                                            <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-lg text-[11px] font-mono text-[#005C8A] dark:text-sky-300 font-bold border border-[#E2E8F0] dark:border-slate-700">
+                                            <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-lg text-[11px] font-mono text-[#004F32] dark:text-morar-300 font-bold border border-[#E2E8F0] dark:border-slate-700">
                                                 Juros = (Financiamento × Quota %) × (Juros % a.a. / 12)
                                             </div>
                                         </div>
 
                                         {/* Passo 3 */}
                                         <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-700 relative overflow-hidden">
-                                            <div className="absolute top-0 right-0 bg-[#005C8A] dark:bg-sky-900 text-white px-3 py-1 rounded-bl-xl font-black text-[10px] uppercase tracking-wider">
+                                            <div className="absolute top-0 right-0 bg-[#004F32] dark:bg-morar-900 text-white px-3 py-1 rounded-bl-xl font-black text-[10px] uppercase tracking-wider">
                                                 Passo 3
                                             </div>
                                             <h5 className="font-bold text-[#0F172A] dark:text-slate-100 text-sm mb-1.5 pr-12">
@@ -4297,14 +4336,14 @@
                                             <p className="text-[#64748B] dark:text-slate-300 text-xs mb-2">
                                                 Atualiza o saldo proporcional com base na Taxa Referencial (TR) oficial divulgada pelo Banco Central do Brasil.
                                             </p>
-                                            <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-lg text-[11px] font-mono text-[#005C8A] dark:text-sky-300 font-bold border border-[#E2E8F0] dark:border-slate-700">
+                                            <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-lg text-[11px] font-mono text-[#004F32] dark:text-morar-300 font-bold border border-[#E2E8F0] dark:border-slate-700">
                                                 Correção TR = Saldo Liberado × Taxa TR do Mês
                                             </div>
                                         </div>
 
                                         {/* Passo 4 */}
                                         <div className="bg-white dark:bg-slate-800/80 p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-700 relative overflow-hidden">
-                                            <div className="absolute top-0 right-0 bg-[#005C8A] dark:bg-sky-900 text-white px-3 py-1 rounded-bl-xl font-black text-[10px] uppercase tracking-wider">
+                                            <div className="absolute top-0 right-0 bg-[#004F32] dark:bg-morar-900 text-white px-3 py-1 rounded-bl-xl font-black text-[10px] uppercase tracking-wider">
                                                 Passo 4
                                             </div>
                                             <h5 className="font-bold text-[#0F172A] dark:text-slate-100 text-sm mb-1.5 pr-12">
@@ -4313,7 +4352,7 @@
                                             <p className="text-[#64748B] dark:text-slate-300 text-xs mb-2">
                                                 Consolida os juros de obra, correção TR, coberturas securitárias e a taxa fixa administrativa.
                                             </p>
-                                            <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-lg text-[11px] font-mono text-[#005C8A] dark:text-sky-300 font-bold border border-[#E2E8F0] dark:border-slate-700">
+                                            <div className="bg-slate-100 dark:bg-slate-900 p-2.5 rounded-lg text-[11px] font-mono text-[#004F32] dark:text-morar-300 font-bold border border-[#E2E8F0] dark:border-slate-700">
                                                 Parcela = Juros + TR + Seguros + Taxa Adm CEF de R$ 25,00
                                             </div>
                                         </div>
@@ -4364,7 +4403,7 @@
                                 <button
                                     type="button"
                                     onClick={() => setShowTutorialModal(false)}
-                                    className="bg-[#0284C7] hover:bg-[#0073AD] text-white font-bold px-6 py-2.5 rounded-xl text-xs transition-all shadow-md ml-auto cursor-pointer active:scale-95 touch-manipulation min-h-[44px]"
+                                    className="bg-[#006B3F] hover:bg-[#004F32] text-white font-bold px-6 py-2.5 rounded-xl text-xs transition-all shadow-md ml-auto cursor-pointer active:scale-95 touch-manipulation min-h-[44px]"
                                 >
                                     Entendi, Fechar Tutorial
                                 </button>
@@ -4381,13 +4420,13 @@
                         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-[#E2E8F0] dark:border-slate-800 w-full max-w-4xl max-h-[92vh] flex flex-col my-auto overflow-hidden">
                             
                             {/* Modal Header */}
-                            <div className="p-4 sm:p-5 border-b border-[#BAE6FD] dark:border-slate-800 flex items-center justify-between bg-[#F0F9FF] dark:bg-slate-900 text-[#0F172A] dark:text-white shrink-0">
+                            <div className="p-4 sm:p-5 border-b border-[#B9DFC9] dark:border-slate-800 flex items-center justify-between bg-[#F3FAF6] dark:bg-slate-900 text-[#0F172A] dark:text-white shrink-0">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2.5 bg-[#E0F2FE] border border-[#BAE6FD] text-[#0284C7] rounded-xl shrink-0">
+                                    <div className="p-2.5 bg-[#E5F3EB] border border-[#B9DFC9] text-[#006B3F] rounded-xl shrink-0">
                                         <TrendingUp size={24} />
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-base sm:text-lg text-[#075985] dark:text-sky-300 flex items-center gap-2">
+                                        <h3 className="font-bold text-base sm:text-lg text-[#004F32] dark:text-morar-300 flex items-center gap-2">
                                             Evolução Mensal dos Juros de Obra
                                         </h3>
                                         <p className="text-xs text-[#64748B] dark:text-slate-400">
@@ -4398,7 +4437,7 @@
                                 <button
                                     type="button"
                                     onClick={() => setShowEvolucaoModal(false)}
-                                    className="p-2 rounded-xl bg-[#E0F2FE] hover:bg-[#BAE6FD] text-[#0369a1] border border-[#BAE6FD] transition-colors cursor-pointer"
+                                    className="p-2 rounded-xl bg-[#E5F3EB] hover:bg-[#B9DFC9] text-[#004F32] border border-[#B9DFC9] transition-colors cursor-pointer"
                                     title="Fechar modal"
                                 >
                                     <X size={20} />
@@ -4415,11 +4454,11 @@
                                     </div>
                                     <div className="bg-[#F8FAFC] dark:bg-slate-800/60 p-3 rounded-xl border border-[#E2E8F0] dark:border-slate-700">
                                         <span className="text-[11px] font-semibold text-[#64748B] dark:text-slate-400 block">Terreno Fixo</span>
-                                        <span className="text-xs sm:text-sm font-bold text-[#075985] dark:text-sky-300">{formatPercent(resultadoSimulacao.percTerreno)}</span>
+                                        <span className="text-xs sm:text-sm font-bold text-[#004F32] dark:text-morar-300">{formatPercent(resultadoSimulacao.percTerreno)}</span>
                                     </div>
-                                    <div className="bg-[#E0F2FE] dark:bg-sky-950/40 p-3 rounded-xl border border-sky-200 dark:border-sky-800/50">
-                                        <span className="text-[11px] font-semibold text-[#0284C7] dark:text-sky-300 block">Medição Atual ({resultadoSimulacao.percObra}%)</span>
-                                        <span className="text-xs sm:text-sm font-extrabold text-[#075985] dark:text-sky-200">{formatCurrency(resultadoSimulacao.totalParcela)}</span>
+                                    <div className="bg-[#E5F3EB] dark:bg-morar-950/40 p-3 rounded-xl border border-morar-200 dark:border-morar-800/50">
+                                        <span className="text-[11px] font-semibold text-[#006B3F] dark:text-morar-300 block">Medição Atual ({resultadoSimulacao.percObra}%)</span>
+                                        <span className="text-xs sm:text-sm font-extrabold text-[#004F32] dark:text-morar-200">{formatCurrency(resultadoSimulacao.totalParcela)}</span>
                                     </div>
                                     <div className="bg-[#F8FAFC] dark:bg-slate-800/60 p-3 rounded-xl border border-[#E2E8F0] dark:border-slate-700">
                                         <span className="text-[11px] font-semibold text-[#64748B] dark:text-slate-400 block">Prestação Futura</span>
@@ -4431,7 +4470,7 @@
                                 <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-[#E2E8F0] dark:border-slate-800 shadow-2xs">
                                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
                                         <h4 className="text-xs sm:text-sm font-bold text-[#0F172A] dark:text-slate-200 flex items-center gap-2">
-                                            <TrendingUp size={16} className="text-[#0284C7]" />
+                                            <TrendingUp size={16} className="text-[#006B3F]" />
                                             Gráfico Comparativo de Parcela (R$) x Medição (%)
                                         </h4>
                                         <span className="text-[11px] text-[#64748B]">
@@ -4464,14 +4503,14 @@
                                                                 const data = payload[0].payload;
                                                                 return (
                                                                     <div className="bg-slate-900 border border-slate-700 p-3.5 rounded-xl shadow-xl text-white text-xs space-y-2 max-w-xs">
-                                                                        <div className="font-bold border-b border-slate-800 pb-1.5 flex items-center justify-between gap-2 text-sky-400">
+                                                                        <div className="font-bold border-b border-slate-800 pb-1.5 flex items-center justify-between gap-2 text-morar-400">
                                                                             <span>Medição Obra: {data.medicaoObra}%</span>
                                                                             <span className="text-[10px] text-slate-300 font-normal">Liberado: {formatPercent(data.percTotalLiberado, 1)}</span>
                                                                         </div>
                                                                         <div className="text-[11px] text-slate-200 font-mono space-y-1">
                                                                             <div className="flex justify-between gap-4">
                                                                                 <span className="text-slate-400">• Juros de Obra:</span>
-                                                                                <span className="font-bold text-sky-300">{formatCurrency(data.juros)}</span>
+                                                                                <span className="font-bold text-morar-300">{formatCurrency(data.juros)}</span>
                                                                             </div>
                                                                             <div className="flex justify-between gap-4">
                                                                                 <span className="text-slate-400">• Correção TR Est.:</span>
@@ -4486,7 +4525,7 @@
                                                                                 <span className="font-bold">{formatCurrency(data.taxaAdm)}</span>
                                                                             </div>
                                                                         </div>
-                                                                        <div className="pt-1.5 border-t border-slate-800 flex justify-between items-center font-bold text-sky-300">
+                                                                        <div className="pt-1.5 border-t border-slate-800 flex justify-between items-center font-bold text-morar-300">
                                                                             <span>Parcela Total:</span>
                                                                             <span className="text-sm">{formatCurrency(data.parcelaTotal)}</span>
                                                                         </div>
@@ -4518,18 +4557,18 @@
                                                         type="monotone" 
                                                         dataKey="juros" 
                                                         name="Juros de Obra (R$)" 
-                                                        stroke="#38BDF8" 
+                                                        stroke="#48AD7D" 
                                                         strokeWidth={2} 
                                                         strokeDasharray="4 4"
-                                                        dot={{ r: 3, fill: "#38BDF8" }} 
+                                                        dot={{ r: 3, fill: "#48AD7D" }} 
                                                     />
                                                     <Line 
                                                         type="monotone" 
                                                         dataKey="parcelaTotal" 
                                                         name="Parcela Total (R$)" 
-                                                        stroke="#0284C7" 
+                                                        stroke="#006B3F" 
                                                         strokeWidth={3} 
-                                                        dot={{ r: 5, fill: "#0284C7" }} 
+                                                        dot={{ r: 5, fill: "#006B3F" }} 
                                                         activeDot={{ r: 8 }} 
                                                     />
                                                 </LineChart>
@@ -4567,12 +4606,12 @@
                                                     return (
                                                         <tr 
                                                             key={row.medicaoObra} 
-                                                            className={isCurrent ? "bg-[#E0F2FE] dark:bg-sky-950/50 font-bold border-l-4 border-l-[#0284C7]" : "hover:bg-[#F8FAFC] dark:hover:bg-slate-800/40"}
+                                                            className={isCurrent ? "bg-[#E5F3EB] dark:bg-morar-950/50 font-bold border-l-4 border-l-[#006B3F]" : "hover:bg-[#F8FAFC] dark:hover:bg-slate-800/40"}
                                                         >
                                                             <td className="p-2 sm:p-2.5 flex items-center gap-1.5 font-sans">
                                                                 <span>{row.medicaoObra}%</span>
                                                                 {isCurrent && (
-                                                                    <span className="bg-[#0284C7] text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">Atual</span>
+                                                                    <span className="bg-[#006B3F] text-white text-[9px] px-1.5 py-0.5 rounded-full font-bold">Atual</span>
                                                                 )}
                                                             </td>
                                                             <td className="p-2 sm:p-2.5">
@@ -4581,11 +4620,11 @@
                                                                     ({formatPercent(resultadoSimulacao.percTerreno, 1)} Terreno + {formatPercent(row.percObraEquiv, 1)} Obra)
                                                                 </div>
                                                             </td>
-                                                            <td className="p-2 sm:p-2.5 text-[#075985] dark:text-sky-300">{formatCurrency(row.juros)}</td>
+                                                            <td className="p-2 sm:p-2.5 text-[#004F32] dark:text-morar-300">{formatCurrency(row.juros)}</td>
                                                             <td className="p-2 sm:p-2.5 text-slate-600 dark:text-slate-400">{formatCurrency(row.tr)}</td>
                                                             <td className="p-2 sm:p-2.5 text-slate-600 dark:text-slate-400">{formatCurrency(row.seguro)}</td>
                                                             <td className="p-2 sm:p-2.5 text-slate-600 dark:text-slate-400">{formatCurrency(row.taxaAdm)}</td>
-                                                            <td className="p-2 sm:p-2.5 text-[#075985] dark:text-sky-300 font-bold">{formatCurrency(row.parcelaTotal)}</td>
+                                                            <td className="p-2 sm:p-2.5 text-[#004F32] dark:text-morar-300 font-bold">{formatCurrency(row.parcelaTotal)}</td>
                                                             <td className="p-2 sm:p-2.5">
                                                                 <span className={row.tetoAlcancado > 90 ? "text-rose-600 font-bold" : "text-slate-600 dark:text-slate-400"}>
                                                                     {formatPercent(row.tetoAlcancado, 2)}
