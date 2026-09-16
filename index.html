@@ -637,6 +637,9 @@
             const [authSubmitting, setAuthSubmitting] = useState(false);
             const [registrationSuccessMsg, setRegistrationSuccessMsg] = useState('');
             const [appUnlocked, setAppUnlocked] = useState(false);
+            // Suprime o alerta automático do listener onAuthStateChanged durante o fluxo
+            // de cadastro, já que o próprio handleRegister exibe a mensagem ao usuário.
+            const suppressAuthAlertRef = useRef(false);
 
             // Estados para Recuperar Senha (Esqueci minha senha)
             const [showModalResetPassword, setShowModalResetPassword] = useState(false);
@@ -832,7 +835,9 @@
                                     signOut(auth).catch(() => {});
                                     setCurrentUser(null);
                                     setUserData(null);
-                                    alert("Seu cadastro foi recebido e aguarda aprovação do administrador.");
+                                    if (!suppressAuthAlertRef.current) {
+                                        alert("Seu cadastro foi recebido e aguarda aprovação do administrador.");
+                                    }
                                 }
                                 setAuthLoading(false);
                                 return;
@@ -846,10 +851,12 @@
                                 signOut(auth).catch(() => {});
                                 setCurrentUser(null);
                                 setUserData(null);
-                                if (st === 'pendente' || !st) {
-                                    alert("Seu cadastro foi recebido e aguarda aprovação do administrador.");
-                                } else {
-                                    alert("Seu acesso está temporariamente pausado pelo Administrador.");
+                                if (!suppressAuthAlertRef.current) {
+                                    if (st === 'pendente' || !st) {
+                                        alert("Seu cadastro foi recebido e aguarda aprovação do administrador.");
+                                    } else {
+                                        alert("Seu acesso está temporariamente pausado pelo Administrador.");
+                                    }
                                 }
                             } else {
                                 setCurrentUser(user);
@@ -1461,6 +1468,10 @@
 
                 setAuthSubmitting(true);
 
+                // Evita que o listener global onAuthStateChanged dispare um segundo alert
+                // quando o Firebase Auth autenticar automaticamente o usuário recém-criado.
+                suppressAuthAlertRef.current = true;
+
                 try {
                     // 2. Cria a conta no Firebase Auth diretamente pelo navegador
                     const userCredential = await createUserWithEmailAndPassword(auth, emailStr, passStr);
@@ -1488,8 +1499,9 @@
                         dataCriacao: new Date().toISOString()
                     });
 
-                    // 4. Efetua o logout automático para aguardar aprovação do Administrador
-                    await signOut(auth);
+                    // 4. Efetua o logout silencioso para aguardar aprovação do Administrador
+                    // (o listener global está suprimido, então nenhum alert extra é disparado aqui)
+                    await signOut(auth).catch(() => {});
 
                     // Limpa os campos do formulário
                     setAuthEmail("");
@@ -1502,13 +1514,14 @@
                     setAuthImobiliaria("");
                     setIsRegistering(false);
 
-                    setRegistrationSuccessMsg("Seu cadastro foi recebido com sucesso! Aguarde a aprovação do administrador para liberar seu acesso ao simulador.");
-                    alert("Cadastro realizado com sucesso! Aguarde a aprovação do administrador para liberar seu acesso.");
+                    const successMsg = "Seu cadastro foi recebido com sucesso e aguarda aprovação do administrador.";
+                    setRegistrationSuccessMsg(successMsg);
+                    alert(successMsg);
 
                 } catch (error) {
                     console.error("Erro no cadastro:", error);
                     const errStr = String(error?.message || error?.code || error);
-                    
+
                     if (error?.code === "auth/email-already-in-use" || errStr.includes("email-already-in-use")) {
                         setAuthError("Este e-mail já está cadastrado no sistema.");
                         alert("Este e-mail já está cadastrado no sistema.");
@@ -1523,6 +1536,7 @@
                         alert("Erro ao realizar cadastro: " + (error?.message || "Verifique os dados informados."));
                     }
                 } finally {
+                    suppressAuthAlertRef.current = false;
                     setAuthSubmitting(false);
                 }
             };
