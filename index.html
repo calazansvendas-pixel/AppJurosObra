@@ -293,7 +293,8 @@
             sendPasswordResetEmail,
             signOut,
             onAuthStateChanged,
-            updateProfile
+            updateProfile,
+            deleteUser
         } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
         const { useState, useEffect, useRef, useMemo } = React;
@@ -867,13 +868,14 @@
                                     }
                                     setCurrentUser(user);
                                     setUserData({ id: user.uid, ...MASTER_ADMIN_DATA });
+                                } else if (suppressAuthAlertRef.current) {
+                                    // Cadastro em andamento: handleRegister ainda vai gravar o doc e é ele
+                                    // quem controla o logout (ou o rollback). Não deslogar aqui.
                                 } else {
                                     signOut(auth).catch(() => {});
                                     setCurrentUser(null);
                                     setUserData(null);
-                                    if (!suppressAuthAlertRef.current) {
-                                        alert("Seu cadastro foi recebido e aguarda aprovação do administrador.");
-                                    }
+                                    alert("Seu cadastro foi recebido e aguarda aprovação do administrador.");
                                 }
                                 setAuthLoading(false);
                                 return;
@@ -884,15 +886,18 @@
                             const isAdmin = isMasterAdmin || uData.role === 'admin' || uData.perfil === 'Administrador';
 
                             if (!isAdmin && (st === 'pendente' || st === 'pausado' || st === 'bloqueado' || !st)) {
+                                if (suppressAuthAlertRef.current) {
+                                    // handleRegister faz o signOut e exibe a mensagem única.
+                                    setAuthLoading(false);
+                                    return;
+                                }
                                 signOut(auth).catch(() => {});
                                 setCurrentUser(null);
                                 setUserData(null);
-                                if (!suppressAuthAlertRef.current) {
-                                    if (st === 'pendente' || !st) {
-                                        alert("Seu cadastro foi recebido e aguarda aprovação do administrador.");
-                                    } else {
-                                        alert("Seu acesso está temporariamente pausado pelo Administrador.");
-                                    }
+                                if (st === 'pendente' || !st) {
+                                    alert("Seu cadastro foi recebido e aguarda aprovação do administrador.");
+                                } else {
+                                    alert("Seu acesso está temporariamente pausado pelo Administrador.");
                                 }
                             } else {
                                 setCurrentUser(user);
@@ -1557,21 +1562,41 @@
                         console.warn("Aviso ao atualizar displayName:", pErr);
                     }
 
-                    // 3. Grava o documento do usuário no Firestore com perfil 'Corretor' e status 'pendente'
-                    await setDoc(doc(db, "usuarios", user.uid), {
-                        nome: nameStr,
-                        cpf: cpfStr,
-                        email: emailStr,
-                        celular: celularStr,
-                        creci: creciStr,
-                        imobiliaria: imobiliariaStr,
-                        empresa: imobiliariaStr,
-                        role: "corretor",
-                        perfil: "Corretor",
-                        status: "pendente",
-                        createdAt: serverTimestamp(),
-                        dataCriacao: new Date().toISOString()
-                    });
+                    // 3. Grava o documento do usuário no Firestore com perfil 'Corretor' e status 'pendente'.
+                    // Se a gravação falhar, faz rollback: apaga a conta recém-criada no Auth para
+                    // não deixar um usuário "órfão" (login existente sem ficha em 'usuarios').
+                    try {
+                        await setDoc(doc(db, "usuarios", user.uid), {
+                            nome: nameStr,
+                            cpf: cpfStr,
+                            email: emailStr,
+                            celular: celularStr,
+                            creci: creciStr,
+                            imobiliaria: imobiliariaStr,
+                            empresa: imobiliariaStr,
+                            role: "corretor",
+                            perfil: "Corretor",
+                            status: "pendente",
+                            createdAt: serverTimestamp(),
+                            dataCriacao: new Date().toISOString()
+                        });
+                    } catch (fsError) {
+                        console.error("Falha ao gravar em 'usuarios'; executando rollback da conta no Auth:", fsError);
+                        let rollbackOk = true;
+                        try {
+                            await deleteUser(user);
+                        } catch (delError) {
+                            rollbackOk = false;
+                            console.error("Rollback falhou: não foi possível apagar a conta no Auth:", delError);
+                            await signOut(auth).catch(() => {});
+                        }
+                        const msgErro = rollbackOk
+                            ? "Não foi possível concluir o seu cadastro. Nenhuma conta foi criada — tente novamente em instantes."
+                            : "Não foi possível concluir o seu cadastro e a conta não pôde ser desfeita automaticamente. Entre em contato com o administrador informando o e-mail " + emailStr + ".";
+                        setAuthError(msgErro);
+                        alert(msgErro);
+                        return;
+                    }
 
                     // 4. Efetua o logout silencioso para aguardar aprovação do Administrador
                     // (o listener global está suprimido, então nenhum alert extra é disparado aqui)
