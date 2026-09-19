@@ -2639,8 +2639,8 @@
             }[viewAtual];
 
             return (
-                <div className="font-sans text-[#0F172A] dark:text-slate-100">
-                <div className="min-h-screen lg:h-screen lg:overflow-hidden flex bg-[#F0F4F8] dark:bg-slate-950">
+                <div className="min-h-screen font-sans text-[#0F172A] dark:text-slate-100 bg-slate-200 dark:bg-black">
+                <div className="w-full max-w-[1440px] mx-auto min-h-screen lg:h-screen lg:overflow-hidden flex bg-white dark:bg-slate-900 shadow-lg">
 
                 {/* OVERLAY DO MENU (MOBILE) */}
                 {mobileMenuOpen && (
@@ -2747,11 +2747,11 @@
                         </div>
                     </header>
 
-                    <main className="flex-1 min-h-0 lg:overflow-y-auto p-4">
+                    <main className="flex-1 min-h-0 lg:overflow-y-auto p-4 bg-[#F0F4F8] dark:bg-slate-950">
 
                 {/* BANNER DE FEEDBACK */}
                 {feedback && (
-                    <div role="status" className={`fixed top-16 right-4 lg:top-auto lg:bottom-4 z-50 max-w-sm p-3.5 rounded-xl font-semibold flex items-center gap-3 shadow-lg ${
+                    <div role="status" className={`fixed top-16 right-4 lg:top-auto lg:bottom-4 lg:right-[max(1rem,calc((100vw_-_1440px)/2_+_1rem))] z-50 max-w-sm p-3.5 rounded-xl font-semibold flex items-center gap-3 shadow-lg ${
                         feedback.type === 'success' ? 'bg-morar-50 border border-morar-200 text-[#006B3F]' :
                         feedback.type === 'error' ? 'bg-rose-50 border border-rose-200 text-[#EF4444]' :
                         'bg-morar-50 border border-morar-200 text-[#006B3F]'
