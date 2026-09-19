@@ -375,7 +375,10 @@
         const Printer = (p) => <Icon {...p}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></Icon>;
         const Download = (p) => <Icon {...p}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></Icon>;
         const ShieldCheck = (p) => <Icon {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></Icon>;
-        const ExternalLink = (p) => <Icon {...p}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></Icon>;
+        const Menu = (p) => <Icon {...p}><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></Icon>;
+        const ChevronLeft = (p) => <Icon {...p}><path d="m15 18-6-6 6-6"/></Icon>;
+        const ChevronRight = (p) => <Icon {...p}><path d="m9 18 6-6-6-6"/></Icon>;
+        const ExternalLink = (p) =><Icon {...p}><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" x2="21" y1="14" y2="3"/></Icon>;
 
         // Máscaras de entrada (CPF e Telefone/WhatsApp)
         const maskCPF = (val = '') => {
@@ -740,6 +743,16 @@
 
             // Estados para Histórico e Auditoria de Acessos (Admin)
             const [tabAdminActive, setTabAdminActive] = useState('usuarios'); // 'usuarios' | 'auditoria'
+
+            // Navegação do layout principal (sidebar): 'simulador' | 'salvas' | 'usuarios'
+            const [activeView, setActiveView] = useState('simulador');
+            const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+            const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+                try { return localStorage.getItem('sidebarCollapsed') === '1'; } catch (e) { return false; }
+            });
+            useEffect(() => {
+                try { localStorage.setItem('sidebarCollapsed', sidebarCollapsed ? '1' : '0'); } catch (e) {}
+            }, [sidebarCollapsed]);
             const [logsAcesso, setLogsAcesso] = useState([]);
             const [isLoadingLogs, setIsLoadingLogs] = useState(false);
             const [searchTermLogs, setSearchTermLogs] = useState('');
@@ -2604,76 +2617,134 @@
             }
 
             // RENDERIZAÇÃO 3: APLICAÇÃO PRINCIPAL (USUÁRIO AUTENTICADO)
+            const isAdminUser = userData?.perfil === 'Administrador';
+            const isPerfilGerencial = userData?.perfil === 'Gerente' || userData?.perfil === 'Analista' || userData?.perfil === 'Administrador';
+            const viewAtual = (activeView === 'usuarios' && !isAdminUser) ? 'simulador' : activeView;
+            const navItens = [
+                { id: 'simulador', label: 'Simulador', icon: Calculator },
+                { id: 'salvas', label: 'Simulações Salvas', icon: Bookmark },
+                ...(isAdminUser ? [{ id: 'usuarios', label: 'Gestão de Usuários e Acessos', icon: Users }] : [])
+            ];
+            const tituloView = {
+                simulador: { titulo: 'Simulador Juros Obra', subtitulo: 'Evolução de obra da Caixa - Modelo Apoio à Produção' },
+                salvas: { titulo: 'Simulações Salvas', subtitulo: 'Histórico de simulações registradas' },
+                usuarios: { titulo: 'Gestão de Usuários e Acessos', subtitulo: 'Aprovação, perfis e auditoria de acessos' }
+            }[viewAtual];
+
             return (
-                <div className="min-h-screen p-4 md:p-8 font-sans text-[#0F172A] bg-[#F0F4F8] dark:bg-slate-950 dark:text-slate-100">
-                
-                {/* HEADER COM IDENTIFICAÇÃO DO USUÁRIO LOGADO, TROCA DE TEMA E LOGOUT */}
-                <div className="w-[90%] max-w-[1200px] mx-auto mb-6 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 overflow-hidden">
-                {/* FAIXA DE IDENTIDADE OFICIAL MORAR */}
-                <div className="px-6 pt-4 pb-3 border-b border-[#E5E8E6] dark:border-slate-800">
-                    <img src="assets/morar-logo.png" alt="Morar Construtora e Incorporadora" className="h-6 md:h-7 w-auto dark:brightness-0 dark:invert" />
-                </div>
-                <div className="p-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-[#E5F3EB] border border-[#B9DFC9] p-3 rounded-xl text-[#006B3F] shadow-2xs shrink-0">
-                            <HardHat size={32} />
-                        </div>
-                        <div>
-                            <h1 className="text-2xl md:text-3xl font-black text-[#004F32] dark:text-morar-300 tracking-tight">Simulador Juros Obra</h1>
-                            <p className="text-[#64748B] dark:text-slate-400 text-sm md:text-base font-medium">Evolução de obra da Caixa - Modelo Apoio à Produção</p>
-                        </div>
+                <div className="font-sans text-[#0F172A] dark:text-slate-100">
+                <div className="min-h-screen lg:h-screen lg:overflow-hidden flex bg-[#F0F4F8] dark:bg-slate-950">
+
+                {/* OVERLAY DO MENU (MOBILE) */}
+                {mobileMenuOpen && (
+                    <div className="fixed inset-0 bg-slate-900/50 z-30 lg:hidden" onClick={() => setMobileMenuOpen(false)}></div>
+                )}
+
+                {/* MENU LATERAL RECOLHÍVEL (SIDEBAR) — no mobile vira menu hambúrguer */}
+                <aside className={`fixed inset-y-0 left-0 z-40 w-64 flex flex-col bg-white dark:bg-slate-900 border-r border-[#E2E8F0] dark:border-slate-800 transition-all duration-200 lg:static lg:translate-x-0 lg:shrink-0 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} ${sidebarCollapsed ? 'lg:w-[76px]' : 'lg:w-64'}`}>
+                    <div className={`flex items-center h-14 px-4 border-b border-[#E5E8E6] dark:border-slate-800 shrink-0 justify-between ${sidebarCollapsed ? 'lg:justify-center lg:px-2' : ''}`}>
+                        <img src="assets/morar-logo.png" alt="Morar Construtora e Incorporadora" className={`h-6 w-auto dark:brightness-0 dark:invert ${sidebarCollapsed ? 'lg:hidden' : ''}`} />
+                        <img src="assets/morar-m-mark.png" alt="Morar" className={`h-10 w-10 object-contain dark:brightness-0 dark:invert hidden ${sidebarCollapsed ? 'lg:block' : ''}`} />
+                        <button
+                            type="button"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="lg:hidden p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                            aria-label="Fechar menu"
+                        >
+                            <X size={20} />
+                        </button>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3 self-start lg:self-auto shrink-0">
-                        {/* SELETOR DE TEMA */}
-                        <ThemeSelector theme={theme} setTheme={setTheme} />
+                    <nav className="flex-1 overflow-y-auto p-3 space-y-1.5" aria-label="Navegação principal">
+                        {navItens.map((item) => {
+                            const ItemIcon = item.icon;
+                            const ativo = viewAtual === item.id;
+                            return (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    onClick={() => { setActiveView(item.id); setMobileMenuOpen(false); }}
+                                    title={item.label}
+                                    aria-current={ativo ? 'page' : undefined}
+                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-all cursor-pointer ${sidebarCollapsed ? 'lg:justify-center lg:px-0' : ''} ${ativo ? 'bg-[#006B3F] text-white shadow-sm' : 'text-slate-600 dark:text-slate-300 hover:bg-[#E5F3EB] hover:text-[#006B3F] dark:hover:bg-slate-800'}`}
+                                >
+                                    <ItemIcon size={20} className="shrink-0" />
+                                    <span className={`text-left leading-tight ${sidebarCollapsed ? 'lg:hidden' : ''}`}>{item.label}</span>
+                                </button>
+                            );
+                        })}
+                    </nav>
 
-                        {/* BOTÃO TUTORIAL E GUIA DO CORRETOR */}
-                        <button 
+                    <div className="border-t border-[#E5E8E6] dark:border-slate-800 p-3 space-y-2.5 shrink-0">
+                        <button
                             type="button"
-                            onClick={() => setShowTutorialModal(true)}
-                            className="bg-[#E5F3EB] hover:bg-[#B9DFC9] text-[#004F32] px-3.5 py-2.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 border border-[#B9DFC9] hover:scale-[1.02] active:scale-95 touch-manipulation min-h-[44px]"
-                            title="Abrir Tutorial e Guia do Corretor (Memória de Cálculo e Script)"
+                            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                            title={sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'}
+                            aria-label={sidebarCollapsed ? 'Expandir menu' : 'Recolher menu'}
+                            className={`hidden lg:flex w-full items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer ${sidebarCollapsed ? 'justify-center px-0' : ''}`}
                         >
-                            <BookOpen size={18} className="text-[#006B3F]" />
-                            <span className="whitespace-nowrap">Tutorial / Guia</span>
+                            {sidebarCollapsed ? <ChevronRight size={18} /> : <><ChevronLeft size={18} /><span>Recolher menu</span></>}
                         </button>
 
-                        {/* BADGE DE USUÁRIO LOGADO E BOTÃO LOGOUT */}
-                        <div className="flex items-center gap-3 bg-[#F8FAFC] dark:bg-slate-800 p-2 rounded-xl border border-[#E2E8F0] dark:border-slate-700 shrink-0">
-                            <div className="flex items-center gap-2.5 pl-1 pr-1">
-                                <div className="w-9 h-9 rounded-lg bg-[#E5F3EB] border border-[#B9DFC9] text-[#006B3F] flex items-center justify-center font-bold text-sm shadow-2xs shrink-0">
-                                    {userData?.nome ? userData.nome.substring(0, 2).toUpperCase() : 'US'}
-                                </div>
-                                <div className="text-xs">
-                                    <p className="font-bold text-[#0F172A] dark:text-white leading-tight">
-                                        {userData?.nome || currentUser.email}
-                                    </p>
-                                    <div className="mt-0.5 flex items-center gap-1.5">
-                                        <span className="text-slate-500 text-[11px]">Perfil:</span>
-                                        <span className={`px-2 py-0.5 rounded-full font-bold text-[10px] tracking-wide uppercase border ${getBadgeStyle(userData?.perfil || 'Corretor')}`}>
-                                            {userData?.perfil || 'Corretor'}
-                                        </span>
-                                    </div>
-                                </div>
+                        <div className={`flex items-center gap-2.5 ${sidebarCollapsed ? 'lg:justify-center' : ''}`} title={userData?.nome || currentUser.email}>
+                            <div className="w-9 h-9 rounded-lg bg-[#E5F3EB] border border-[#B9DFC9] text-[#006B3F] flex items-center justify-center font-bold text-sm shadow-2xs shrink-0">
+                                {userData?.nome ? userData.nome.substring(0, 2).toUpperCase() : 'US'}
                             </div>
+                            <div className={`text-xs min-w-0 ${sidebarCollapsed ? 'lg:hidden' : ''}`}>
+                                <p className="font-bold text-[#0F172A] dark:text-white leading-tight truncate">
+                                    {userData?.nome || currentUser.email}
+                                </p>
+                                <span className={`mt-1 inline-block px-2 py-0.5 rounded-full font-bold text-[10px] tracking-wide uppercase border ${getBadgeStyle(userData?.perfil || 'Corretor')}`}>
+                                    {userData?.perfil || 'Corretor'}
+                                </span>
+                            </div>
+                        </div>
 
+                        <button
+                            onClick={handleLogout}
+                            title="Sair do Sistema"
+                            className="w-full bg-[#FEE2E2] hover:bg-rose-200 text-[#EF4444] px-2 py-2 rounded-lg border border-rose-200 transition-colors flex items-center justify-center gap-1.5 text-xs font-bold cursor-pointer"
+                        >
+                            <LogOut size={16} />
+                            <span className={sidebarCollapsed ? 'lg:hidden' : ''}>Sair</span>
+                        </button>
+                    </div>
+                </aside>
+
+                {/* COLUNA PRINCIPAL: BARRA SUPERIOR + CONTEÚDO */}
+                <div className="flex-1 min-w-0 flex flex-col lg:h-screen">
+                    <header className="sticky top-0 z-20 lg:static shrink-0 flex items-center gap-3 px-4 md:px-6 h-14 bg-white dark:bg-slate-900 border-b border-[#E2E8F0] dark:border-slate-800">
+                        <button
+                            type="button"
+                            onClick={() => setMobileMenuOpen(true)}
+                            className="lg:hidden p-2 -ml-2 rounded-lg text-[#004F32] dark:text-morar-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+                            aria-label="Abrir menu"
+                        >
+                            <Menu size={24} />
+                        </button>
+                        <div className="min-w-0">
+                            <h1 className="text-lg md:text-xl font-black text-[#004F32] dark:text-morar-300 tracking-tight truncate">{tituloView.titulo}</h1>
+                            <p className="hidden md:block text-xs text-[#64748B] dark:text-slate-400 font-medium truncate">{tituloView.subtitulo}</p>
+                        </div>
+                        <div className="ml-auto flex items-center gap-2 md:gap-3 shrink-0">
+                            <ThemeSelector theme={theme} setTheme={setTheme} />
                             <button
-                                onClick={handleLogout}
-                                title="Sair do Sistema"
-                                className="bg-[#FEE2E2] hover:bg-rose-200 text-[#EF4444] p-2 rounded-lg border border-rose-200 transition-colors flex items-center gap-1.5 text-xs font-bold cursor-pointer"
+                                type="button"
+                                onClick={() => setShowTutorialModal(true)}
+                                className="bg-[#E5F3EB] hover:bg-[#B9DFC9] text-[#004F32] px-3 py-2 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shrink-0 border border-[#B9DFC9] touch-manipulation min-h-[40px]"
+                                title="Abrir Tutorial e Guia do Corretor (Memória de Cálculo e Script)"
                             >
-                                <LogOut size={16} />
-                                <span className="hidden sm:inline">Sair</span>
+                                <BookOpen size={18} className="text-[#006B3F]" />
+                                <span className="hidden sm:inline whitespace-nowrap">Tutorial / Guia</span>
                             </button>
                         </div>
-                    </div>
-                </div>
-                </div>
+                    </header>
+
+                    <main className="flex-1 min-h-0 lg:overflow-y-auto p-4">
 
                 {/* BANNER DE FEEDBACK */}
                 {feedback && (
-                    <div className={`w-[90%] max-w-[1200px] mx-auto mb-6 p-4 rounded-xl font-semibold flex items-center gap-3 shadow-sm ${
+                    <div role="status" className={`fixed top-16 right-4 lg:top-auto lg:bottom-4 z-50 max-w-sm p-3.5 rounded-xl font-semibold flex items-center gap-3 shadow-lg ${
                         feedback.type === 'success' ? 'bg-morar-50 border border-morar-200 text-[#006B3F]' :
                         feedback.type === 'error' ? 'bg-rose-50 border border-rose-200 text-[#EF4444]' :
                         'bg-morar-50 border border-morar-200 text-[#006B3F]'
@@ -2683,63 +2754,49 @@
                     </div>
                 )}
 
-                {/* SEÇÃO ESPECIAL PARA GERENTE / ANALISTA / ADMINISTRADOR: PAINEL GERENCIAL */}
-                {(userData?.perfil === 'Gerente' || userData?.perfil === 'Analista' || userData?.perfil === 'Administrador') && (
-                    <div className="w-[90%] max-w-[1200px] mx-auto mb-6 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-5 border-l-4 border-l-[#006B3F]">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div className="flex items-center gap-3">
-                                <div className="bg-[#E5F3EB] text-[#006B3F] p-2.5 rounded-xl border border-morar-200 shrink-0">
-                                    <BarChart2 size={24} />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-[#0F172A] dark:text-white text-base">Relatório Gerencial de Simulações</h3>
-                                    <p className="text-xs text-[#64748B] dark:text-slate-400">Visão consolidada das simulações da equipe</p>
-                                </div>
-                            </div>
+                {/* ========================================== */}
+                {/* TELA 1: SIMULADOR (3 COLUNAS)              */}
+                {/* ========================================== */}
+                {viewAtual === 'simulador' && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
 
-                            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs font-semibold text-[#0F172A] dark:text-slate-200 bg-[#F8FAFC] dark:bg-slate-800 p-3.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700">
-                                <div className="flex flex-col items-center text-center">
-                                    <span className="text-[#64748B] block mb-0.5">Total de Simulações:</span>
-                                    <span className="text-[#0F172A] dark:text-white font-bold text-sm">{simulacoes.length}</span>
-                                </div>
-                                <div className="h-9 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
-                                <div className="flex flex-col items-center text-center">
-                                    <span className="text-[#64748B] block mb-0.5">Volume Total Financiado:</span>
-                                    <span className="text-[#004F32] dark:text-morar-400 font-bold text-sm">
-                                        {formatCurrency(simulacoes.reduce((acc, c) => acc + (c.financiamento || 0), 0))}
-                                    </span>
-                                </div>
+                    {/* COLUNA 1: LIMPAR/SALVAR + DADOS DO CONTRATO */}
+                    <div className="space-y-4">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-4 border-l-4 border-l-[#006B3F]">
+                            <span className="font-bold text-[#0F172A] dark:text-white text-sm">Limpar/Salvar</span>
+                            <input
+                                type="text"
+                                placeholder="Nome da simulação (Ex: Ap 302, Cliente João...)"
+                                aria-label="Nome / identificação da simulação"
+                                value={nomeSimulacao}
+                                onChange={(e) => setNomeSimulacao(e.target.value)}
+                                className="mt-3 w-full px-3 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none font-medium placeholder-slate-400"
+                            />
+                            <div className="mt-3 grid grid-cols-2 gap-3">
+                                <button
+                                    onClick={handleReset}
+                                    className="bg-[#E5F3EB] hover:bg-morar-200 text-[#006B3F] border border-morar-200 transition-all px-3 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-2xs cursor-pointer"
+                                    title="Zerar todos os valores e resultados"
+                                >
+                                    <RotateCcw size={16} />
+                                    Zerar
+                                </button>
+                                <button
+                                    onClick={handleSalvarSimulacao}
+                                    disabled={isSaving}
+                                    className="bg-[#006B3F] hover:bg-[#004F32] text-white transition-all px-3 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-2xs disabled:opacity-50 cursor-pointer"
+                                    title="Salvar esta simulação"
+                                >
+                                    <Save size={16} />
+                                    {isSaving ? 'Salvando...' : 'Salvar'}
+                                </button>
                             </div>
                         </div>
-                    </div>
-                )}
 
-                {/* ESTRUTURA DE 3 COLUNAS RESPONSIVAS (DESKTOP) E EMPILHADAS (CELULAR) */}
-                <div className="w-[90%] max-w-[1200px] mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    {/* ========================================== */}
-                    {/* COLUNA 1 (ESQUERDA): ENTRADA DE DADOS      */}
-                    {/* ========================================== */}
-                    <div className="space-y-6">
-                        {/* BOTÃO "ZERAR TODOS OS VALORES" NO TOPO DO PAINEL */}
-                        <div className="flex items-center justify-between bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-4 border-l-4 border-l-[#006B3F]">
-                            <div>
-                                <span className="font-bold text-[#0F172A] dark:text-white text-sm">Limpar Formulário</span>
-                            </div>
-                            <button 
-                                onClick={handleReset}
-                                className="bg-[#E5F3EB] hover:bg-morar-200 text-[#006B3F] border border-morar-200 transition-all px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shrink-0 shadow-2xs cursor-pointer"
-                                title="Zerar todos os valores e resultados"
-                            >
-                                <RotateCcw size={15} />
-                                Zerar Todos os Valores
-                            </button>
-                        </div>
-
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6 border-t-4 border-t-[#006B3F]">
-                            <div className="flex items-center justify-between gap-2 mb-6">
-                                <h2 className="text-xl font-bold flex items-center gap-2 text-[#004F32] dark:text-morar-300">
-                                    <FileText className="text-[#006B3F]" /> 
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-4 border-t-4 border-t-[#006B3F]">
+                            <div className="flex items-center justify-between gap-2 mb-3">
+                                <h2 className="text-lg font-bold flex items-center gap-2 text-[#004F32] dark:text-morar-300">
+                                    <FileText className="text-[#006B3F]" size={22} />
                                     Dados do Contrato
                                 </h2>
                                 <button
@@ -2752,24 +2809,22 @@
                                     <span>Ver Guia</span>
                                 </button>
                             </div>
-                            
-                            <div className="space-y-5">
-                                {/* Financiamento */}
-                                <MoneyInput 
+
+                            <div className="space-y-3">
+                                <MoneyInput
                                     label="Valor do Financiamento (R$)"
                                     value={financiamento}
                                     onChange={updateInputVal(setFinanciamento)}
                                     helpText="O valor total que você financiou com o banco."
                                 />
 
-                                {/* Taxa de Juros Anual */}
                                 <div>
                                     <label className="block text-sm font-semibold text-[#0F172A] dark:text-slate-300 mb-1">Taxa de Juros Nominal (% ao ano)</label>
                                     <div className="relative">
-                                        <input 
-                                            type="number" 
+                                        <input
+                                            type="number"
                                             step="0.01"
-                                            value={taxaAnual} 
+                                            value={taxaAnual}
                                             onChange={(e) => updateInputVal(setTaxaAnual)(e.target.value)}
                                             className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none transition-all font-semibold"
                                         />
@@ -2777,6 +2832,25 @@
                                     </div>
                                 </div>
 
+                                <MoneyInput
+                                    label="Valor da Parcela de Amortização (R$)"
+                                    value={parcelaFutura}
+                                    onChange={updateInputVal(setParcelaFutura)}
+                                    helpText="Usaremos para comparar se o juro está chegando no teto."
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* COLUNA 2: TAXAS E ENCARGOS + EVOLUÇÃO DA OBRA + CALCULAR */}
+                    <div className="space-y-4">
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-5 border-t-4 border-t-[#006B3F]">
+                            <h2 className="text-lg font-bold flex items-center gap-2 mb-4 text-[#004F32] dark:text-morar-300">
+                                <Building size={22} className="text-[#006B3F]" />
+                                Taxas e Encargos
+                            </h2>
+
+                            <div className="space-y-4">
                                 {/* Taxa TR (Taxa Referencial) */}
                                 <div>
                                     <div className="mb-1">
@@ -2785,44 +2859,34 @@
                                         </label>
                                     </div>
                                     <div className="relative">
-                                        <input 
-                                            type="number" 
+                                        <input
+                                            type="number"
                                             step="0.0001"
-                                            value={tr} 
+                                            value={tr}
                                             onChange={(e) => updateInputVal(setTr)(e.target.value)}
                                             disabled={!canEditCamposRestritos}
                                             readOnly={!canEditCamposRestritos}
                                             className={`w-full pl-4 pr-16 py-2.5 rounded-xl border outline-none transition-all font-semibold ${
-                                                canEditCamposRestritos 
-                                                    ? 'border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] text-[#0F172A] dark:text-white' 
+                                                canEditCamposRestritos
+                                                    ? 'border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] text-[#0F172A] dark:text-white'
                                                     : 'border-[#E2E8F0] dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-400 cursor-not-allowed'
                                             }`}
                                             placeholder="0.0000"
                                         />
                                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-xs">% a.m.</span>
                                     </div>
-                                    <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1 flex items-center justify-between">
+                                    <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1 flex items-center justify-between gap-2">
                                         <span>Base: TR de {formatTrPeriodo(trData).replace('Ref. ', '')}</span>
                                         <span>Atualizado em: {trData && trData !== 'Buscando...' && trData !== 'Fallback' ? trData : 'indisponível'}</span>
                                     </p>
                                 </div>
 
-                                {/* Parcela Futura */}
-                                <MoneyInput 
-                                    label="Valor da Parcela de Amortização (R$)"
-                                    value={parcelaFutura}
-                                    onChange={updateInputVal(setParcelaFutura)}
-                                    helpText="Usaremos para comparar se o juro está chegando no teto."
-                                />
-
-                                <div className="grid grid-cols-2 gap-4 pt-2">
-                                    {/* Seguros */}
-                                    <MoneyInput 
+                                <div className="grid grid-cols-2 gap-4">
+                                    <MoneyInput
                                         label="Seguros (MIP/DFI)"
                                         value={seguro}
                                         onChange={updateInputVal(setSeguro)}
                                     />
-                                    {/* Taxa Adm */}
                                     <div>
                                         <label className="block text-sm font-semibold text-[#0F172A] dark:text-slate-300 mb-1">Taxa Adm. CEF</label>
                                         <div className="w-full px-3 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC] dark:bg-slate-800/60 font-semibold text-[#64748B] dark:text-slate-400 flex items-center cursor-not-allowed h-[42px]">
@@ -2833,59 +2897,50 @@
                             </div>
                         </div>
 
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6 border-t-4 border-t-[#006B3F]">
-                            <h2 className="text-xl font-bold flex items-center gap-2 mb-6 text-[#004F32] dark:text-morar-300">
-                                <TrendingUp className="text-[#006B3F]" /> 
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-5 border-t-4 border-t-[#006B3F]">
+                            <h2 className="text-lg font-bold flex items-center gap-2 mb-4 text-[#004F32] dark:text-morar-300">
+                                <TrendingUp className="text-[#006B3F]" size={22} />
                                 Evolução da Obra (Medição)
                             </h2>
-                            
-                            <div className="space-y-5">
-                                {/* Percentual Terreno */}
+
+                            <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <div className="mb-1">
-                                        <label className="block text-sm font-semibold text-[#0F172A] dark:text-slate-300">
-                                            Percentual do Terreno (%)
-                                        </label>
-                                    </div>
+                                    <label className="block text-sm font-semibold text-[#0F172A] dark:text-slate-300 mb-1" title="Percentual do Terreno (%)">Terreno (%)</label>
                                     <div className="relative">
-                                        <input 
-                                            type="number" 
+                                        <input
+                                            type="number"
                                             step="0.1"
-                                            value={percTerreno} 
+                                            value={percTerreno}
                                             onChange={(e) => updateInputVal(setPercTerreno)(e.target.value)}
                                             disabled={!canEditCamposRestritos}
                                             readOnly={!canEditCamposRestritos}
-                                            className={`w-full pl-4 pr-10 py-2.5 rounded-xl border outline-none transition-all font-semibold ${
-                                                canEditCamposRestritos 
-                                                    ? 'border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] text-[#0F172A] dark:text-white' 
+                                            className={`w-full pl-4 pr-9 py-2.5 rounded-xl border outline-none transition-all font-semibold ${
+                                                canEditCamposRestritos
+                                                    ? 'border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] text-[#0F172A] dark:text-white'
                                                     : 'border-[#E2E8F0] dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-400 cursor-not-allowed'
                                             }`}
                                         />
-                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
                                     </div>
-                                    <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">Valor do terreno fixado por padrão em 7,0%.</p>
                                 </div>
-
-                                {/* Percentual Obra */}
                                 <div>
                                     <label className="block text-sm font-semibold text-[#0F172A] dark:text-slate-300 mb-1">Obra Executada (%)</label>
                                     <div className="relative">
-                                        <input 
-                                            type="number" 
+                                        <input
+                                            type="number"
                                             step="0.1"
-                                            value={percObra} 
+                                            value={percObra}
                                             onChange={(e) => updateInputVal(setPercObra)(e.target.value)}
-                                            className="w-full pl-4 pr-10 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none transition-all font-semibold"
+                                            className="w-full pl-4 pr-9 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none transition-all font-semibold"
                                         />
-                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
+                                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
                                     </div>
-                                    <p className="text-xs text-[#64748B] dark:text-slate-400 mt-1">Medição atestada pela engenharia da Caixa este mês.</p>
                                 </div>
                             </div>
+                            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-2">Terreno fixado por padrão em 7,0%. Obra: medição atestada pela engenharia da Caixa este mês.</p>
                         </div>
 
-                        {/* BOTÃO PRINCIPAL "CALCULAR SIMULAÇÃO" */}
-                        <button 
+                        <button
                             onClick={handleCalcularSimulacao}
                             className="w-full bg-[#E5F3EB] hover:bg-[#B9DFC9] text-[#004F32] border border-[#B9DFC9] transition-all py-3.5 px-4 rounded-xl font-black text-base flex items-center justify-center gap-2 shadow-2xs active:scale-[0.99] cursor-pointer"
                         >
@@ -2894,13 +2949,10 @@
                         </button>
                     </div>
 
-                    {/* ========================================== */}
-                    {/* COLUNA 2 (CENTRO): RESULTADOS & CÁLCULOS   */}
-                    {/* ========================================== */}
-                    <div className="space-y-6">
-                        
+                    {/* COLUNA 3: RESULTADOS */}
+                    <div className="space-y-4">
                         {!resultadoSimulacao ? (
-                            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-8 text-center flex flex-col items-center justify-center min-h-[380px]">
+                            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-8 text-center flex flex-col items-center justify-center min-h-[320px]">
                                 <div className="w-16 h-16 rounded-full bg-[#E5F3EB] text-[#006B3F] flex items-center justify-center mb-4 border border-morar-200 shadow-2xs">
                                     <Calculator size={32} />
                                 </div>
@@ -2908,9 +2960,9 @@
                                     Simulação Pronta para Cálculo
                                 </h3>
                                 <p className="text-sm text-[#64748B] dark:text-slate-400 max-w-sm mb-6 leading-relaxed font-medium">
-                                    Preencha os dados do contrato e a evolução da obra na coluna ao lado e clique no botão <span className="font-bold text-[#006B3F]">"Calcular Simulação"</span> para visualizar os resultados.
+                                    Preencha os dados do contrato e a evolução da obra nas colunas ao lado e clique no botão <span className="font-bold text-[#006B3F]">"Calcular Simulação"</span> para visualizar os resultados.
                                 </p>
-                                <button 
+                                <button
                                     onClick={handleCalcularSimulacao}
                                     className="bg-[#006B3F] hover:bg-[#004F32] text-white transition-all px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-sm cursor-pointer"
                                 >
@@ -2921,16 +2973,16 @@
                         ) : (
                             <>
                                 {/* CARD DE RESULTADO PRINCIPAL */}
-                                <div className="bg-[#F3FAF6] dark:bg-slate-900 border border-[#B9DFC9] dark:border-slate-800 rounded-2xl shadow-sm p-6 sm:p-8 text-[#0F172A] dark:text-white relative overflow-hidden">
+                                <div className="bg-[#F3FAF6] dark:bg-slate-900 border border-[#B9DFC9] dark:border-slate-800 rounded-2xl shadow-sm p-4 text-[#0F172A] dark:text-white relative overflow-hidden">
                                     <div className="relative z-10">
-                                        <div className="flex items-center justify-between mb-4 gap-2">
+                                        <div className="flex items-center justify-between mb-3 gap-2">
                                             <span className="text-[#004F32] dark:text-morar-300 font-bold uppercase tracking-wider text-xs sm:text-sm flex items-center gap-2 shrink-0">
                                                 <Calculator size={18} className="shrink-0 text-[#006B3F]" /> VALOR DA PARCELA
                                             </span>
-                                            
+
                                             {/* TR Badge */}
                                             {canEditCamposRestritos ? (
-                                                <button 
+                                                <button
                                                     type="button"
                                                     onClick={fetchTR}
                                                     disabled={isFetchingTr}
@@ -2946,19 +2998,8 @@
                                             )}
                                         </div>
 
-                                        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-                                            <div className="text-4xl sm:text-5xl font-black tracking-tight text-[#006B3F] dark:text-morar-400 drop-shadow-2xs">
-                                                {formatCurrency(resultadoSimulacao.totalParcela)}
-                                            </div>
-                                            <button 
-                                                type="button"
-                                                onClick={() => setShowEvolucaoModal(true)}
-                                                className="bg-[#E5F3EB] hover:bg-[#B9DFC9] text-[#004F32] border border-[#B9DFC9] font-bold px-3.5 py-2.5 rounded-xl text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-2xs active:scale-95 shrink-0"
-                                                title="Abrir gráfico comparativo com a evolução mensal de 10% a 100%"
-                                            >
-                                                <TrendingUp size={18} className="text-[#006B3F]" />
-                                                <span>Ver Evolução Mensal</span>
-                                            </button>
+                                        <div className="text-4xl font-black tracking-tight text-[#006B3F] dark:text-morar-400 drop-shadow-2xs mb-4">
+                                            {formatCurrency(resultadoSimulacao.totalParcela)}
                                         </div>
 
                                         {/* Progress Bar do Teto */}
@@ -2968,7 +3009,7 @@
                                                 <span className="font-bold text-[#006B3F] dark:text-morar-300">{formatPercent(resultadoSimulacao.tetoAlcancado, 1)} da parcela</span>
                                             </div>
                                             <div className="h-2.5 w-full bg-[#E5F3EB] dark:bg-slate-800 rounded-full overflow-hidden border border-[#B9DFC9] dark:border-slate-700">
-                                                <div 
+                                                <div
                                                     className={`h-full rounded-full transition-all duration-500 ${resultadoSimulacao.tetoAlcancado > 90 ? 'bg-rose-500' : resultadoSimulacao.tetoAlcancado > 70 ? 'bg-amber-500' : 'bg-[#006B3F]'}`}
                                                     style={{ width: `${Math.min(resultadoSimulacao.tetoAlcancado, 100)}%` }}
                                                 ></div>
@@ -2980,14 +3021,69 @@
                                     </div>
                                 </div>
 
-                                {/* MEMÓRIA DE CÁLCULO */}
-                                <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6">
-                                    <h3 className="text-lg font-bold text-[#004F32] dark:text-morar-300 mb-4 flex items-center gap-2">
-                                        <Info className="text-[#006B3F]" /> 
-                                        Memória de Cálculo (Passo a Passo)
-                                    </h3>
-                                    
-                                    <div className="space-y-4">
+                                {/* COMPOSIÇÃO FINAL DA PARCELA */}
+                                <div className="p-4 rounded-2xl bg-[#F3FAF6] dark:bg-slate-900 text-[#0F172A] dark:text-white border border-[#B9DFC9] dark:border-slate-800 space-y-2.5 shadow-sm">
+                                    <div className="flex items-center justify-between gap-2 border-b border-[#B9DFC9] dark:border-slate-800 pb-2.5">
+                                        <h4 className="font-bold flex items-center gap-2 text-[#004F32] dark:text-morar-300 text-sm">
+                                            <CheckCircle2 size={18} className="text-[#006B3F]" />
+                                            Composição Final
+                                        </h4>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowEvolucaoModal(true)}
+                                            className="bg-[#E5F3EB] hover:bg-[#B9DFC9] text-[#004F32] border border-[#B9DFC9] font-bold px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs active:scale-95 shrink-0"
+                                            title="Abrir gráfico comparativo com a evolução mensal de 10% a 100%"
+                                        >
+                                            <TrendingUp size={14} className="text-[#006B3F]" />
+                                            <span>Ver Evolução Mensal</span>
+                                        </button>
+                                    </div>
+
+                                    <ul className="space-y-1 text-xs text-[#0F172A] dark:text-slate-300 font-mono">
+                                        <li className="flex justify-between">
+                                            <span className="text-slate-500">Juros (C):</span>
+                                            <span className="font-semibold">{formatCurrency(resultadoSimulacao.valorJuros)}</span>
+                                        </li>
+                                        <li className="flex justify-between">
+                                            <span className="text-slate-500">Correção TR (D):</span>
+                                            <span className="font-semibold">{formatCurrency(resultadoSimulacao.valorTr)}</span>
+                                        </li>
+                                        <li className="flex justify-between">
+                                            <span className="text-slate-500">Seguros:</span>
+                                            <span className="font-semibold">{formatCurrency(resultadoSimulacao.seguro)}</span>
+                                        </li>
+                                        <li className="flex justify-between">
+                                            <span className="text-slate-500">Taxa Adm. CEF:</span>
+                                            <span className="font-semibold">{formatCurrency(TAXA_ADM)}</span>
+                                        </li>
+                                        <li className="border-t border-[#B9DFC9] dark:border-slate-800 my-1 pt-2 flex justify-between font-bold text-sm text-[#0F172A] dark:text-white">
+                                            <span>Total (TEO):</span>
+                                            <span className="text-[#006B3F] dark:text-morar-400 text-base font-black">{formatCurrency(resultadoSimulacao.totalParcela)}</span>
+                                        </li>
+                                    </ul>
+
+                                    <div className="pt-3 border-t border-[#B9DFC9] dark:border-slate-800 space-y-1.5 font-sans">
+                                        <div className="flex items-center justify-between gap-2 text-xs text-[#64748B] dark:text-slate-300">
+                                            <span className="font-medium">Parcela Futura (Pós-Chaves):</span>
+                                            <span className="font-bold text-[#0F172A] dark:text-white font-mono">{formatCurrency(resultadoSimulacao.parcelaFutura)}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="text-slate-500">% Teto Alcançado:</span>
+                                            <span className="font-extrabold text-[#006B3F] dark:text-morar-300 font-mono">
+                                                {formatPercent(resultadoSimulacao.tetoAlcancado, 1)} da parcela futura
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* MEMÓRIA DE CÁLCULO (RECOLHIDA POR PADRÃO PARA ECONOMIZAR ALTURA) */}
+                                <details className="group bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800">
+                                    <summary className="cursor-pointer list-none flex items-center justify-between gap-2 p-3.5 font-bold text-[#004F32] dark:text-morar-300 text-sm">
+                                        <span className="flex items-center gap-2"><Info className="text-[#006B3F]" size={18} /> Memória de Cálculo (Passo a Passo)</span>
+                                        <span className="text-xs font-semibold text-[#006B3F] dark:text-morar-400 group-open:hidden">Expandir</span>
+                                        <span className="text-xs font-semibold text-[#006B3F] dark:text-morar-400 hidden group-open:inline">Recolher</span>
+                                    </summary>
+                                    <div className="px-4 pb-4 space-y-4">
                                         {/* Passo A */}
                                         <div className="p-4 rounded-xl border border-[#E2E8F0] dark:border-slate-800 bg-[#F8FAFC] dark:bg-slate-800/50">
                                             <div className="flex items-start gap-3">
@@ -3097,222 +3193,67 @@
                                                 </div>
                                             </div>
                                         )}
-
-                                        {/* Conclusão - Composição Final da Parcela */}
-                                        <div className="p-4 sm:p-5 rounded-xl bg-[#F3FAF6] dark:bg-slate-900 text-[#0F172A] dark:text-white border border-[#B9DFC9] dark:border-slate-800 space-y-4 shadow-2xs">
-                                            <div className="flex items-center justify-between gap-2 flex-wrap border-b border-[#B9DFC9] dark:border-slate-800 pb-2.5">
-                                                <h4 className="font-bold flex items-center gap-2 text-[#004F32] dark:text-morar-300 text-sm sm:text-base">
-                                                    <CheckCircle2 size={18} className="text-[#006B3F]" /> 
-                                                    Composição Final da Parcela
-                                                </h4>
-                                                <button 
-                                                    type="button"
-                                                    onClick={() => setShowEvolucaoModal(true)}
-                                                    className="text-xs font-bold text-[#006B3F] dark:text-morar-400 hover:underline flex items-center gap-1 cursor-pointer transition-colors"
-                                                >
-                                                    <TrendingUp size={14} />
-                                                    <span>Ver Evolução Mensal</span>
-                                                </button>
-                                            </div>
-
-                                            {/* Lista da Composição */}
-                                            <ul className="space-y-1.5 text-xs text-[#0F172A] dark:text-slate-300 font-mono">
-                                                <li className="flex justify-between">
-                                                    <span className="text-slate-500">Juros (C):</span> 
-                                                    <span className="font-semibold">{formatCurrency(resultadoSimulacao.valorJuros)}</span>
-                                                </li>
-                                                <li className="flex justify-between">
-                                                    <span className="text-slate-500">Correção TR (D):</span> 
-                                                    <span className="font-semibold">{formatCurrency(resultadoSimulacao.valorTr)}</span>
-                                                </li>
-                                                <li className="flex justify-between">
-                                                    <span className="text-slate-500">Seguros:</span> 
-                                                    <span className="font-semibold">{formatCurrency(resultadoSimulacao.seguro)}</span>
-                                                </li>
-                                                <li className="flex justify-between">
-                                                    <span className="text-slate-500">Taxa Adm. CEF:</span> 
-                                                    <span className="font-semibold">{formatCurrency(TAXA_ADM)}</span>
-                                                </li>
-                                                <li className="border-t border-[#B9DFC9] dark:border-slate-800 my-1 pt-2 flex justify-between font-bold text-sm text-[#0F172A] dark:text-white">
-                                                    <span>Total (TEO):</span> 
-                                                    <span className="text-[#006B3F] dark:text-morar-400 text-base font-black">{formatCurrency(resultadoSimulacao.totalParcela)}</span>
-                                                </li>
-                                            </ul>
-
-                                            {/* Proporção e % Teto Futuro */}
-                                            <div className="pt-3 border-t border-[#B9DFC9] dark:border-slate-800 space-y-2 font-sans">
-                                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs text-[#64748B] dark:text-slate-300">
-                                                    <span className="font-medium">Comparação com a Parcela Futura (Pós-Chaves):</span>
-                                                    <span className="font-bold text-[#0F172A] dark:text-white font-mono">{formatCurrency(resultadoSimulacao.parcelaFutura)}</span>
-                                                </div>
-
-                                                <div className="flex justify-between items-center text-xs">
-                                                    <span className="text-slate-500">% Teto Alcançado:</span>
-                                                    <span className="font-extrabold text-[#006B3F] dark:text-morar-300 font-mono">
-                                                        {formatPercent(resultadoSimulacao.tetoAlcancado, 1)} da parcela futura
-                                                    </span>
-                                                </div>
-
-                                                {/* Barra de Progresso Visual */}
-                                                <div className="h-2.5 w-full bg-[#E5F3EB] dark:bg-slate-800 rounded-full overflow-hidden border border-[#B9DFC9] dark:border-slate-700 mt-1">
-                                                    <div 
-                                                        className={`h-full rounded-full transition-all duration-500 ${resultadoSimulacao.tetoAlcancado > 90 ? 'bg-rose-500' : resultadoSimulacao.tetoAlcancado > 70 ? 'bg-amber-500' : 'bg-[#006B3F]'}`}
-                                                        style={{ width: `${Math.min(resultadoSimulacao.tetoAlcancado, 100)}%` }}
-                                                    ></div>
-                                                </div>
-                                            </div>
-                                        </div>
                                     </div>
-                                </div>
+                                </details>
                             </>
                         )}
-
-                    </div>
-
-                    {/* ========================================== */}
-                    {/* COLUNA 3 (DIREITA): SIMULAÇÕES SALVAS      */}
-                    {/* ========================================== */}
-                    <div className="space-y-6">
-                        {/* CARD SALVAR SIMULAÇÃO NO FIRESTORE (NO TOPO DA COLUNA 3) */}
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6 border-t-4 border-t-[#006B3F]">
-                            <h3 className="text-lg font-bold text-[#004F32] dark:text-morar-300 mb-4 flex items-center gap-2">
-                                <Bookmark className="text-[#006B3F]" size={20} />
-                                Salvar Simulação
-                            </h3>
-
-                            <div className="space-y-3">
-                                <div>
-                                    <label className="block text-xs font-semibold text-[#0F172A] dark:text-slate-300 mb-1">Nome / Identificação da Simulação</label>
-                                    <input 
-                                        type="text" 
-                                        placeholder="Ex: Ap 302, Cliente João, Medição 50%..."
-                                        value={nomeSimulacao}
-                                        onChange={(e) => setNomeSimulacao(e.target.value)}
-                                        className="w-full px-3 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none font-medium placeholder-slate-400"
-                                    />
-                                </div>
-
-                                <button 
-                                    onClick={handleSalvarSimulacao}
-                                    disabled={isSaving}
-                                    className="w-full bg-[#E5F3EB] hover:bg-[#B9DFC9] text-[#004F32] border border-[#B9DFC9] font-bold py-3 rounded-xl transition-all shadow-2xs flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
-                                >
-                                    <Save size={18} className="text-[#006B3F]" />
-                                    {isSaving ? 'Salvando no Firestore...' : 'Salvar Simulação'}
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* LISTA DE SIMULAÇÕES SALVAS DO FIRESTORE */}
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6 border-t-4 border-t-[#006B3F] flex flex-col">
-                            <div className="flex items-center justify-between gap-2 pb-4 border-b border-[#E2E8F0] dark:border-slate-800 mb-6">
-                                <div>
-                                    <h2 className="text-xl font-bold text-[#004F32] dark:text-morar-300 flex items-center gap-2">
-                                        <Bookmark className="text-[#006B3F]" size={22} />
-                                        Simulações Salvas
-                                    </h2>
-                                </div>
-                                <div className="bg-[#E5F3EB] dark:bg-slate-800 text-[#006B3F] dark:text-morar-300 px-3 py-1 rounded-full font-bold text-xs border border-morar-200 dark:border-slate-700 shrink-0">
-                                    {simulacoes.length}
-                                </div>
-                            </div>
-
-                            {isLoadingSimulacoes ? (
-                                <div className="py-12 text-center text-slate-500 flex flex-col items-center justify-center gap-2 my-auto">
-                                    <RefreshCw size={24} className="animate-spin text-[#006B3F]" />
-                                    <p className="text-sm font-medium">Carregando registros...</p>
-                                </div>
-                            ) : simulacoes.length === 0 ? (
-                                <div className="py-12 text-center text-slate-400 bg-[#F8FAFC] dark:bg-slate-800/40 rounded-xl border border-dashed border-[#E2E8F0] dark:border-slate-800 my-auto p-4">
-                                    <Bookmark size={36} className="mx-auto text-slate-300 dark:text-slate-600 mb-2" />
-                                    <p className="font-semibold text-slate-600 dark:text-slate-300 text-sm">
-                                        {userData?.perfil === 'Corretor' ? 'Você ainda não possui simulações salvas.' : 'Nenhum registro salvo'}
-                                    </p>
-                                    <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-                                        {userData?.perfil === 'Corretor' 
-                                            ? 'Preencha os valores do formulário e clique em "Salvar Simulação" para registrar no seu histórico.'
-                                            : 'Preencha os valores e clique em "Salvar Simulação" acima para registrar no banco.'}
-                                    </p>
-                                </div>
-                            ) : (
-                                <div className="space-y-4 overflow-y-auto max-h-[600px] pr-1">
-                                    {simulacoes.map((item) => {
-                                        const isAdmin = userData?.role === "admin" || userData?.perfil === "Administrador" || currentUser?.uid === MASTER_ADMIN_UID;
-                                        return (
-                                            <div key={item.id} className="bg-[#F8FAFC] dark:bg-slate-800/60 border border-[#E2E8F0] dark:border-slate-700/80 rounded-xl p-4 hover:border-[#006B3F] transition-all shadow-2xs flex flex-col justify-between space-y-3">
-                                                <div>
-                                                    <div className="flex items-start justify-between gap-2 mb-2">
-                                                        <h3 className="font-bold text-[#0F172A] dark:text-white text-sm line-clamp-2">
-                                                            {item.titulo}
-                                                        </h3>
-                                                        {isAdmin && (
-                                                            <button 
-                                                                type="button"
-                                                                title="Excluir simulação"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    e.preventDefault();
-                                                                    handleDeleteSimulacao(item.id || item._id, item.titulo || item.nomeCliente || ('Simulação R$ ' + (item.financiamento || '')), e);
-                                                                }}
-                                                                className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors shrink-0 cursor-pointer"
-                                                            >
-                                                                <Trash2 size={16} className="text-rose-500" />
-                                                            </button>
-                                                        )}
-                                                    </div>
-
-                                                <div className="space-y-1 text-xs text-[#64748B] dark:text-slate-300 bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-[#E2E8F0] dark:border-slate-800">
-                                                    <div className="flex justify-between">
-                                                        <span className="text-slate-400">Financiamento:</span>
-                                                        <span className="font-bold text-[#0F172A] dark:text-white">{formatCurrency(item.financiamento)}</span>
-                                                    </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="text-slate-400">Medição Total:</span>
-                                                        <span className="font-semibold text-slate-700 dark:text-slate-300">
-                                                            {formatPercent((item.percTerreno || 0) + (item.percObra || 0))} 
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex justify-between">
-                                                        <span className="text-slate-400">Taxa Juros:</span>
-                                                        <span className="font-semibold text-slate-700 dark:text-slate-300">{formatPercent(item.taxaAnual)} a.a.</span>
-                                                    </div>
-                                                    <div className="flex justify-between pt-1 border-t border-slate-100 dark:border-slate-800 text-xs font-bold text-[#004F32] dark:text-morar-300">
-                                                        <span>Parcela:</span>
-                                                        <span>{formatCurrency(item.totalParcela)}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div>
-                                                <div className="text-[10px] text-slate-400 mb-2 flex items-center justify-between">
-                                                    <span>Salvo por:</span>
-                                                    <span className="font-semibold text-slate-600 dark:text-slate-300">{item.criadoPorNome || 'Usuário'}</span>
-                                                </div>
-                                                <div className="text-[10px] text-slate-400 mb-2 flex items-center justify-between">
-                                                    <span>Data:</span>
-                                                    <span>{item.dataTexto || 'Indisponível'}</span>
-                                                </div>
-                                                <button 
-                                                    onClick={() => handleCarregarSimulacao(item)}
-                                                    className="w-full bg-[#E5F3EB] hover:bg-morar-200 dark:bg-slate-800 border border-morar-200 dark:border-slate-700 text-[#006B3F] dark:text-morar-300 font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer"
-                                                >
-                                                    <ArrowUpRight size={14} />
-                                                    Carregar no Formulário
-                                                </button>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                                </div>
-                            )}
-                        </div>
                     </div>
 
                 </div>
+                )}
+
+                {/* ========================================== */}
+                {/* TELA 2: SIMULAÇÕES SALVAS (EM BRANCO)      */}
+                {/* ========================================== */}
+                {viewAtual === 'salvas' && (
+                <div className="space-y-4">
+                    {isPerfilGerencial && (
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-5 border-l-4 border-l-[#006B3F]">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="bg-[#E5F3EB] text-[#006B3F] p-2.5 rounded-xl border border-morar-200 shrink-0">
+                                        <BarChart2 size={24} />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-[#0F172A] dark:text-white text-base">Relatório Gerencial de Simulações</h3>
+                                        <p className="text-xs text-[#64748B] dark:text-slate-400">Visão consolidada das simulações da equipe</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs font-semibold text-[#0F172A] dark:text-slate-200 bg-[#F8FAFC] dark:bg-slate-800 p-3.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700">
+                                    <div className="flex flex-col items-center text-center">
+                                        <span className="text-[#64748B] block mb-0.5">Total de Simulações:</span>
+                                        <span className="text-[#0F172A] dark:text-white font-bold text-sm">{simulacoes.length}</span>
+                                    </div>
+                                    <div className="h-9 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
+                                    <div className="flex flex-col items-center text-center">
+                                        <span className="text-[#64748B] block mb-0.5">Volume Total Financiado:</span>
+                                        <span className="text-[#004F32] dark:text-morar-400 font-bold text-sm">
+                                            {formatCurrency(simulacoes.reduce((acc, c) => acc + (c.financiamento || 0), 0))}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-[#B9DFC9] dark:border-slate-700 p-10 text-center min-h-[320px] flex flex-col items-center justify-center">
+                        <div className="w-16 h-16 rounded-full bg-[#E5F3EB] text-[#006B3F] flex items-center justify-center mb-4 border border-morar-200">
+                            <Bookmark size={30} />
+                        </div>
+                        <h2 className="text-xl font-bold text-[#0F172A] dark:text-white mb-1">Simulações Salvas</h2>
+                        <p className="text-sm text-[#64748B] dark:text-slate-400 max-w-sm">Esta seção será disponibilizada em breve.</p>
+                    </div>
+                </div>
+                )}
+
+                {/* ========================================== */}
+                {/* TELA 3: GESTÃO DE USUÁRIOS E ACESSOS       */}
+                {/* ========================================== */}
 
                 {/* SEÇÃO DE GESTÃO DE USUÁRIOS E PERFIS (APENAS ADMINISTRADOR) */}
-                {userData?.perfil === 'Administrador' && (
-                    <div className="w-[90%] max-w-[1200px] mx-auto mt-8 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-6 border-t-4 border-t-[#004F32]">
+                {viewAtual === 'usuarios' && (
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-5 border-t-4 border-t-[#004F32]">
                         {/* ABAS DE NAVEGAÇÃO DO PAINEL ADMINISTRATIVO */}
                         <div className="flex flex-wrap items-center gap-3 mb-6 border-b border-[#E2E8F0] dark:border-slate-800 pb-4">
                             <button
@@ -3837,6 +3778,10 @@
                         )}
                     </div>
                 )}
+
+                    </main>
+                </div>
+                </div>
 
                 {/* MODAL FICHA CADASTRAL DETALHADA DO USUÁRIO */}
                 {showUserProfileModal && selectedUserProfile && (
