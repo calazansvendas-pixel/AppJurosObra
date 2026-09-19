@@ -744,8 +744,9 @@
             // Estados para Histórico e Auditoria de Acessos (Admin)
             const [tabAdminActive, setTabAdminActive] = useState('usuarios'); // 'usuarios' | 'auditoria'
 
-            // Navegação do layout principal (sidebar): 'simulador' | 'salvas' | 'usuarios'
+            // Navegação do layout principal (sidebar): 'simulador' | 'salvas' | 'relatorios' | 'usuarios'
             const [activeView, setActiveView] = useState('simulador');
+            const [filtroSalvas, setFiltroSalvas] = useState('');
             const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
             const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
                 try { return localStorage.getItem('sidebarCollapsed') === '1'; } catch (e) { return false; }
@@ -2619,15 +2620,21 @@
             // RENDERIZAÇÃO 3: APLICAÇÃO PRINCIPAL (USUÁRIO AUTENTICADO)
             const isAdminUser = userData?.perfil === 'Administrador';
             const isPerfilGerencial = userData?.perfil === 'Gerente' || userData?.perfil === 'Analista' || userData?.perfil === 'Administrador';
-            const viewAtual = (activeView === 'usuarios' && !isAdminUser) ? 'simulador' : activeView;
+            const viewAtual = (activeView === 'usuarios' && !isAdminUser) || (activeView === 'relatorios' && !isPerfilGerencial) ? 'simulador' : activeView;
+            const termoSalvas = filtroSalvas.trim().toLowerCase();
+            const salvasFiltradas = termoSalvas
+                ? simulacoes.filter((s) => `${s.titulo || ''} ${s.criadoPorNome || ''}`.toLowerCase().includes(termoSalvas))
+                : simulacoes;
             const navItens = [
                 { id: 'simulador', label: 'Simulador', icon: Calculator },
                 { id: 'salvas', label: 'Simulações Salvas', icon: Bookmark },
+                ...(isPerfilGerencial ? [{ id: 'relatorios', label: 'Relatórios', icon: BarChart2 }] : []),
                 ...(isAdminUser ? [{ id: 'usuarios', label: 'Gestão de Usuários e Acessos', icon: Users }] : [])
             ];
             const tituloView = {
                 simulador: { titulo: 'Simulador Juros Obra', subtitulo: 'Evolução de obra da Caixa - Modelo Apoio à Produção' },
-                salvas: { titulo: 'Simulações Salvas', subtitulo: 'Histórico de simulações registradas' },
+                salvas: { titulo: 'Simulações Salvas', subtitulo: 'Carregue no simulador ou gerencie o histórico de simulações' },
+                relatorios: { titulo: 'Relatórios', subtitulo: 'Visão gerencial das simulações da equipe' },
                 usuarios: { titulo: 'Gestão de Usuários e Acessos', subtitulo: 'Aprovação, perfis e auditoria de acessos' }
             }[viewAtual];
 
@@ -3203,52 +3210,161 @@
                 )}
 
                 {/* ========================================== */}
-                {/* TELA 2: SIMULAÇÕES SALVAS (EM BRANCO)      */}
+                {/* TELA 2: SIMULAÇÕES SALVAS                  */}
                 {/* ========================================== */}
                 {viewAtual === 'salvas' && (
                 <div className="space-y-4">
-                    {isPerfilGerencial && (
-                        <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-5 border-l-4 border-l-[#006B3F]">
-                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="bg-[#E5F3EB] text-[#006B3F] p-2.5 rounded-xl border border-morar-200 shrink-0">
-                                        <BarChart2 size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-[#0F172A] dark:text-white text-base">Relatório Gerencial de Simulações</h3>
-                                        <p className="text-xs text-[#64748B] dark:text-slate-400">Visão consolidada das simulações da equipe</p>
-                                    </div>
-                                </div>
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-4 border-l-4 border-l-[#006B3F] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-[#E5F3EB] text-[#006B3F] p-2.5 rounded-xl border border-morar-200 shrink-0">
+                                <Bookmark size={22} />
+                            </div>
+                            <div>
+                                <h2 className="text-base font-bold text-[#0F172A] dark:text-white leading-tight">
+                                    {userData?.perfil === 'Corretor' ? 'Minhas simulações' : 'Simulações da equipe'}
+                                </h2>
+                                <p className="text-xs text-[#64748B] dark:text-slate-400">
+                                    {salvasFiltradas.length === simulacoes.length
+                                        ? `${simulacoes.length} registro(s)`
+                                        : `${salvasFiltradas.length} de ${simulacoes.length} registro(s)`}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="relative w-full sm:w-72">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                            <input
+                                type="text"
+                                value={filtroSalvas}
+                                onChange={(e) => setFiltroSalvas(e.target.value)}
+                                placeholder="Buscar por nome ou autor..."
+                                aria-label="Buscar simulações salvas"
+                                className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none font-medium placeholder-slate-400"
+                            />
+                        </div>
+                    </div>
 
-                                <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs font-semibold text-[#0F172A] dark:text-slate-200 bg-[#F8FAFC] dark:bg-slate-800 p-3.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700">
-                                    <div className="flex flex-col items-center text-center">
-                                        <span className="text-[#64748B] block mb-0.5">Total de Simulações:</span>
-                                        <span className="text-[#0F172A] dark:text-white font-bold text-sm">{simulacoes.length}</span>
+                    {isLoadingSimulacoes ? (
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-[#E2E8F0] dark:border-slate-800 py-16 text-center text-slate-500 flex flex-col items-center justify-center gap-2">
+                            <RefreshCw size={24} className="animate-spin text-[#006B3F]" />
+                            <p className="text-sm font-medium">Carregando registros...</p>
+                        </div>
+                    ) : salvasFiltradas.length === 0 ? (
+                        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-[#B9DFC9] dark:border-slate-700 p-10 text-center min-h-[260px] flex flex-col items-center justify-center">
+                            <div className="w-16 h-16 rounded-full bg-[#E5F3EB] text-[#006B3F] flex items-center justify-center mb-4 border border-morar-200">
+                                <Bookmark size={30} />
+                            </div>
+                            <p className="font-semibold text-slate-700 dark:text-slate-200 text-sm">
+                                {simulacoes.length === 0
+                                    ? (userData?.perfil === 'Corretor' ? 'Você ainda não possui simulações salvas.' : 'Nenhum registro salvo')
+                                    : 'Nenhuma simulação encontrada para a busca.'}
+                            </p>
+                            {simulacoes.length === 0 && (
+                                <p className="text-xs text-slate-400 mt-1 max-w-xs">
+                                    Preencha o simulador, clique em "Calcular Simulação" e depois em "Salvar" para registrar aqui.
+                                </p>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                            {salvasFiltradas.map((item) => {
+                                const podeExcluir = userData?.role === "admin" || userData?.perfil === "Administrador" || currentUser?.uid === MASTER_ADMIN_UID;
+                                return (
+                                    <div key={item.id} className="bg-white dark:bg-slate-900 border border-[#E2E8F0] dark:border-slate-800 rounded-2xl p-4 hover:border-[#006B3F] transition-all shadow-sm flex flex-col gap-3">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="min-w-0">
+                                                <h3 className="font-bold text-[#0F172A] dark:text-white text-sm line-clamp-2">{item.titulo}</h3>
+                                                <p className="text-[11px] text-slate-400 mt-0.5">
+                                                    {item.dataTexto || 'Data indisponível'} · {item.criadoPorNome || 'Usuário'}
+                                                </p>
+                                            </div>
+                                            {podeExcluir && (
+                                                <button
+                                                    type="button"
+                                                    title="Excluir simulação"
+                                                    aria-label="Excluir simulação"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        e.preventDefault();
+                                                        handleDeleteSimulacao(item.id || item._id, item.titulo || item.nomeCliente || ('Simulação R$ ' + (item.financiamento || '')), e);
+                                                    }}
+                                                    className="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors shrink-0 cursor-pointer"
+                                                >
+                                                    <Trash2 size={16} className="text-rose-500" />
+                                                </button>
+                                            )}
+                                        </div>
+
+                                        <div className="space-y-1 text-xs bg-[#F8FAFC] dark:bg-slate-800/60 p-3 rounded-xl border border-[#E2E8F0] dark:border-slate-800">
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-400">Financiamento:</span>
+                                                <span className="font-bold text-[#0F172A] dark:text-white">{formatCurrency(item.financiamento)}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-400">Medição Total:</span>
+                                                <span className="font-semibold text-slate-700 dark:text-slate-300">{formatPercent((item.percTerreno || 0) + (item.percObra || 0))}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                                <span className="text-slate-400">Taxa Juros:</span>
+                                                <span className="font-semibold text-slate-700 dark:text-slate-300">{formatPercent(item.taxaAnual)} a.a.</span>
+                                            </div>
+                                            <div className="flex justify-between pt-1.5 mt-1 border-t border-slate-200 dark:border-slate-700 font-bold text-[#004F32] dark:text-morar-300">
+                                                <span>Parcela:</span>
+                                                <span>{formatCurrency(item.totalParcela)}</span>
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            onClick={() => { handleCarregarSimulacao(item); setActiveView('simulador'); }}
+                                            className="mt-auto w-full bg-[#E5F3EB] hover:bg-morar-200 dark:bg-slate-800 border border-morar-200 dark:border-slate-700 text-[#006B3F] dark:text-morar-300 font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+                                        >
+                                            <ArrowUpRight size={14} />
+                                            Carregar no Simulador
+                                        </button>
                                     </div>
-                                    <div className="h-9 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
-                                    <div className="flex flex-col items-center text-center">
-                                        <span className="text-[#64748B] block mb-0.5">Volume Total Financiado:</span>
-                                        <span className="text-[#004F32] dark:text-morar-400 font-bold text-sm">
-                                            {formatCurrency(simulacoes.reduce((acc, c) => acc + (c.financiamento || 0), 0))}
-                                        </span>
-                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+                )}
+
+                {/* ========================================== */}
+                {/* TELA 3: RELATÓRIOS (GERENTE / ANALISTA / ADMIN) */}
+                {/* ========================================== */}
+                {viewAtual === 'relatorios' && (
+                <div className="space-y-4">
+                    <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-[#E2E8F0] dark:border-slate-800 p-5 border-l-4 border-l-[#006B3F]">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-[#E5F3EB] text-[#006B3F] p-2.5 rounded-xl border border-morar-200 shrink-0">
+                                    <BarChart2 size={24} />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-[#0F172A] dark:text-white text-base">Relatório Gerencial de Simulações</h3>
+                                    <p className="text-xs text-[#64748B] dark:text-slate-400">Visão consolidada das simulações da equipe</p>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs font-semibold text-[#0F172A] dark:text-slate-200 bg-[#F8FAFC] dark:bg-slate-800 p-3.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700">
+                                <div className="flex flex-col items-center text-center">
+                                    <span className="text-[#64748B] block mb-0.5">Total de Simulações:</span>
+                                    <span className="text-[#0F172A] dark:text-white font-bold text-sm">{simulacoes.length}</span>
+                                </div>
+                                <div className="h-9 w-px bg-slate-200 dark:bg-slate-700 hidden sm:block"></div>
+                                <div className="flex flex-col items-center text-center">
+                                    <span className="text-[#64748B] block mb-0.5">Volume Total Financiado:</span>
+                                    <span className="text-[#004F32] dark:text-morar-400 font-bold text-sm">
+                                        {formatCurrency(simulacoes.reduce((acc, c) => acc + (c.financiamento || 0), 0))}
+                                    </span>
                                 </div>
                             </div>
                         </div>
-                    )}
-
-                    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-dashed border-[#B9DFC9] dark:border-slate-700 p-10 text-center min-h-[320px] flex flex-col items-center justify-center">
-                        <div className="w-16 h-16 rounded-full bg-[#E5F3EB] text-[#006B3F] flex items-center justify-center mb-4 border border-morar-200">
-                            <Bookmark size={30} />
-                        </div>
-                        <h2 className="text-xl font-bold text-[#0F172A] dark:text-white mb-1">Simulações Salvas</h2>
-                        <p className="text-sm text-[#64748B] dark:text-slate-400 max-w-sm">Esta seção será disponibilizada em breve.</p>
                     </div>
                 </div>
                 )}
 
                 {/* ========================================== */}
-                {/* TELA 3: GESTÃO DE USUÁRIOS E ACESSOS       */}
+                {/* TELA 4: GESTÃO DE USUÁRIOS E ACESSOS       */}
                 {/* ========================================== */}
 
                 {/* SEÇÃO DE GESTÃO DE USUÁRIOS E PERFIS (APENAS ADMINISTRADOR) */}
