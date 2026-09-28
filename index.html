@@ -453,6 +453,20 @@
             );
         };
 
+        // Escapa HTML de qualquer valor antes de interpolar em document.write/innerHTML.
+        // Necessário porque nome, CRECI, imobiliária etc. vêm de cadastro público e são
+        // interpolados na ficha impressa — sem isso, um valor como "<img onerror=...>"
+        // executaria como script na janela de impressão.
+        const escapeHtml = (val) => {
+            if (val === null || val === undefined) return '';
+            return String(val)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        };
+
         // ==========================================
         // COMPONENTE DE INPUT DE MOEDA (BRL)
         // ==========================================
@@ -1135,7 +1149,7 @@
                     <html lang="pt-BR">
                     <head>
                         <meta charset="UTF-8">
-                        <title>Ficha Cadastral - ${selectedUserProfile.nome || 'Usuário'}</title>
+                        <title>Ficha Cadastral - ${escapeHtml(selectedUserProfile.nome || 'Usuário')}</title>
                         <style>
                             body { font-family: Arial, sans-serif; padding: 40px; color: #0F172A; max-width: 800px; margin: 0 auto; line-height: 1.5; }
                             .header { border-bottom: 2px solid #006B3F; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
@@ -1156,24 +1170,24 @@
                                 <h1 class="title">Ficha Cadastral do Usuário</h1>
                                 <p class="subtitle">Simulador Juros Obra — CALAZANS IMOB</p>
                             </div>
-                            <div class="badge">${selectedUserProfile.perfil || selectedUserProfile.role || 'Corretor'}</div>
+                            <div class="badge">${escapeHtml(selectedUserProfile.perfil || selectedUserProfile.role || 'Corretor')}</div>
                         </div>
 
                         <div class="grid">
-                            <div class="field"><div class="field-label">Nome Completo</div><div class="field-value">${selectedUserProfile.nome || 'Não informado'}</div></div>
-                            <div class="field"><div class="field-label">CPF</div><div class="field-value">${selectedUserProfile.cpf || 'Não informado'}</div></div>
-                            <div class="field"><div class="field-label">E-mail Profissional</div><div class="field-value">${selectedUserProfile.email || 'Não informado'}</div></div>
-                            <div class="field"><div class="field-label">Celular / WhatsApp</div><div class="field-value">${selectedUserProfile.celular || 'Não informado'}</div></div>
-                            <div class="field"><div class="field-label">CRECI</div><div class="field-value">${selectedUserProfile.creci || 'Não informado'}</div></div>
-                            <div class="field"><div class="field-label">Imobiliária / Empresa</div><div class="field-value">${selectedUserProfile.imobiliaria || selectedUserProfile.empresa || 'Não informada'}</div></div>
-                            <div class="field"><div class="field-label">Perfil de Acesso</div><div class="field-value">${selectedUserProfile.perfil || selectedUserProfile.role || 'Corretor'}</div></div>
-                            <div class="field"><div class="field-label">Status da Conta</div><div class="field-value">${selectedUserProfile.status || 'Ativo'}</div></div>
-                            <div class="field"><div class="field-label">Data de Cadastro</div><div class="field-value">${selectedUserProfile.dataTexto || (selectedUserProfile.createdAt?.seconds ? new Date(selectedUserProfile.createdAt.seconds * 1000).toLocaleString('pt-BR') : selectedUserProfile.dataCriacao || 'Indisponível')}</div></div>
-                            <div class="field"><div class="field-label">Simulações Registradas</div><div class="field-value">${countSims} simulação(ões)</div></div>
+                            <div class="field"><div class="field-label">Nome Completo</div><div class="field-value">${escapeHtml(selectedUserProfile.nome || 'Não informado')}</div></div>
+                            <div class="field"><div class="field-label">CPF</div><div class="field-value">${escapeHtml(selectedUserProfile.cpf || 'Não informado')}</div></div>
+                            <div class="field"><div class="field-label">E-mail Profissional</div><div class="field-value">${escapeHtml(selectedUserProfile.email || 'Não informado')}</div></div>
+                            <div class="field"><div class="field-label">Celular / WhatsApp</div><div class="field-value">${escapeHtml(selectedUserProfile.celular || 'Não informado')}</div></div>
+                            <div class="field"><div class="field-label">CRECI</div><div class="field-value">${escapeHtml(selectedUserProfile.creci || 'Não informado')}</div></div>
+                            <div class="field"><div class="field-label">Imobiliária / Empresa</div><div class="field-value">${escapeHtml(selectedUserProfile.imobiliaria || selectedUserProfile.empresa || 'Não informada')}</div></div>
+                            <div class="field"><div class="field-label">Perfil de Acesso</div><div class="field-value">${escapeHtml(selectedUserProfile.perfil || selectedUserProfile.role || 'Corretor')}</div></div>
+                            <div class="field"><div class="field-label">Status da Conta</div><div class="field-value">${escapeHtml(selectedUserProfile.status || 'Ativo')}</div></div>
+                            <div class="field"><div class="field-label">Data de Cadastro</div><div class="field-value">${escapeHtml(selectedUserProfile.dataTexto || (selectedUserProfile.createdAt?.seconds ? new Date(selectedUserProfile.createdAt.seconds * 1000).toLocaleString('pt-BR') : selectedUserProfile.dataCriacao || 'Indisponível'))}</div></div>
+                            <div class="field"><div class="field-label">Simulações Registradas</div><div class="field-value">${escapeHtml(countSims)} simulação(ões)</div></div>
                         </div>
 
                         <div class="footer">
-                            Documento emitido em ${new Date().toLocaleString('pt-BR')} — Sistema de Auditoria e Gestão de Usuários
+                            Documento emitido em ${escapeHtml(new Date().toLocaleString('pt-BR'))} — Sistema de Auditoria e Gestão de Usuários
                         </div>
 
                         <script>

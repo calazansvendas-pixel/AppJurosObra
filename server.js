@@ -27,7 +27,10 @@ if (!getApps().length) {
 // Endpoint POST para cadastro de novos usuários/corretores
 app.post('/api/cadastrar', async (req, res) => {
   try {
-    const { nome, email, senha, celular, creci, perfil } = req.body || {};
+    // 'perfil' e 'role' NUNCA são aceitos do corpo da requisição: todo cadastro criado por
+    // esta rota é sempre Corretor/pendente. A promoção de perfil só pode ser feita depois,
+    // por um Administrador já autenticado, pela tela de Gestão de Usuários.
+    const { nome, email, senha, celular, creci } = req.body || {};
 
     if (!email || !senha) {
       return res.status(400).json({ success: false, message: 'E-mail e senha são obrigatórios.' });
@@ -38,7 +41,7 @@ app.post('/api/cadastrar', async (req, res) => {
     const nomeClean = String(nome || '').trim();
     const celularClean = String(celular || '').trim();
     const creciClean = String(creci || '').trim();
-    const perfilClean = String(perfil || 'Corretor').trim();
+    const perfilClean = 'Corretor';
 
     let uid = null;
 
@@ -74,40 +77,68 @@ app.post('/api/cadastrar', async (req, res) => {
       uid = restData.localId;
     }
 
-    // 2. Grava os dados do usuário no Firestore
+    // 2. Grava os dados do usuário no Firestore. Perfil/role são sempre fixos aqui —
+    // nunca vêm do que o cliente enviou.
     const userData = {
       nome: nomeClean,
       email: emailClean,
       celular: celularClean,
       creci: creciClean,
-      role: perfilClean === "Administrador" ? "admin" : "corretor",
+      role: "corretor",
       perfil: perfilClean,
       status: "pendente",
       createdAt: new Date().toISOString()
     };
 
+    // A ficha em 'usuarios' é o que torna o cadastro válido no sistema (é ela que o
+    // login e o painel de aprovação enxergam). Se nem o SDK nem o fallback REST
+    // confirmarem a gravação, a conta do Auth é revertida (deleteUser) e a API
+    // retorna 500 — nunca sucesso sem a ficha gravada, para não criar mais órfãos.
+    let firestoreOk = false;
     try {
       await getFirestore().collection('usuarios').doc(uid).set(userData);
+      firestoreOk = true;
     } catch (fsError) {
       console.warn("getFirestore().doc().set falhou, tentando fallback via REST API:", fsError?.message);
-      const apiKey = "AIzaSyAeDyh0mYtakjGED6c0gIFW-J35zJ52qJ8";
-      const firestoreUrl = `https://firestore.googleapis.com/v1/projects/juros-obra-ea823/databases/(default)/documents/usuarios?documentId=${uid}&key=${apiKey}`;
-      await fetch(firestoreUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fields: {
-            nome: { stringValue: nomeClean },
-            email: { stringValue: emailClean },
-            celular: { stringValue: celularClean },
-            creci: { stringValue: creciClean },
-            role: { stringValue: userData.role },
-            perfil: { stringValue: perfilClean },
-            status: { stringValue: "pendente" },
-            createdAt: { stringValue: userData.createdAt }
-          }
-        })
-      }).catch(err => console.warn("Erro no fallback REST do Firestore:", err));
+      try {
+        const apiKey = "AIzaSyAeDyh0mYtakjGED6c0gIFW-J35zJ52qJ8";
+        const firestoreUrl = `https://firestore.googleapis.com/v1/projects/juros-obra-ea823/databases/(default)/documents/usuarios?documentId=${uid}&key=${apiKey}`;
+        const fsRestResp = await fetch(firestoreUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fields: {
+              nome: { stringValue: nomeClean },
+              email: { stringValue: emailClean },
+              celular: { stringValue: celularClean },
+              creci: { stringValue: creciClean },
+              role: { stringValue: userData.role },
+              perfil: { stringValue: perfilClean },
+              status: { stringValue: "pendente" },
+              createdAt: { stringValue: userData.createdAt }
+            }
+          })
+        });
+        firestoreOk = fsRestResp.ok;
+        if (!firestoreOk) {
+          const errBody = await fsRestResp.text().catch(() => '');
+          console.error("Fallback REST do Firestore retornou erro:", fsRestResp.status, errBody);
+        }
+      } catch (fsRestError) {
+        console.error("Erro no fallback REST do Firestore:", fsRestError);
+      }
+    }
+
+    if (!firestoreOk) {
+      try {
+        await getAuth().deleteUser(uid);
+      } catch (rollbackError) {
+        console.error("Rollback falhou: não foi possível apagar a conta órfã no Auth:", uid, rollbackError?.message);
+      }
+      return res.status(500).json({
+        success: false,
+        message: "Não foi possível concluir o cadastro. Tente novamente em instantes."
+      });
     }
 
     return res.json({ success: true, message: "Cadastro realizado com sucesso! Aguarde a aprovação do administrador." });
@@ -138,12 +169,18 @@ app.get('/api/tr', async (req, res) => {
   }
 });
 
-// Serve static assets from root
-app.use(express.static(__dirname));
+// Serve apenas os arquivos públicos da aplicação — nunca a raiz do projeto.
+// express.static(__dirname) expunha server.js, scripts/, package.json etc. como
+// texto puro para qualquer requisição GET que combinasse com o caminho do arquivo.
+app.use('/assets', express.static(path.join(__dirname, 'assets'), { dotfiles: 'deny', index: false }));
 
-// Fallback to index.html for SPA routing
-app.get('*', (req, res) => {
+app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Qualquer outra rota não mapeada: 404 (nada de fallback servindo arquivos do servidor)
+app.use((req, res) => {
+  res.status(404).send('Not Found');
 });
 
 const server = app.listen(PORT, '0.0.0.0', () => {
