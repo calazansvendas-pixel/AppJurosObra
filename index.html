@@ -634,6 +634,24 @@
                 setter(val);
                 setResultadoSimulacao(null);
             };
+
+            // Trava de negócio: Terreno (%) + Obra (%) nunca pode passar de 100%, senão o
+            // saldo liberado excede o valor financiado e a parcela sai negativa/divergente.
+            // Limita o campo que está sendo digitado ao espaço ainda disponível no outro.
+            const updatePercComTravaDe100 = (setter, valorOutroCampo) => (val) => {
+                const outro = parseFloat(valorOutroCampo || 0) || 0;
+                const disponivel = Math.max(0, 100 - outro);
+                let novo = val;
+                if (novo !== '') {
+                    const num = parseFloat(novo);
+                    if (!isNaN(num)) {
+                        const limitado = Math.min(Math.max(num, 0), disponivel);
+                        novo = String(limitado);
+                    }
+                }
+                setter(novo);
+                setResultadoSimulacao(null);
+            };
             
             // Estados para a API do Banco Central (TR)
             const [tr, setTr] = useState(0);
@@ -1917,6 +1935,14 @@
                 const seg = parseFloat(seguro || 0);
                 const trVal = parseFloat(tr || 0);
 
+                // Trava de negócio: a soma de Terreno + Obra nunca pode passar de 100%.
+                // Os campos já se limitam sozinhos ao digitar, mas essa checagem cobre
+                // simulações carregadas do histórico com dados antigos/divergentes.
+                if (pTerr + pObra > 100) {
+                    alert(`A soma de Terreno (${formatPercent(pTerr, 1)}) e Obra Executada (${formatPercent(pObra, 1)}) não pode ultrapassar 100%. Ajuste os percentuais antes de calcular.`);
+                    return;
+                }
+
                 const percTotalLiberado = pTerr + pObra;
                 const saldoLiberado = fin * (percTotalLiberado / 100);
                 
@@ -2932,7 +2958,7 @@
                                             type="number"
                                             step="0.1"
                                             value={percTerreno}
-                                            onChange={(e) => updateInputVal(setPercTerreno)(e.target.value)}
+                                            onChange={(e) => updatePercComTravaDe100(setPercTerreno, percObra)(e.target.value)}
                                             disabled={!canEditCamposRestritos}
                                             readOnly={!canEditCamposRestritos}
                                             className={`w-full pl-4 pr-9 py-2.5 rounded-xl border outline-none transition-all font-semibold ${
@@ -2951,14 +2977,18 @@
                                             type="number"
                                             step="0.1"
                                             value={percObra}
-                                            onChange={(e) => updateInputVal(setPercObra)(e.target.value)}
+                                            onChange={(e) => updatePercComTravaDe100(setPercObra, percTerreno)(e.target.value)}
                                             className="w-full pl-4 pr-9 py-2.5 rounded-xl border border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 text-[#0F172A] dark:text-white focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] outline-none transition-all font-semibold"
                                         />
                                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium">%</span>
                                     </div>
                                 </div>
                             </div>
-                            <p className="text-xs text-[#64748B] dark:text-slate-400 mt-2">Terreno fixado por padrão em 7,0%. Obra: medição atestada pela engenharia da Caixa este mês.</p>
+                            <p className={`text-xs mt-2 ${(parseFloat(percTerreno || 0) + parseFloat(percObra || 0)) > 100 ? 'text-rose-600 dark:text-rose-400 font-semibold' : 'text-[#64748B] dark:text-slate-400'}`}>
+                                {(parseFloat(percTerreno || 0) + parseFloat(percObra || 0)) > 100
+                                    ? `Atenção: Terreno + Obra somam ${formatPercent(parseFloat(percTerreno || 0) + parseFloat(percObra || 0), 1)}, acima do limite de 100%.`
+                                    : `Total liberado: ${formatPercent(parseFloat(percTerreno || 0) + parseFloat(percObra || 0), 1)} de 100%. Terreno fixado por padrão em 7,0%; Obra: medição atestada pela engenharia da Caixa este mês.`}
+                            </p>
                         </div>
 
                         <button
