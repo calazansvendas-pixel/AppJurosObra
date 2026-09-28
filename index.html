@@ -1334,10 +1334,14 @@
                     // sessão (se houver) em vez de sobrescrever com o fallback estático.
                     setTr((valorAtual) => (valorAtual && valorAtual > 0 ? valorAtual : TR_FALLBACK_ESTATICO));
                     setTrData((dataAtual) => (dataAtual && dataAtual !== 'Buscando...' && dataAtual !== 'Fallback' ? dataAtual : 'Fallback'));
+                    setFeedback({ text: 'Não foi possível conectar ao Banco Central. A utilizar taxa de contingência.', type: 'warning' });
+                    setTimeout(() => setFeedback(null), 5000);
                 } catch (error) {
                     console.error('Erro inesperado ao buscar TR:', error);
                     setTr((valorAtual) => (valorAtual && valorAtual > 0 ? valorAtual : TR_FALLBACK_ESTATICO));
                     setTrData('Fallback');
+                    setFeedback({ text: 'Não foi possível conectar ao Banco Central. A utilizar taxa de contingência.', type: 'warning' });
+                    setTimeout(() => setFeedback(null), 5000);
                 } finally {
                     setIsFetchingTr(false);
                 }
@@ -2768,9 +2772,10 @@
                     <div role="status" className={`fixed top-16 right-4 lg:top-auto lg:bottom-4 lg:right-[max(1rem,calc((100vw_-_1440px)/2_+_1rem))] z-50 max-w-sm p-3.5 rounded-xl font-semibold flex items-center gap-3 shadow-lg ${
                         feedback.type === 'success' ? 'bg-morar-50 border border-morar-200 text-[#006B3F]' :
                         feedback.type === 'error' ? 'bg-rose-50 border border-rose-200 text-[#EF4444]' :
+                        feedback.type === 'warning' ? 'bg-amber-50 dark:bg-amber-950/80 border border-amber-200 dark:border-amber-500/40 text-amber-700 dark:text-amber-300' :
                         'bg-morar-50 border border-morar-200 text-[#006B3F]'
                     }`}>
-                        <CheckCircle2 size={20} />
+                        {feedback.type === 'warning' ? <AlertOctagon size={20} /> : <CheckCircle2 size={20} />}
                         <span>{feedback.text}</span>
                     </div>
                 )}
@@ -2872,33 +2877,40 @@
                             </h2>
 
                             <div className="space-y-4">
-                                {/* Taxa TR (Taxa Referencial) */}
+                                {/* Taxa TR (Taxa Referencial) — somente leitura: vem sempre da API do BCB */}
                                 <div>
                                     <div className="mb-1">
                                         <label className="block text-sm font-semibold text-[#0F172A] dark:text-slate-300">
                                             Taxa TR (% ao mês)
                                         </label>
                                     </div>
-                                    <div className="relative">
-                                        <input
-                                            type="number"
-                                            step="0.0001"
-                                            value={tr}
-                                            onChange={(e) => updateInputVal(setTr)(e.target.value)}
-                                            disabled={!canEditCamposRestritos}
-                                            readOnly={!canEditCamposRestritos}
-                                            className={`w-full pl-4 pr-16 py-2.5 rounded-xl border outline-none transition-all font-semibold ${
-                                                canEditCamposRestritos
-                                                    ? 'border-[#E2E8F0] dark:border-slate-700 bg-[#F8FAFC] dark:bg-slate-800 focus:ring-2 focus:ring-[#006B3F] focus:border-[#006B3F] text-[#0F172A] dark:text-white'
-                                                    : 'border-[#E2E8F0] dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-400 cursor-not-allowed'
-                                            }`}
-                                            placeholder="0.0000"
-                                        />
-                                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-xs">% a.m.</span>
+                                    <div className="relative flex items-center gap-2">
+                                        <div className="relative flex-1">
+                                            <input
+                                                type="number"
+                                                step="0.0001"
+                                                value={tr}
+                                                readOnly
+                                                disabled
+                                                title="Preenchida automaticamente pela API do Banco Central (SGS). Use o botão Atualizar para buscar o valor mais recente."
+                                                className="w-full pl-4 pr-16 py-2.5 rounded-xl border outline-none transition-all font-semibold border-[#E2E8F0] dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-300 cursor-not-allowed"
+                                                placeholder="0.0000"
+                                            />
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-xs">% a.m.</span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={fetchTR}
+                                            disabled={isFetchingTr}
+                                            title="Atualizar TR na API do Banco Central"
+                                            className="shrink-0 p-2.5 rounded-xl border border-[#B9DFC9] bg-[#E5F3EB] hover:bg-[#B9DFC9] text-[#006B3F] transition-all disabled:opacity-50 cursor-pointer"
+                                        >
+                                            <RefreshCw size={16} className={isFetchingTr ? "animate-spin" : ""} />
+                                        </button>
                                     </div>
                                     <p className="text-[11px] text-[#64748B] dark:text-slate-400 mt-1 flex items-center justify-between gap-2">
                                         <span>Base: TR de {formatTrPeriodo(trData).replace('Ref. ', '')}</span>
-                                        <span>Atualizado em: {trData && trData !== 'Buscando...' && trData !== 'Fallback' ? trData : 'indisponível'}</span>
+                                        <span>{isFetchingTr ? 'A atualizar...' : `Atualizado em: ${trData && trData !== 'Buscando...' && trData !== 'Fallback' ? trData : 'indisponível'}`}</span>
                                     </p>
                                 </div>
 
@@ -3171,24 +3183,26 @@
                                                         </p>
                                                         <div className="mt-2.5 flex flex-wrap gap-2 items-center">
                                                             <div className="relative w-32">
-                                                                <input 
-                                                                    type="number" 
+                                                                <input
+                                                                    type="number"
                                                                     step="0.0001"
-                                                                    value={tr} 
-                                                                    onChange={(e) => updateInputVal(setTr)(e.target.value)}
-                                                                    className="w-full pl-2.5 pr-8 py-1.5 text-xs rounded-lg border border-morar-300 bg-white dark:bg-slate-800 font-mono font-bold text-[#0F172A] dark:text-white shadow-2xs focus:ring-2 focus:ring-[#006B3F] outline-none"
+                                                                    value={tr}
+                                                                    readOnly
+                                                                    disabled
+                                                                    title="Preenchida automaticamente pela API do Banco Central (SGS)."
+                                                                    className="w-full pl-2.5 pr-8 py-1.5 text-xs rounded-lg border border-morar-300 bg-slate-100 dark:bg-slate-800 font-mono font-bold text-slate-500 dark:text-slate-300 shadow-2xs outline-none cursor-not-allowed"
                                                                 />
                                                                 <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">% a.m.</span>
                                                             </div>
-                                                            
-                                                            <button 
+
+                                                            <button
                                                                 onClick={fetchTR}
                                                                 disabled={isFetchingTr}
                                                                 className="px-2.5 py-1.5 bg-[#006B3F] text-white hover:bg-[#004F32] transition-all rounded-lg text-xs font-bold flex items-center gap-1 disabled:opacity-50 shadow-2xs cursor-pointer"
                                                                 title="Atualizar via API SGS do Banco Central"
                                                             >
                                                                 <RefreshCw size={12} className={isFetchingTr ? "animate-spin" : ""} />
-                                                                Atualizar
+                                                                {isFetchingTr ? 'A atualizar...' : 'Atualizar'}
                                                             </button>
                                                         </div>
                                                         <div className="mt-2 font-mono text-xs bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-morar-200 dark:border-slate-700 text-[#0F172A] dark:text-slate-200 overflow-x-auto shadow-2xs">
