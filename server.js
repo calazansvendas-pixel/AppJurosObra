@@ -154,18 +154,40 @@ app.post('/api/cadastrar', async (req, res) => {
 
 
 
+const BCB_TR_URL = 'https://api.bcb.gov.br/dados/serie/bcdata.sgs.226/dados/ultimos/1?formato=json';
+
+// Busca com timeout (evita pendurar a requisição em rede lenta) e algumas
+// tentativas com atraso curto, porque falhas de DNS/conexão ao BCB costumam
+// ser blips passageiros (poucos segundos), não uma indisponibilidade real.
+async function fetchComRetry(url, { tentativas = 3, timeoutMs = 5000, atrasoMs = 600 } = {}) {
+  let ultimoErro = null;
+  for (let i = 1; i <= tentativas; i++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(url, { signal: controller.signal });
+      clearTimeout(timer);
+      if (response.ok) return response;
+      ultimoErro = new Error(`HTTP ${response.status} ${response.statusText}`);
+    } catch (err) {
+      clearTimeout(timer);
+      ultimoErro = err;
+    }
+    console.warn(`TR: tentativa ${i}/${tentativas} falhou (${ultimoErro?.code || ultimoErro?.message || ultimoErro})`);
+    if (i < tentativas) await new Promise((r) => setTimeout(r, atrasoMs * i));
+  }
+  throw ultimoErro;
+}
+
 // API proxy for Banco Central do Brasil TR data to prevent CORS issues
 app.get('/api/tr', async (req, res) => {
   try {
-    const response = await fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.226/dados/ultimos/1?formato=json');
-    if (!response.ok) {
-      throw new Error(`BCB API error: ${response.statusText}`);
-    }
+    const response = await fetchComRetry(BCB_TR_URL);
     const data = await response.json();
     res.json(data);
   } catch (err) {
-    console.error('Error proxying TR from BCB:', err);
-    res.status(500).json({ error: 'Failed to fetch TR data' });
+    console.error('Error proxying TR from BCB:', err?.code || err?.message || err);
+    res.status(502).json({ error: 'Failed to fetch TR data', detail: err?.code || err?.message || String(err) });
   }
 });
 

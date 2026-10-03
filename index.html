@@ -1324,14 +1324,20 @@
                         return null;
                     });
 
-                    // 2ª tentativa: chamada direta à API do BCB (SGS série 226 - TR).
-                    // A API do BCB responde com Access-Control-Allow-Origin: *, então funciona
-                    // também direto do navegador caso o proxy não exista (ex.: hospedagem estática).
+                    // 2ª tentativa: chamada direta à API do BCB (SGS série 226 - TR), com uma
+                    // repetição curta — falhas de DNS/conexão ao BCB costumam ser blips
+                    // passageiros. A API do BCB responde com Access-Control-Allow-Origin: *,
+                    // então funciona também direto do navegador caso o proxy não exista.
                     if (!response || !response.ok) {
-                        response = await fetchComTimeout(BCB_TR_URL).catch((err) => {
-                            console.warn('TR: falha ao buscar diretamente na API do BCB.', err?.message || err);
-                            return null;
-                        });
+                        for (let tentativa = 1; tentativa <= 2 && (!response || !response.ok); tentativa++) {
+                            response = await fetchComTimeout(BCB_TR_URL).catch((err) => {
+                                console.warn(`TR: falha ao buscar diretamente na API do BCB (tentativa ${tentativa}/2).`, err?.message || err);
+                                return null;
+                            });
+                            if ((!response || !response.ok) && tentativa === 1) {
+                                await new Promise((r) => setTimeout(r, 700));
+                            }
+                        }
                     }
 
                     if (response && response.ok) {
