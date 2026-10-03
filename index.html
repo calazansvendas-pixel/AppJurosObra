@@ -1928,6 +1928,18 @@
                 return `${num.toLocaleString('pt-BR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}%`;
             };
 
+            // Formata o valor da TR com exatamente 4 casas decimais (ex.: "0,1700"),
+            // sem o símbolo de %, para os campos somente leitura que exibem a taxa.
+            // O estado `tr` em si NUNCA é arredondado — isso é só para exibição;
+            // os cálculos (handleCalcularSimulacao) usam parseFloat(tr) com a
+            // precisão completa vinda da API do BCB.
+            const formatTrInputValue = (value) => {
+                const num = parseFloat(value);
+                return Number.isFinite(num)
+                    ? num.toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 })
+                    : '0,0000';
+            };
+
             // ==========================================
             // MOTOR DE CÁLCULO SOB DEMANDA
             // ==========================================
@@ -2919,14 +2931,14 @@
                                     <div className="relative flex items-center gap-2">
                                         <div className="relative flex-1">
                                             <input
-                                                type="number"
-                                                step="0.0001"
-                                                value={tr}
+                                                type="text"
+                                                inputMode="decimal"
+                                                value={formatTrInputValue(tr)}
                                                 readOnly
                                                 disabled
                                                 title="Preenchida automaticamente pela API do Banco Central (SGS). Use o botão Atualizar para buscar o valor mais recente."
                                                 className="w-full pl-4 pr-16 py-2.5 rounded-xl border outline-none transition-all font-semibold border-[#E2E8F0] dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-500 dark:text-slate-300 cursor-not-allowed"
-                                                placeholder="0.0000"
+                                                placeholder="0,0000"
                                             />
                                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-xs">% a.m.</span>
                                         </div>
@@ -3220,9 +3232,9 @@
                                                         <div className="mt-2.5 flex flex-wrap gap-2 items-center">
                                                             <div className="relative w-32">
                                                                 <input
-                                                                    type="number"
-                                                                    step="0.0001"
-                                                                    value={tr}
+                                                                    type="text"
+                                                                    inputMode="decimal"
+                                                                    value={formatTrInputValue(tr)}
                                                                     readOnly
                                                                     disabled
                                                                     title="Preenchida automaticamente pela API do Banco Central (SGS)."
